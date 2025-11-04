@@ -95,7 +95,7 @@ All Phase 2 components have been implemented and tested:
    - ✅ Permission Request Handler
 4. ✅ MCP Integration - Complete
 
-### Phase 3 Progress: 33% Complete (2/6 sub-phases)
+### Phase 3 Progress: 50% Complete (3/6 sub-phases)
 
 #### Phase 3.1: Core Request Handler ✅
 - ✅ `ACPRequestHandler` implementation
@@ -113,25 +113,30 @@ All Phase 2 components have been implemented and tested:
 - ✅ Provides markdown, progress, and reference mapping helpers
 - ✅ 15 unit tests passing
 
-#### Phase 3.3: Session Manager (Next)
-- [ ] Create `SessionManager` for session lifecycle
-- [ ] Session creation, loading, persistence
-- [ ] Map VS Code conversation IDs to ACP session IDs
+#### Phase 3.3: Session Manager ✅
+- ✅ `SessionManager` implementation
+- ✅ Session creation, loading, and persistence
+- ✅ Maps VS Code conversation IDs to ACP session IDs
+- ✅ Handles session cancellation and clearing
+- ✅ Restores sessions from storage on initialization
+- ✅ 20 unit tests passing
 
-#### Phase 3.4: Chat Participant Integration
+#### Phase 3.4: Tool Call Handler (Next)
+- [ ] Create `ToolCallHandler` for tool execution
+- [ ] Display tool calls in UI
+- [ ] Request permission from user
+- [ ] Execute tools via FileSystemHandler/TerminalManager
+- [ ] Send tool results back to agent
+
+#### Phase 3.5: Chat Participant Integration
 - [ ] Create `ACPChatParticipant` to replace existing chat participant
 - [ ] Initialize ACP client and route requests
 - [ ] Handle session lifecycle
 
-#### Phase 3.5: Agent Plan & Thinking Steps UI
+#### Phase 3.6: Agent Plan & Thinking Steps UI
 - [ ] Create `AgentPlanViewer` component
 - [ ] Create `ThinkingStepsDisplay` component
 - [ ] Integrate with VS Code UI
-
-#### Phase 3.6: Inline Chat Handler
-- [ ] Create `ACPInlineChatHandler`
-- [ ] Handle inline edits and code suggestions
-- [ ] Show diffs and apply changes
 
 ## 📝 Testing Strategy
 
