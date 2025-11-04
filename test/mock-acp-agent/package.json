@@ -1,0 +1,12 @@
+{
+	"name": "mock-acp-agent",
+	"version": "1.0.0",
+	"description": "Mock ACP Agent for integration testing",
+	"main": "agent.ts",
+	"bin": {
+		"mock-acp-agent": "./agent.ts"
+	},
+	"scripts": {
+		"start": "tsx agent.js"
+	}
+}
