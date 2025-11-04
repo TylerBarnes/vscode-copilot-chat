@@ -177,15 +177,20 @@ All Phase 2 components have been implemented and tested:
 - ✅ Immutable configuration updates
 - ✅ 32 unit tests passing
 
-#### Phase 4.2: Agent Profile Selector 🔄
-- ⏳ UI for selecting agent profiles
-- ⏳ Agent profile creation/editing
-- ⏳ Profile validation
+#### Phase 4.2: Agent Profile Selector ✅
+- ✅ UI for selecting agent profiles
+- ✅ Agent profile creation/editing
+- ✅ Profile validation
+- ✅ Status bar integration
+- ✅ 26 unit tests passing
 
-#### Phase 4.3: MCP Server Configuration UI 🔄
-- ⏳ UI for managing MCP servers
-- ⏳ Server creation/editing
-- ⏳ Server validation
+#### Phase 4.3: MCP Server Configuration UI ✅
+- ✅ UI for managing MCP servers
+- ✅ Server creation/editing
+- ✅ Server validation
+- ✅ Connection testing
+- ✅ Enable/disable/restart functionality
+- ✅ 28 unit tests passing
 
 #### Phase 4.4: Permission Policy Manager 🔄
 - ⏳ UI for permission settings
@@ -239,7 +244,7 @@ pnpm vitest watch test/unit/acp/
 
 ## 🎉 Achievements
 
-- **352 tests passing** with 100% success rate (344 unit + 8 integration)
+- **406 tests passing** with 100% success rate (398 unit + 8 integration)
 - **Mock ACP agent** working correctly
 - **Full protocol implementation** for core features
 - **Clean architecture** with separation of concerns
@@ -248,3 +253,5 @@ pnpm vitest watch test/unit/acp/
 - **Phase 2 Complete** - Protocol Implementation (Agent Config, File System, Terminal, Permissions, MCP)
 - **Phase 3 Complete** - VS Code UI Integration (Request Handler, Content Mapper, Sessions, Tools, Chat Participant, Plan Viewer, Thinking Steps, Mode Switcher, Slash Commands, Extension Activation)
 - **Phase 4.1 Complete** - Configuration Manager (Central configuration management with full CRUD operations)
+- **Phase 4.2 Complete** - Agent Profile Selector (UI for selecting/managing agent profiles with status bar integration)
+- **Phase 4.3 Complete** - MCP Server Configuration UI (UI for managing MCP server configurations with connection testing)
