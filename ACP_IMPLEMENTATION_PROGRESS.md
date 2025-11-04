@@ -95,7 +95,7 @@ All Phase 2 components have been implemented and tested:
    - ✅ Permission Request Handler
 4. ✅ MCP Integration - Complete
 
-### Phase 3 Progress: 50% Complete (3/6 sub-phases)
+### Phase 3 Progress: 66% Complete (4/6 sub-phases)
 
 #### Phase 3.1: Core Request Handler ✅
 - ✅ `ACPRequestHandler` implementation
@@ -121,12 +121,13 @@ All Phase 2 components have been implemented and tested:
 - ✅ Restores sessions from storage on initialization
 - ✅ 20 unit tests passing
 
-#### Phase 3.4: Tool Call Handler (Next)
-- [ ] Create `ToolCallHandler` for tool execution
-- [ ] Display tool calls in UI
-- [ ] Request permission from user
-- [ ] Execute tools via FileSystemHandler/TerminalManager
-- [ ] Send tool results back to agent
+#### Phase 3.4: Tool Call Handler ✅
+- ✅ `ToolCallHandler` implementation
+- ✅ Displays tool calls in chat stream with status icons
+- ✅ Executes file system operations (read/write)
+- ✅ Executes terminal operations (create, send input, get output, kill)
+- ✅ Requests user permission for sensitive operations
+- ✅ 20 passing unit tests
 
 #### Phase 3.5: Chat Participant Integration
 - [ ] Create `ACPChatParticipant` to replace existing chat participant

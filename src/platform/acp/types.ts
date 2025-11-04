@@ -181,7 +181,8 @@ export enum ToolCallKind {
     ReadTextFile = 'fs/read_text_file',
     WriteTextFile = 'fs/write_text_file',
     TerminalCreate = 'terminal/create',
-    TerminalSendText = 'terminal/send_text',
+    TerminalSendInput = 'terminal/send_input',
+    TerminalGetOutput = 'terminal/get_output',
     TerminalKill = 'terminal/kill',
     MCPToolCall = 'mcp/tool_call',
 }
