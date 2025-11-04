@@ -129,15 +129,41 @@ All Phase 2 components have been implemented and tested:
 - ✅ Requests user permission for sensitive operations
 - ✅ 20 passing unit tests
 
-#### Phase 3.5: Chat Participant Integration
-- [ ] Create `ACPChatParticipant` to replace existing chat participant
-- [ ] Initialize ACP client and route requests
-- [ ] Handle session lifecycle
+#### Phase 3.5: Chat Participant Integration ✅
+- ✅ `ACPChatParticipant` implementation
+- ✅ Routes chat requests to ACP request handler
+- ✅ Manages session lifecycle
+- ✅ Handles cancellation and errors
+- ✅ 10 unit tests passing
 
-#### Phase 3.6: Agent Plan & Thinking Steps UI
-- [ ] Create `AgentPlanViewer` component
-- [ ] Create `ThinkingStepsDisplay` component
-- [ ] Integrate with VS Code UI
+#### Phase 3.6: Agent Plan Viewer & Thinking Steps Display ✅
+- ✅ `AgentPlanViewer` implementation
+- ✅ `ThinkingStepsDisplay` implementation
+- ✅ Displays agent plans with progress tracking
+- ✅ Shows thinking steps in collapsible format
+- ✅ 35 unit tests passing (14 + 21)
+
+#### Phase 3.7: Session Mode Switcher ✅
+- ✅ `SessionModeSwitcher` implementation
+- ✅ Manages session modes (chat, code, architect, etc.)
+- ✅ Provides mode selection UI
+- ✅ Handles mode switching and updates
+- ✅ 24 unit tests passing
+
+#### Phase 3.8: Slash Command Support ✅
+- ✅ `SlashCommandProvider` implementation
+- ✅ Registers slash commands from agent
+- ✅ Handles command execution
+- ✅ Provides command suggestions
+- ✅ 20 unit tests passing
+
+#### Phase 3.9: Extension Activation & Registration ✅
+- ✅ `ACPContribution` implementation
+- ✅ Initializes all ACP components
+- ✅ Starts MCP servers
+- ✅ Registers chat participant
+- ✅ Handles initialization errors
+- ✅ 17 unit tests passing
 
 ## 📝 Testing Strategy
 
@@ -181,10 +207,11 @@ pnpm vitest watch test/unit/acp/
 
 ## 🎉 Achievements
 
-- **303 tests passing** with 100% success rate (295 unit + 8 integration)
+- **320 tests passing** with 100% success rate (312 unit + 8 integration)
 - **Mock ACP agent** working correctly
 - **Full protocol implementation** for core features
 - **Clean architecture** with separation of concerns
 - **Type-safe** implementation throughout
-- **Phase 2 Complete** - All client-implemented methods working
-- **Phase 3.1-3.8 Complete** - All UI integration components ready
+- **Phase 1 Complete** - ACP Foundation (JSON-RPC, ACP Client, Mock Agent)
+- **Phase 2 Complete** - Protocol Implementation (Agent Config, File System, Terminal, Permissions, MCP)
+- **Phase 3 Complete** - VS Code UI Integration (Request Handler, Content Mapper, Sessions, Tools, Chat Participant, Plan Viewer, Thinking Steps, Mode Switcher, Slash Commands, Extension Activation)
