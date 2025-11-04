@@ -177,9 +177,22 @@ export interface SessionPromptResult {
 // Tool Calls
 // ============================================================================
 
-export type ToolCallKind = 'read' | 'edit' | 'execute' | 'think';
+export enum ToolCallKind {
+    ReadTextFile = 'fs/read_text_file',
+    WriteTextFile = 'fs/write_text_file',
+    TerminalCreate = 'terminal/create',
+    TerminalSendText = 'terminal/send_text',
+    TerminalKill = 'terminal/kill',
+    MCPToolCall = 'mcp/tool_call',
+}
 
-export type ToolCallStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
+export enum ToolCallStatus {
+    Pending = 'pending',
+    InProgress = 'in_progress',
+    Completed = 'completed',
+    Error = 'error',
+    AwaitingPermission = 'awaiting_permission',
+}
 
 export interface ToolCallLocation {
     path: string;

@@ -62,7 +62,7 @@
 - ✅ Switched from npm to pnpm for faster package management
 - ✅ Fixed test file naming convention (`.spec.ts`)
 - ✅ Configured vitest for both unit and integration tests
-- ✅ **Total Tests:** 143 tests passing (135 unit + 8 integration)
+- ✅ **Total Tests:** 161 tests passing (153 unit + 8 integration)
 
 ## 📊 Test Coverage Summary
 
@@ -75,12 +75,13 @@
 ✅ test/unit/acp/terminal-manager.spec.ts       23 tests
 ✅ test/unit/acp/permission-handler.spec.ts     17 tests
 ✅ test/unit/acp/mcp-manager.spec.ts            19 tests
+✅ test/unit/acp/acp-request-handler.spec.ts    18 tests
 ✅ test/integration/acp/acp-integration.spec.ts  8 tests
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TOTAL                                       143 tests
+   TOTAL                                       161 tests
 ```
 
-## 🎯 Next Steps (Phase 2: VS Code Integration)
+## 🎯 Next Steps (Phase 3: UI Integration)
 
 ### Phase 2 Progress: 100% Complete ✅
 
@@ -94,28 +95,43 @@ All Phase 2 components have been implemented and tested:
    - ✅ Permission Request Handler
 4. ✅ MCP Integration - Complete
 
-### Next: Phase 3 - UI Integration
+### Phase 3 Progress: 33% Complete (2/6 sub-phases)
 
-### 1. Chat Panel Integration
-- [ ] Replace GitHub Copilot API calls with ACP client
-- [ ] Stream agent responses to chat UI
-- [ ] Render tool calls and status updates
-- [ ] Handle embedded resources (@-mentions)
-- [ ] Session persistence and history
+#### Phase 3.1: Core Request Handler ✅
+- ✅ `ACPRequestHandler` implementation
+- ✅ Handles chat requests and streams responses to VS Code UI
+- ✅ Maps agent messages (text, thinking, images, embedded resources)
+- ✅ Displays tool call status updates
+- ✅ Handles permission requests
+- ✅ Displays agent plans
+- ✅ 18 unit tests passing
 
-### 2. Agent Plan Viewer
-- [ ] Create UI component for displaying agent plans
-- [ ] Update plan dynamically as agent reports progress
-- [ ] Show plan entry status (pending, in_progress, completed, failed)
+#### Phase 3.2: Content Block Mapper ✅
+- ✅ `ContentBlockMapper` implementation
+- ✅ Converts ACP content blocks to VS Code format
+- ✅ Handles text, thinking, image, and embedded resource content
+- ✅ Provides markdown, progress, and reference mapping helpers
+- ✅ 15 unit tests passing
 
-### 3. Inline Chat Integration
-- [ ] Integrate ACP client with inline chat
-- [ ] Handle inline edits and suggestions
+#### Phase 3.3: Session Manager (Next)
+- [ ] Create `SessionManager` for session lifecycle
+- [ ] Session creation, loading, persistence
+- [ ] Map VS Code conversation IDs to ACP session IDs
 
-### 4. Session Management UI
-- [ ] Session history viewer
-- [ ] Session switching
-- [ ] Session export/import
+#### Phase 3.4: Chat Participant Integration
+- [ ] Create `ACPChatParticipant` to replace existing chat participant
+- [ ] Initialize ACP client and route requests
+- [ ] Handle session lifecycle
+
+#### Phase 3.5: Agent Plan & Thinking Steps UI
+- [ ] Create `AgentPlanViewer` component
+- [ ] Create `ThinkingStepsDisplay` component
+- [ ] Integrate with VS Code UI
+
+#### Phase 3.6: Inline Chat Handler
+- [ ] Create `ACPInlineChatHandler`
+- [ ] Handle inline edits and code suggestions
+- [ ] Show diffs and apply changes
 
 ## 📝 Testing Strategy
 
