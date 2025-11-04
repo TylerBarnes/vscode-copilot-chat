@@ -62,16 +62,20 @@
 - ✅ Switched from npm to pnpm for faster package management
 - ✅ Fixed test file naming convention (`.spec.ts`)
 - ✅ Configured vitest for both unit and integration tests
-- ✅ **Total Tests:** 36 tests passing (28 unit + 8 integration)
+- ✅ **Total Tests:** 107 tests passing (99 unit + 8 integration)
 
 ## 📊 Test Coverage Summary
 
 ```
-✅ test/unit/acp/json-rpc-client.spec.ts     14 tests
-✅ test/unit/acp/acp-client.spec.ts          14 tests
+✅ test/unit/acp/json-rpc-client.spec.ts        14 tests
+✅ test/unit/acp/acp-client.spec.ts             14 tests
+✅ test/unit/acp/agent-config.spec.ts           11 tests
+✅ test/unit/acp/agent-settings.spec.ts         19 tests
+✅ test/unit/acp/file-system-handler.spec.ts    18 tests
+✅ test/unit/acp/terminal-manager.spec.ts       23 tests
 ✅ test/integration/acp/acp-integration.spec.ts  8 tests
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TOTAL                                     36 tests
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOTAL                                       107 tests
 ```
 
 ## 🎯 Next Steps (Phase 2: VS Code Integration)
