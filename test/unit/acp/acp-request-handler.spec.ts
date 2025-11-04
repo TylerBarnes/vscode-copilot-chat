@@ -58,19 +58,12 @@ describe('ACPRequestHandler', () => {
             onCancellationRequested: vi.fn(),
         } as any;
 
-        handler = new ACPRequestHandler(acpClient, stream, token);
+        handler = new ACPRequestHandler(acpClient);
     });
 
     describe('constructor', () => {
-        it('should create handler with client, stream, and token', () => {
+        it('should create handler with client', () => {
             expect(handler).toBeDefined();
-        });
-
-        it('should register event listeners on ACP client', () => {
-            expect(acpClient.on).toHaveBeenCalledWith('agent_message', expect.any(Function));
-            expect(acpClient.on).toHaveBeenCalledWith('tool_call', expect.any(Function));
-            expect(acpClient.on).toHaveBeenCalledWith('permission_request', expect.any(Function));
-            expect(acpClient.on).toHaveBeenCalledWith('agent_plan', expect.any(Function));
         });
     });
 
@@ -78,7 +71,7 @@ describe('ACPRequestHandler', () => {
         it('should send prompt to ACP client', async () => {
             vi.mocked(acpClient.prompt).mockResolvedValue(undefined);
 
-            await handler.handleRequest('Hello, agent!', []);
+            await handler.handleRequest('Hello, agent!', [], stream, token);
 
             expect(acpClient.prompt).toHaveBeenCalledWith({
                 messages: [
@@ -100,7 +93,7 @@ describe('ACPRequestHandler', () => {
                 } as any,
             ];
 
-            await handler.handleRequest('Check this file', references);
+            await handler.handleRequest('Check this file', references, stream, token);
 
             expect(acpClient.prompt).toHaveBeenCalledWith({
                 messages: [
@@ -124,7 +117,7 @@ describe('ACPRequestHandler', () => {
         it('should return success result on completion', async () => {
             vi.mocked(acpClient.prompt).mockResolvedValue(undefined);
 
-            const result = await handler.handleRequest('Hello', []);
+            const result = await handler.handleRequest('Hello', [], stream, token);
 
             expect(result).toEqual({
                 metadata: {
@@ -139,9 +132,7 @@ describe('ACPRequestHandler', () => {
                 onCancellationRequested: vi.fn(),
             } as any;
 
-            const cancelHandler = new ACPRequestHandler(acpClient, stream, cancelToken);
-
-            const result = await cancelHandler.handleRequest('Hello', []);
+            const result = await handler.handleRequest('Hello', [], stream, cancelToken);
 
             expect(result).toEqual({
                 errorDetails: {
@@ -156,7 +147,7 @@ describe('ACPRequestHandler', () => {
         it('should handle errors from ACP client', async () => {
             vi.mocked(acpClient.prompt).mockRejectedValue(new Error('Agent error'));
 
-            const result = await handler.handleRequest('Hello', []);
+            const result = await handler.handleRequest('Hello', [], stream, token);
 
             expect(result).toEqual({
                 errorDetails: {
@@ -171,6 +162,9 @@ describe('ACPRequestHandler', () => {
 
     describe('handleAgentMessage', () => {
         it('should stream text content to markdown', () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const content: AgentMessageContent = {
                 type: 'text',
                 text: 'Hello from agent',
@@ -182,6 +176,9 @@ describe('ACPRequestHandler', () => {
         });
 
         it('should handle thinking content', () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const content: AgentMessageContent = {
                 type: 'thinking',
                 thinking: 'Analyzing the request...',
@@ -193,6 +190,9 @@ describe('ACPRequestHandler', () => {
         });
 
         it('should handle image content', () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const content: AgentMessageContent = {
                 type: 'image',
                 data: 'base64data',
@@ -207,6 +207,9 @@ describe('ACPRequestHandler', () => {
         });
 
         it('should handle embedded resource content', () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const content: AgentMessageContent = {
                 type: 'embedded_resource',
                 resource: {
@@ -223,6 +226,9 @@ describe('ACPRequestHandler', () => {
 
     describe('handleToolCall', () => {
         it('should display tool call in progress', async () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const toolCall: ToolCall = {
                 id: 'tool-1',
                 kind: ToolCallKind.ReadTextFile,
@@ -238,6 +244,9 @@ describe('ACPRequestHandler', () => {
         });
 
         it('should display tool call completion', async () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const toolCall: ToolCall = {
                 id: 'tool-1',
                 kind: ToolCallKind.ReadTextFile,
@@ -254,6 +263,9 @@ describe('ACPRequestHandler', () => {
         });
 
         it('should display tool call error', async () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const toolCall: ToolCall = {
                 id: 'tool-1',
                 kind: ToolCallKind.ReadTextFile,
@@ -315,6 +327,9 @@ describe('ACPRequestHandler', () => {
 
     describe('handleAgentPlan', () => {
         it('should display agent plan steps', () => {
+            // Set current stream
+            handler['currentStream'] = stream;
+
             const plan: AgentPlan = {
                 steps: [
                     { description: 'Read file', status: 'completed' },
@@ -340,14 +355,4 @@ describe('ACPRequestHandler', () => {
         });
     });
 
-    describe('dispose', () => {
-        it('should remove event listeners', () => {
-            handler.dispose();
-
-            expect(acpClient.off).toHaveBeenCalledWith('agent_message', expect.any(Function));
-            expect(acpClient.off).toHaveBeenCalledWith('tool_call', expect.any(Function));
-            expect(acpClient.off).toHaveBeenCalledWith('permission_request', expect.any(Function));
-            expect(acpClient.off).toHaveBeenCalledWith('agent_plan', expect.any(Function));
-        });
-    });
 });

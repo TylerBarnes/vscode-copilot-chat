@@ -16,39 +16,39 @@ import {
  */
 export class ACPRequestHandler {
     private onPermissionRequest?: (request: PermissionRequest) => Promise<boolean>;
-    private handleAgentMessageBound: (content: AgentMessageContent) => void;
-    private handleToolCallBound: (toolCall: ToolCall) => Promise<void>;
-    private handlePermissionRequestBound: (request: PermissionRequest) => Promise<PermissionResponse>;
-    private handleAgentPlanBound: (plan: AgentPlan) => void;
+    private currentStream?: vscode.ChatResponseStream;
+    private currentToken?: vscode.CancellationToken;
 
     constructor(
-        private acpClient: ACPClient,
-        private stream: vscode.ChatResponseStream,
-        private token: vscode.CancellationToken
-    ) {
-        // Bind event handlers
-        this.handleAgentMessageBound = this.handleAgentMessage.bind(this);
-        this.handleToolCallBound = this.handleToolCall.bind(this);
-        this.handlePermissionRequestBound = this.handlePermissionRequest.bind(this);
-        this.handleAgentPlanBound = this.handleAgentPlan.bind(this);
-
-        // Register event listeners
-        this.acpClient.on('agent_message', this.handleAgentMessageBound);
-        this.acpClient.on('tool_call', this.handleToolCallBound);
-        this.acpClient.on('permission_request', this.handlePermissionRequestBound);
-        this.acpClient.on('agent_plan', this.handleAgentPlanBound);
-    }
+        private acpClient: ACPClient
+    ) {}
 
     /**
      * Handle a chat request by sending it to the ACP agent
      */
     async handleRequest(
         prompt: string,
-        references: vscode.ChatPromptReference[]
+        references: vscode.ChatPromptReference[],
+        stream: vscode.ChatResponseStream,
+        token: vscode.CancellationToken
     ): Promise<vscode.ChatResult> {
+        // Store current stream and token for event handlers
+        this.currentStream = stream;
+        this.currentToken = token;
+
+        // Register event listeners for this request
+        const handleAgentMessage = this.handleAgentMessage.bind(this);
+        const handleToolCall = this.handleToolCall.bind(this);
+        const handlePermissionRequest = this.handlePermissionRequest.bind(this);
+        const handleAgentPlan = this.handleAgentPlan.bind(this);
+
+        this.acpClient.on('agent_message', handleAgentMessage);
+        this.acpClient.on('tool_call', handleToolCall);
+        this.acpClient.on('permission_request', handlePermissionRequest);
+        this.acpClient.on('agent_plan', handleAgentPlan);
         try {
             // Check for cancellation
-            if (this.token.isCancellationRequested) {
+            if (token.isCancellationRequested) {
                 return {
                     errorDetails: {
                         message: 'Request cancelled',
@@ -106,6 +106,16 @@ export class ACPRequestHandler {
                     command: undefined,
                 },
             };
+        } finally {
+            // Clean up event listeners
+            this.acpClient.off('agent_message', handleAgentMessage);
+            this.acpClient.off('tool_call', handleToolCall);
+            this.acpClient.off('permission_request', handlePermissionRequest);
+            this.acpClient.off('agent_plan', handleAgentPlan);
+            
+            // Clear current stream and token
+            this.currentStream = undefined;
+            this.currentToken = undefined;
         }
     }
 
@@ -113,25 +123,27 @@ export class ACPRequestHandler {
      * Handle agent message content
      */
     private handleAgentMessage(content: AgentMessageContent): void {
+        if (!this.currentStream) return;
+
         switch (content.type) {
             case 'text':
-                this.stream.markdown(content.text);
+                this.currentStream.markdown(content.text);
                 break;
 
             case 'thinking':
-                this.stream.progress(`💭 ${content.thinking}`);
+                this.currentStream.progress(`💭 ${content.thinking}`);
                 break;
 
             case 'image':
                 const imageMarkdown = `![Image](data:${content.mimeType};base64,${content.data})`;
-                this.stream.markdown(imageMarkdown);
+                this.currentStream.markdown(imageMarkdown);
                 break;
 
             case 'embedded_resource':
                 // Create a reference to the embedded resource
                 if (content.resource.type === 'file') {
                     const uri = vscode.Uri.parse(content.resource.uri);
-                    this.stream.reference(uri);
+                    this.currentStream.reference(uri);
                 }
                 break;
         }
@@ -141,23 +153,25 @@ export class ACPRequestHandler {
      * Handle tool call updates
      */
     private async handleToolCall(toolCall: ToolCall): Promise<void> {
+        if (!this.currentStream) return;
+
         const toolName = this.getToolName(toolCall.kind);
 
         switch (toolCall.status) {
             case ToolCallStatus.Pending:
-                this.stream.progress(`🔧 ${toolName} (pending)`);
+                this.currentStream.progress(`🔧 ${toolName} (pending)`);
                 break;
 
             case ToolCallStatus.Completed:
-                this.stream.progress(`✓ ${toolName} (completed)`);
+                this.currentStream.progress(`✓ ${toolName} (completed)`);
                 break;
 
             case ToolCallStatus.Error:
-                this.stream.progress(`✗ ${toolName} (error: ${toolCall.error})`);
+                this.currentStream.progress(`✗ ${toolName} (error: ${toolCall.error})`);
                 break;
 
             case ToolCallStatus.AwaitingPermission:
-                this.stream.progress(`⏸️ ${toolName} (awaiting permission)`);
+                this.currentStream.progress(`⏸️ ${toolName} (awaiting permission)`);
                 break;
         }
     }
@@ -186,6 +200,8 @@ export class ACPRequestHandler {
      * Handle agent plan updates
      */
     private handleAgentPlan(plan: AgentPlan): void {
+        if (!this.currentStream) return;
+
         let planMarkdown = '🎯 Agent Plan:\n\n';
 
         for (const step of plan.steps) {
@@ -193,7 +209,7 @@ export class ACPRequestHandler {
             planMarkdown += `${icon} ${step.description}\n`;
         }
 
-        this.stream.markdown(planMarkdown);
+        this.currentStream.markdown(planMarkdown);
     }
 
     /**
@@ -236,13 +252,4 @@ export class ACPRequestHandler {
         }
     }
 
-    /**
-     * Clean up event listeners
-     */
-    dispose(): void {
-        this.acpClient.off('agent_message', this.handleAgentMessageBound);
-        this.acpClient.off('tool_call', this.handleToolCallBound);
-        this.acpClient.off('permission_request', this.handlePermissionRequestBound);
-        this.acpClient.off('agent_plan', this.handleAgentPlanBound);
-    }
 }
