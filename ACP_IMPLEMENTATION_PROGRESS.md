@@ -62,7 +62,7 @@
 - ✅ Switched from npm to pnpm for faster package management
 - ✅ Fixed test file naming convention (`.spec.ts`)
 - ✅ Configured vitest for both unit and integration tests
-- ✅ **Total Tests:** 107 tests passing (99 unit + 8 integration)
+- ✅ **Total Tests:** 143 tests passing (135 unit + 8 integration)
 
 ## 📊 Test Coverage Summary
 
@@ -73,62 +73,49 @@
 ✅ test/unit/acp/agent-settings.spec.ts         19 tests
 ✅ test/unit/acp/file-system-handler.spec.ts    18 tests
 ✅ test/unit/acp/terminal-manager.spec.ts       23 tests
+✅ test/unit/acp/permission-handler.spec.ts     17 tests
+✅ test/unit/acp/mcp-manager.spec.ts            19 tests
 ✅ test/integration/acp/acp-integration.spec.ts  8 tests
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TOTAL                                       107 tests
+   TOTAL                                       143 tests
 ```
 
 ## 🎯 Next Steps (Phase 2: VS Code Integration)
 
-### 1. Agent Configuration System
-- [ ] Create `src/platform/acp/agent-config.ts`
-  - Agent executable path and arguments
-  - Environment variables
-  - Agent profiles (multiple agents)
-  - Capability detection
-  - Auto-discovery of installed agents
+### Phase 2 Progress: 100% Complete ✅
 
-### 2. VS Code Extension Settings
-- [ ] Update `package.json` with ACP configuration schema
-  - `acp.agent.executable`
-  - `acp.agent.args`
-  - `acp.agent.env`
-  - `acp.agent.profiles`
-  - `acp.mcp.servers`
-  - `acp.permissions.autoApprove`
-  - `acp.session.persistence`
+All Phase 2 components have been implemented and tested:
 
-### 3. Client-Implemented Methods
-- [ ] File System Handler (`fs/read_text_file`, `fs/write_text_file`)
-  - Path validation (within cwd)
-  - VS Code workspace integration
-  - Error handling
-- [ ] Terminal Handler (`terminal/create`, `terminal/output`, etc.)
-  - VS Code integrated terminal integration
-  - Output streaming
-  - Process lifecycle management
-- [ ] Permission Request Handler (`session/request_permission`)
-  - VS Code UI for user approval
-  - Permission persistence (allow always/reject always)
+1. ✅ Agent Configuration System - Complete
+2. ✅ VS Code Extension Settings - Complete
+3. ✅ Client-Implemented Methods - Complete
+   - ✅ File System Handler
+   - ✅ Terminal Handler
+   - ✅ Permission Request Handler
+4. ✅ MCP Integration - Complete
 
-### 4. Chat Panel Integration
+### Next: Phase 3 - UI Integration
+
+### 1. Chat Panel Integration
 - [ ] Replace GitHub Copilot API calls with ACP client
 - [ ] Stream agent responses to chat UI
 - [ ] Render tool calls and status updates
 - [ ] Handle embedded resources (@-mentions)
 - [ ] Session persistence and history
 
-### 5. Agent Plan Viewer
+### 2. Agent Plan Viewer
 - [ ] Create UI component for displaying agent plans
 - [ ] Update plan dynamically as agent reports progress
 - [ ] Show plan entry status (pending, in_progress, completed, failed)
 
-### 6. MCP Integration
-- [ ] MCP server configuration
-- [ ] Built-in MCP server (VS Code Proxy)
-  - Expose workspace search
-  - Expose diagnostics
-  - Expose file operations
+### 3. Inline Chat Integration
+- [ ] Integrate ACP client with inline chat
+- [ ] Handle inline edits and suggestions
+
+### 4. Session Management UI
+- [ ] Session history viewer
+- [ ] Session switching
+- [ ] Session export/import
 
 ## 📝 Testing Strategy
 
