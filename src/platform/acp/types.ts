@@ -266,6 +266,74 @@ export interface PlanUpdate {
     plan: PlanEntry[];
 }
 
+/**
+ * Agent Plan notification structure
+ * Used for displaying agent's execution plan in the UI
+ */
+export interface AgentPlan {
+    steps: Array<{
+        description: string;
+        status: 'pending' | 'in_progress' | 'completed' | 'failed';
+    }>;
+}
+
+/**
+ * Thinking content block from agent
+ * Represents a single thinking step in the agent's reasoning process
+ */
+export interface ThinkingContent {
+    type: 'thinking';
+    content: string;
+}
+
+/**
+ * Session mode definition
+ * Represents a mode that the agent can operate in (e.g., "chat", "code", "debug")
+ */
+export interface SessionMode {
+    name: string;
+    description: string;
+    icon?: string;
+}
+
+/**
+ * Session modes configuration
+ * Contains available modes and the currently active mode
+ */
+export interface SessionModes {
+    availableModes: SessionMode[];
+    currentMode: string;
+}
+
+// ============================================================================
+// Slash Commands
+// ============================================================================
+
+/**
+ * Represents a slash command that can be invoked in the chat interface
+ */
+export interface SlashCommand {
+    /** Command name (without the leading /) */
+    name: string;
+    /** Human-readable description */
+    description: string;
+    /** Optional input configuration */
+    input?: {
+        /** Hint text for the input */
+        hint?: string;
+        /** Whether input is required */
+        required?: boolean;
+    };
+}
+
+/**
+ * Notification from agent about available slash commands
+ */
+export interface AvailableCommandsUpdate {
+    type: 'available_commands_update';
+    commands: SlashCommand[];
+}
+
 // ============================================================================
 // Session Cancellation
 // ============================================================================
