@@ -3278,7 +3278,140 @@
 						]
 					}
 				}
-			}
+			},
+            {
+                "title": "ACP Agent",
+                "properties": {
+                    "copilot-chat.acp.agent.executable": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Path to the ACP agent executable",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.agent.args": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": [],
+                        "description": "Command-line arguments to pass to the agent",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.agent.env": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        },
+                        "default": {},
+                        "description": "Environment variables to set for the agent process",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.agent.profiles": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "executable": {
+                                    "type": "string"
+                                },
+                                "args": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "env": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "icon": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["id", "name", "executable"]
+                        },
+                        "default": [],
+                        "description": "Saved agent profiles",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.agent.activeProfile": {
+                        "type": ["string", "null"],
+                        "default": null,
+                        "description": "ID of the currently active agent profile",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.mcp.servers": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "command": {
+                                    "type": "string"
+                                },
+                                "args": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "env": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                },
+                                "transport": {
+                                    "type": "string",
+                                    "enum": ["stdio", "http", "sse"]
+                                },
+                                "url": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["name"]
+                        },
+                        "default": [],
+                        "description": "MCP server configurations",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.permissions.autoApprove": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": ["read", "edit", "execute", "think"]
+                        },
+                        "default": [],
+                        "description": "Tool kinds to automatically approve without prompting",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.session.persistHistory": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Whether to persist session history to disk",
+                        "scope": "machine-overridable"
+                    },
+                    "copilot-chat.acp.session.storageDirectory": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Directory to store session history (defaults to .vscode-acp in workspace)",
+                        "scope": "machine-overridable"
+                    }
+                }
+            }
 		],
 		"submenus": [
 			{
