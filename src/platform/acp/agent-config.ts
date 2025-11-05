@@ -71,34 +71,13 @@ export class AgentConfigManager {
 
 	private async initializeDefaults(): Promise<void> {
 		// Add some common default profiles
-		const defaultProfiles: AgentProfileData[] = [
-			{
-				id: 'claude-code',
-				name: 'Claude Code',
-				executable: 'claude-code',
-				args: ['--acp'],
-				description: 'Anthropic Claude Code agent',
-			},
-			{
-				id: 'gemini-cli',
-				name: 'Gemini CLI',
-				executable: 'gemini-cli',
-				args: ['--acp'],
-				description: 'Google Gemini CLI agent',
-			},
-			{
-				id: 'opencode',
-				name: 'OpenCode',
-				executable: 'opencode',
-				args: ['--acp'],
-				description: 'OpenCode agent',
-			},
-		];
+        // Initialize with empty profiles - users should configure their own ACP agents
+        const defaultProfiles: AgentProfileData[] = [];
 
-		for (const profileData of defaultProfiles) {
-			const profile = new AgentProfile(profileData);
-			this.profiles.set(profile.id, profile);
-		}
+        for (const profileData of defaultProfiles) {
+            const profile = new AgentProfile(profileData);
+            this.profiles.set(profile.id, profile);
+        }
 
 		// Set first profile as active by default
 		if (defaultProfiles.length > 0) {

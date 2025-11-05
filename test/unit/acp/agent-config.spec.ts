@@ -50,13 +50,13 @@ describe('AgentConfigManager', () => {
 	});
 
 	describe('AgentConfigManager', () => {
-		it('should initialize with default profiles', async () => {
-			const manager = new AgentConfigManager(configPath);
-			await manager.initialize();
+        it('should initialize with empty profiles', async () => {
+            const manager = new AgentConfigManager(configPath);
+            await manager.initialize();
 
-			const profiles = manager.getProfiles();
-			expect(profiles.length).toBeGreaterThan(0);
-		});
+            const profiles = manager.getProfiles();
+            expect(profiles.length).toBe(0);
+        });
 
 		it('should add a custom profile', async () => {
 			const manager = new AgentConfigManager(configPath);
@@ -93,18 +93,24 @@ describe('AgentConfigManager', () => {
 			expect(manager.getProfile('temp-agent')).toBeUndefined();
 		});
 
-		it('should set and get active profile', async () => {
-			const manager = new AgentConfigManager(configPath);
-			await manager.initialize();
+        it('should set and get active profile', async () => {
+            const manager = new AgentConfigManager(configPath);
+            await manager.initialize();
 
-			const profiles = manager.getProfiles();
-			const firstProfile = profiles[0];
+            // Add a test profile first since we don't have default profiles
+            const testProfile = new AgentProfile({
+                id: 'test-profile',
+                name: 'Test Profile',
+                executable: 'test-agent',
+                args: ['--acp'],
+            });
+            manager.addProfile(testProfile);
 
-			await manager.setActiveProfile(firstProfile.id);
-			const activeProfile = manager.getActiveProfile();
+            await manager.setActiveProfile(testProfile.id);
+            const activeProfile = manager.getActiveProfile();
 
-			expect(activeProfile?.id).toBe(firstProfile.id);
-		});
+            expect(activeProfile?.id).toBe(testProfile.id);
+        });
 
 		it('should persist configuration to disk', async () => {
 			const manager1 = new AgentConfigManager(configPath);
