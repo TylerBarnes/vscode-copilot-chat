@@ -56,10 +56,10 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
 					await this.configManager.removeMcpServer(data.name);
 					await this._sendConfig();
 					break;
-				case 'updatePermissionPolicy':
-					await this.configManager.updatePermissionPolicy(data.policy);
-					await this._sendConfig();
-					break;
+                case 'updatePermissionPolicy':
+                    await this.configManager.updatePermissionPolicy(data.policy.pattern, data.policy);
+                    await this._sendConfig();
+                    break;
 				case 'removePermissionPolicy':
 					await this.configManager.removePermissionPolicy(data.pattern);
 					await this._sendConfig();
@@ -68,8 +68,8 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
 					await this.configManager.updateSessionConfig(data.config);
 					await this._sendConfig();
 					break;
-				case 'openAgentProfileSelector':
-					await this.profileSelector.showProfileSelector();
+                case 'openAgentProfileSelector':
+                    await this.profileSelector.selectProfile();
 					break;
 				case 'openMcpServerUI':
 					await this.mcpServerUI.showManagementUI();
@@ -80,10 +80,10 @@ export class SettingsWebviewProvider implements vscode.WebviewViewProvider {
 			}
 		});
 
-		// Listen for configuration changes
-		this.configManager.onConfigChange(() => {
-			this._sendConfig();
-		});
+        // Listen for configuration changes
+        this.configManager.onDidChangeConfiguration(() => {
+            this._sendConfig();
+        });
 
 		// Send initial config
 		this._sendConfig();

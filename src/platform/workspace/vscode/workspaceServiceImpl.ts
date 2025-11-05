@@ -11,10 +11,10 @@ import { ILogService } from '../../log/common/logService';
 import { AbstractWorkspaceService } from '../common/workspaceService';
 
 export class ExtensionTextDocumentManager extends AbstractWorkspaceService {
-	private _fullyLoadedPromise: Promise<void> | undefined;
+    private _fullyLoadedPromise: Promise<void> | undefined;
 
     constructor(
-        @ILogService private readonly _logService: ILogService,
+        @ILogService _logService: ILogService,
     ) {
         super();
     }
@@ -44,9 +44,9 @@ export class ExtensionTextDocumentManager extends AbstractWorkspaceService {
 		await window.showTextDocument(document);
 	}
 
-	override async openNotebookDocument(uri: Uri): Promise<NotebookDocument>;
-	override async openNotebookDocument(notebookType: string, content?: NotebookData): Promise<NotebookDocument>;
-	override async openNotebookDocument(arg1: Uri | string, arg2?: NotebookData): Promise<NotebookDocument> {
+    async openNotebookDocument(uri: Uri): Promise<NotebookDocument>;
+    async openNotebookDocument(notebookType: string, content?: NotebookData): Promise<NotebookDocument>;
+    async openNotebookDocument(arg1: Uri | string, arg2?: NotebookData): Promise<NotebookDocument> {
 		if (typeof arg1 === 'string') {
 			// Handle the overload for notebookType and content
 			return await workspace.openNotebookDocument(arg1, arg2);

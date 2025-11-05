@@ -195,7 +195,7 @@ export class JsonRpcClient {
         pending.timeout = setTimeout(() => {
           this.pendingRequests.delete(id);
           reject(new Error('Request timeout'));
-        }, options.timeout) as NodeJS.Timeout;
+        }, options.timeout) as unknown as NodeJS.Timeout;
       }
 
       this.pendingRequests.set(id, pending);

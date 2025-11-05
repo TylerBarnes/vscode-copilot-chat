@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AgentPlanViewer } from '../../../src/platform/acp/agent-plan-viewer';
 import type { AgentPlan } from '../../../src/platform/acp/types';
-import * as vscode from 'vscode';
 
 // Mock vscode module
 vi.mock('vscode', () => ({

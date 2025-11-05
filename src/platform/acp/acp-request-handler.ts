@@ -17,7 +17,6 @@ import {
 export class ACPRequestHandler {
     private onPermissionRequest?: (request: PermissionRequest) => Promise<boolean>;
     private currentStream?: vscode.ChatResponseStream;
-    private currentToken?: vscode.CancellationToken;
 
     constructor(
         private acpClient: ACPClient
@@ -32,9 +31,8 @@ export class ACPRequestHandler {
         stream: vscode.ChatResponseStream,
         token: vscode.CancellationToken
     ): Promise<vscode.ChatResult> {
-        // Store current stream and token for event handlers
+        // Store current stream for event handlers
         this.currentStream = stream;
-        this.currentToken = token;
 
         // Register event listeners for this request
         const handleAgentMessage = this.handleAgentMessage.bind(this);
@@ -113,9 +111,8 @@ export class ACPRequestHandler {
             this.acpClient.off('permission_request', handlePermissionRequest);
             this.acpClient.off('agent_plan', handleAgentPlan);
             
-            // Clear current stream and token
+            // Clear current stream
             this.currentStream = undefined;
-            this.currentToken = undefined;
         }
     }
 

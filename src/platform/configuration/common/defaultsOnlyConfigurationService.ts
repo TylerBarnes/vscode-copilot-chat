@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ConfigurationScope } from 'vscode';
-import { IExperimentationService } from '../../acp/stub-experimentation-service';
 import { AbstractConfigurationService, BaseConfig, Config, ExperimentBasedConfig, ExperimentBasedConfigType, InspectConfigResult } from './configurationService';
 
 /** Provides only the default values, ignoring the user's settings or exp. */
@@ -29,9 +28,9 @@ export class DefaultsOnlyConfigurationService extends AbstractConfigurationServi
 		return undefined;
 	}
 
-	override getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, experimentationService: IExperimentationService, scope?: ConfigurationScope): T {
-		return this.getDefaultValue(key);
-	}
+    override getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, scope?: ConfigurationScope): T {
+        return this.getDefaultValue(key);
+    }
 
 	override dumpConfig(): { [key: string]: string } {
 		return {};

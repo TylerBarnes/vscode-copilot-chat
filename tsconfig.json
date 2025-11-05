@@ -19,12 +19,11 @@
 			"vscode": ["./src/util/common/test/shims/vscodeTypesShim.ts"]
 		}
 	},
-	"include": [
-		"vscodeTypes.ts",
-		"src",
-		"test",
-		".vscode/extensions/test-extension"
-	],
+    "include": [
+        "vscodeTypes.ts",
+        "src",
+        "test"
+    ],
 	"exclude": [
 		"test/scenarios/**/*",
 		"test/simulation/fixtures/**/*",

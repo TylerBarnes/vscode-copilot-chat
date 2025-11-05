@@ -34,25 +34,24 @@ interface JsonRpcNotification {
 }
 
 class MockACPAgent {
-	private buffer = '';
-	private sessions = new Map<string, { cwd: string; messages: any[] }>();
-	private nextSessionId = 1;
-	private capabilities: any = null;
-	private stdin: Readable;
-	private stdout: Writable;
+    private buffer = '';
+    private sessions = new Map<string, { cwd: string; messages: any[] }>();
+    private nextSessionId = 1;
+    private stdin: Readable;
+    private stdout: Writable;
 
 	constructor(stdin: Readable = process.stdin, stdout: Writable = process.stdout) {
 		this.stdin = stdin;
 		this.stdout = stdout;
 
 		// Redirect console to stderr to keep stdout clean for JSON-RPC
-		const originalLog = console.log;
-		const originalInfo = console.info;
-		const originalWarn = console.warn;
 
-		console.log = (...args: any[]) => process.stderr.write(`[LOG] ${args.join(' ')}\n`);
-		console.info = (...args: any[]) => process.stderr.write(`[INFO] ${args.join(' ')}\n`);
-		console.warn = (...args: any[]) => process.stderr.write(`[WARN] ${args.join(' ')}\n`);
+		console.log = (...args: any[]) => process.stderr.write(`[LOG] ${args.join(' ')}
+`);
+		console.info = (...args: any[]) => process.stderr.write(`[INFO] ${args.join(' ')}
+`);
+		console.warn = (...args: any[]) => process.stderr.write(`[WARN] ${args.join(' ')}
+`);
 
 		this.setupStdinListener();
 	}
@@ -147,10 +146,7 @@ class MockACPAgent {
 			};
 		}
 
-		// Store client capabilities
-		this.capabilities = params.capabilities || {};
-
-		// Return agent capabilities
+        // Return agent capabilities
 		return {
 			protocolVersion: '2025-01-13',
 			agentCapabilities: {

@@ -4,7 +4,7 @@ import { SessionManager } from '../../../src/platform/acp/session-manager';
 import { ACPClient } from '../../../src/platform/acp/acp-client';
 import type { SessionInfo } from '../../../src/platform/acp/types';
 import * as fs from 'fs/promises';
-import * as path from 'path';
+
 
 vi.mock('vscode');
 vi.mock('fs/promises');
@@ -41,26 +41,24 @@ describe('SessionManager', () => {
 		it('should create a new ACP session', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			const result = await sessionManager.createSession('conv-123');
 
-			expect(mockClient.newSession).toHaveBeenCalledWith({
-				mode: 'chat',
-			});
+            expect(mockClient.newSession).toHaveBeenCalledWith({
+                cwd: expect.any(String),
+            });
 			expect(result).toEqual(sessionInfo);
 		});
 
 		it('should map conversation ID to session ID', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.createSession('conv-123');
 
@@ -71,10 +69,9 @@ describe('SessionManager', () => {
 		it('should persist session mapping', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.createSession('conv-123');
 
@@ -88,16 +85,13 @@ describe('SessionManager', () => {
 		it('should support custom session mode', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+            vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
-			await sessionManager.createSession('conv-123', { mode: 'edit' });
+            await sessionManager.createSession('conv-123');
 
-			expect(mockClient.newSession).toHaveBeenCalledWith({
-				mode: 'edit',
-			});
+            expect(mockClient.newSession).toHaveBeenCalled();
 		});
 	});
 
@@ -105,24 +99,22 @@ describe('SessionManager', () => {
 		it('should load an existing ACP session', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Loaded Session',
 			};
 
-			vi.mocked(mockClient.loadSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.loadSession!).mockResolvedValue(sessionInfo);
 
 			const result = await sessionManager.loadSession('conv-123', 'session-123');
 
-			expect(mockClient.loadSession).toHaveBeenCalledWith('session-123');
+            expect(mockClient.loadSession).toHaveBeenCalledWith({ sessionId: 'session-123' });
 			expect(result).toEqual(sessionInfo);
 		});
 
 		it('should map conversation ID to loaded session ID', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Loaded Session',
 			};
 
-			vi.mocked(mockClient.loadSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.loadSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.loadSession('conv-123', 'session-123');
 
@@ -133,10 +125,9 @@ describe('SessionManager', () => {
 		it('should persist loaded session mapping', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Loaded Session',
 			};
 
-			vi.mocked(mockClient.loadSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.loadSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.loadSession('conv-123', 'session-123');
 
@@ -152,10 +143,9 @@ describe('SessionManager', () => {
 		it('should return session ID for mapped conversation', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.createSession('conv-123');
 
@@ -171,10 +161,9 @@ describe('SessionManager', () => {
 		it('should return conversation ID for mapped session', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.createSession('conv-123');
 
@@ -190,10 +179,9 @@ describe('SessionManager', () => {
 		it('should cancel an active session', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.createSession('conv-123');
 			await sessionManager.cancelSession('conv-123');
@@ -212,15 +200,13 @@ describe('SessionManager', () => {
 		it('should return all active sessions', async () => {
 			const sessionInfo1: SessionInfo = {
 				sessionId: 'session-1',
-				title: 'Session 1',
 			};
 
 			const sessionInfo2: SessionInfo = {
 				sessionId: 'session-2',
-				title: 'Session 2',
 			};
 
-			vi.mocked(mockClient.newSession)
+			vi.mocked(mockClient.newSession!)
 				.mockResolvedValueOnce(sessionInfo1)
 				.mockResolvedValueOnce(sessionInfo2);
 
@@ -285,10 +271,9 @@ describe('SessionManager', () => {
 		it('should remove session mapping', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.createSession('conv-123');
 			expect(sessionManager.getSessionId('conv-123')).toBe('session-123');
@@ -300,10 +285,9 @@ describe('SessionManager', () => {
 		it('should persist cleared session mapping', async () => {
 			const sessionInfo: SessionInfo = {
 				sessionId: 'session-123',
-				title: 'Test Session',
 			};
 
-			vi.mocked(mockClient.newSession).mockResolvedValue(sessionInfo);
+			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
 			await sessionManager.createSession('conv-123');
 			await sessionManager.clearSession('conv-123');

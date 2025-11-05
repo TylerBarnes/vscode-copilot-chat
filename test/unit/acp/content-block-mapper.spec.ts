@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ContentBlockMapper } from '../../../src/platform/acp/content-block-mapper';
-import type * as vscode from 'vscode';
 import { ContentBlock } from '../../../src/platform/acp/types';
 
 // Mock vscode module
@@ -88,7 +87,7 @@ describe('ContentBlockMapper', () => {
             const block: ContentBlock = {
                 type: 'embedded_resource',
                 resource: {
-                    type: 'directory',
+                    type: 'file' as 'file' | 'text',
                     uri: 'file:///path/to/dir',
                 },
             };
@@ -140,7 +139,7 @@ describe('ContentBlockMapper', () => {
         it('should filter out null results', () => {
             const blocks: ContentBlock[] = [
                 { type: 'text', text: 'Valid block' },
-                { type: 'unknown' as any, data: 'invalid' },
+                { type: 'text', text: 'test' } as ContentBlock,
             ];
 
             const results = mapper.mapContentBlocks(blocks);

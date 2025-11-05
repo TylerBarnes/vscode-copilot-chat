@@ -51,7 +51,7 @@ export class StubSearchService implements ISearchService {
         try {
             return await vscode.workspace.findTextInFiles(query, options, result => progress.report(result), token);
         } catch {
-            return { resultCount: 0 };
+            return { limitHit: false };
         }
     }
 

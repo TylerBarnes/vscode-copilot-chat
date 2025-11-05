@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as vscode from 'vscode';
 import { ACPChatParticipant } from '../../../src/platform/acp/acp-chat-participant';
-import { ACPClient } from '../../../src/platform/acp/acp-client';
-import { ACPRequestHandler } from '../../../src/platform/acp/acp-request-handler';
-import { SessionManager } from '../../../src/platform/acp/session-manager';
-import { AgentConfigManager } from '../../../src/platform/acp/agent-config';
 
 vi.mock('vscode', () => ({
     chat: {
@@ -29,7 +25,6 @@ describe('ACPChatParticipant', () => {
     let mockACPClient: any;
     let mockRequestHandler: any;
     let mockSessionManager: any;
-    let mockAgentConfig: any;
     let mockParticipant: any;
     
     // Store spy references separately for assertion
@@ -88,15 +83,6 @@ describe('ACPChatParticipant', () => {
             initialize: vi.fn().mockResolvedValue(undefined),
         };
 
-        mockAgentConfig = {
-            getActiveProfile: vi.fn().mockReturnValue({
-                name: 'default',
-                executable: 'test-agent',
-                args: [],
-                env: {},
-            }),
-        };
-
         mockParticipant = {
             iconPath: undefined,
             dispose: vi.fn(),
@@ -107,8 +93,7 @@ describe('ACPChatParticipant', () => {
         chatParticipant = new ACPChatParticipant(
             mockACPClient,
             mockRequestHandler,
-            mockSessionManager,
-            mockAgentConfig
+            mockSessionManager
         );
     });
 
@@ -211,11 +196,10 @@ describe('ACPChatParticipant', () => {
             const callCountBefore = vi.mocked(vscode.chat.createChatParticipant).mock.calls.length;
             
             // Create a new chat participant with the custom session manager
-            const customChatParticipant = new ACPChatParticipant(
+            new ACPChatParticipant(
                 mockACPClient,
                 mockRequestHandler,
-                customSessionManager as any,
-                mockAgentConfig
+                customSessionManager as any
             );
             
             // Get the handler from the most recent call
@@ -238,12 +222,15 @@ describe('ACPChatParticipant', () => {
                 toString: () => 'file:///test/file.txt'
             };
             
-            mockRequest.references = [
-                {
-                    id: 'file:///test/file.txt',
-                    value: { uri: mockUri }
-                } as vscode.ChatPromptReference
-            ];
+            Object.defineProperty(mockRequest, 'references', {
+                value: [
+                    {
+                        id: 'file:///test/file.txt',
+                        value: { uri: mockUri }
+                    } as vscode.ChatPromptReference
+                ],
+                writable: true
+            });
 
             const handler = vi.mocked(vscode.chat.createChatParticipant).mock.calls[0][1];
             await handler(mockRequest as vscode.ChatRequest, mockContext as vscode.ChatContext, mockStream as vscode.ChatResponseStream, mockToken);
@@ -294,11 +281,10 @@ describe('ACPChatParticipant', () => {
             const callCountBefore = vi.mocked(vscode.chat.createChatParticipant).mock.calls.length;
             
             // Create a new chat participant with the custom request handler
-            const customChatParticipant = new ACPChatParticipant(
+            new ACPChatParticipant(
                 mockACPClient,
                 customRequestHandler as any,
-                mockSessionManager,
-                mockAgentConfig
+                mockSessionManager
             );
 
             // Get the handler from the most recent call

@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, suite, test } from 'vitest';
-// Removed proprietary import: AlternativeNotebookFormat
-import { AbstractConfigurationService, ConfigKey, DefaultValueWithTeamValue } from '../../common/configurationService';
+import { AbstractConfigurationService, ConfigKey } from '../../common/configurationService';
 
 suite('AbstractConfigurationService', () => {
 	suite('_extractHashValue', () => {
@@ -376,31 +375,6 @@ suite('AbstractConfigurationService', () => {
 
 		});
 
-		test('InlineEditsTriggerOnEditorChangeAfterSeconds is correctly configured', () => {
-			const setting = ConfigKey.Internal.InlineEditsTriggerOnEditorChangeAfterSeconds;
-			assert.strictEqual(setting.id, 'chat.advanced.inlineEdits.triggerOnEditorChangeAfterSeconds');
-			const defaultValue = setting.defaultValue as DefaultValueWithTeamValue<number>;
-			assert.strictEqual(defaultValue.defaultValue, undefined);
-			assert.strictEqual(defaultValue.teamDefaultValue, 10);
-			assert.strictEqual(setting.isPublic, false);
-
-		});
-
-		test('InlineEditsNextCursorPredictionDisplayLine is correctly configured', () => {
-			const setting = ConfigKey.Internal.InlineEditsNextCursorPredictionDisplayLine;
-			assert.strictEqual(setting.id, 'chat.advanced.inlineEdits.nextCursorPrediction.displayLine');
-			assert.strictEqual(setting.defaultValue, true);
-			assert.strictEqual(setting.isPublic, false);
-
-		});
-
-		test('InlineEditsNextCursorPredictionCurrentFileMaxTokens is correctly configured', () => {
-			const setting = ConfigKey.Internal.InlineEditsNextCursorPredictionCurrentFileMaxTokens;
-			assert.strictEqual(setting.id, 'chat.advanced.inlineEdits.nextCursorPrediction.currentFileMaxTokens');
-			assert.strictEqual(setting.defaultValue, 2000);
-			assert.strictEqual(setting.isPublic, false);
-
-		});
 	});
 
 });

@@ -98,7 +98,7 @@ export class ACPClient {
     async newSession(params: SessionNewParams): Promise<SessionNewResult> {
         this.ensureInitialized();
         
-        const result = await this.rpcClient.sendRequest<SessionNewResult>('session/new', params);
+        const result = await this.rpcClient.sendRequest('session/new', params) as SessionNewResult;
         this.currentSessionId = result.sessionId;
         
         return result;
@@ -114,7 +114,7 @@ export class ACPClient {
             throw new Error('Agent does not support loading sessions');
         }
 
-        const result = await this.rpcClient.sendRequest<SessionLoadResult>('session/load', params);
+        const result = await this.rpcClient.sendRequest('session/load', params) as SessionLoadResult;
         this.currentSessionId = params.sessionId;
         
         return result;
@@ -130,7 +130,7 @@ export class ACPClient {
             throw new Error('Agent does not support setting modes');
         }
 
-        return this.rpcClient.sendRequest<SessionSetModeResult>('session/set_mode', params);
+        return this.rpcClient.sendRequest('session/set_mode', params) as SessionSetModeResult;
     }
 
     /**
@@ -139,7 +139,7 @@ export class ACPClient {
     async prompt(params: SessionPromptParams): Promise<SessionPromptResult> {
         this.ensureInitialized();
         
-        return this.rpcClient.sendRequest<SessionPromptResult>('session/prompt', params);
+        return this.rpcClient.sendRequest('session/prompt', params) as unknown as SessionPromptResult;
     }
 
     /**

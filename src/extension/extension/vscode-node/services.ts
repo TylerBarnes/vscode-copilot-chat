@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, ExtensionMode } from 'vscode';
+import { ExtensionContext } from 'vscode';
 import { IDiffService } from '../../../platform/diff/common/diffService';
 import { DiffServiceImpl } from '../../../platform/diff/node/diffServiceImpl';
 import { INativeEnvService } from '../../../platform/env/common/envService';
@@ -26,9 +26,6 @@ import { registerServices as registerCommonServices } from '../vscode/services';
 // ###########################################################################################
 
 export function registerServices(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext): void {
-    const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
-
-    // Register IExperimentationService first to avoid dependency injection issues
     setupMSFTExperimentationService(builder, extensionContext);
 
     registerCommonServices(builder, extensionContext);
@@ -41,13 +38,10 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
     // Removed IRequestLogger (proprietary - prompt deleted)
 	builder.define(INativeEnvService, new SyncDescriptor(NativeEnvServiceImpl));
 
-	// Removed IFetcherService, IDomainService, ICAPIClientService, IImageService (proprietary)
+    // Removed IFetcherService, IDomainService, ICAPIClientService, IImageService (proprietary)
+    // Removed ITelemetryUserConfig (proprietary - telemetry deleted)
 
-	builder.define(ITelemetryUserConfig, new SyncDescriptor(TelemetryUserConfigImpl, [undefined, undefined]));
-	const internalAIKey = extensionContext.extension.packageJSON.internalAIKey ?? '';
-	const internalLargeEventAIKey = extensionContext.extension.packageJSON.internalLargeStorageAriaKey ?? '';
-	const ariaKey = extensionContext.extension.packageJSON.ariaKey ?? '';
-// Use stub token manager for ACP - we don't need GitHub Copilot authentication
+    // Use stub token manager for ACP - we don't need GitHub Copilot authentication
     // This avoids the devDeviceId proposed API dependency
     builder.define(ICopilotTokenManager, new SyncDescriptor(StubTokenManager));
 
@@ -65,9 +59,9 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
         builder.define(ICopilotTokenManager, new SyncDescriptor(StubTokenManager));
     // Removed: ITestDepsResolver, ISetupTestsDetector, IWorkspaceMutationManager (proprietary testing services)
     // Removed IScopeSelector (proprietary - scopeSelection deleted)
-	builder.define(IGitDiffService, new SyncDescriptor(GitDiffService));
-	builder.define(IGitCommitMessageService, new SyncDescriptor(GitCommitMessageServiceImpl));
-// Removed IGithubRepositoryService (proprietary)
+    // Removed IGitDiffService (proprietary - git services deleted)
+    // Removed IGitCommitMessageService (proprietary - git services deleted)
+    // Removed IGithubRepositoryService (proprietary)
     // builder.define(IDevContainerConfigurationService, new SyncDescriptor(DevContainerConfigurationServiceImpl)); // Removed - proprietary
     // Removed IChatAgentService (proprietary)
     // Removed ILinkifyService registration (proprietary - linkify deleted)
@@ -97,21 +91,3 @@ function setupMSFTExperimentationService(builder: IInstantiationServiceBuilder, 
     builder.define(IExperimentationService, new NullExperimentationService());
 }
 
-function setupTelemetry(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext, internalAIKey: string, internalLargeEventAIKey: string, externalAIKey: string) {
-
-	if (ExtensionMode.Production === extensionContext.extensionMode && !isScenarioAutomation) {
-		builder.define(ITelemetryService, new SyncDescriptor(TelemetryService, [
-			extensionContext.extension.packageJSON.name,
-			internalAIKey,
-			internalLargeEventAIKey,
-			externalAIKey,
-			APP_INSIGHTS_KEY_STANDARD,
-			APP_INSIGHTS_KEY_ENHANCED,
-		]));
-	} else {
-		// If we're developing or testing we don't want telemetry to be sent, so we turn it off
-		builder.define(ITelemetryService, new NullTelemetryService());
-	}
-
-	setupMSFTExperimentationService(builder, extensionContext);
-}

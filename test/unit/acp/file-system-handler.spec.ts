@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { FileSystemHandler } from '../../../src/platform/acp/file-system-handler';
 import * as fs from 'fs/promises';
 import * as path from 'path';

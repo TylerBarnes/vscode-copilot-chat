@@ -247,7 +247,7 @@ export interface ToolCall {
 
 export interface ToolResult {
     toolCallId: string;
-    content: string;
+    content: ContentBlock[];
     error?: string;
 }
 

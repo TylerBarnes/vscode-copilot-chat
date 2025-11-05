@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PermissionPolicyManager } from '../../../src/platform/acp/permission-policy-manager';
-import { ConfigurationManager, PermissionPolicy } from '../../../src/platform/acp/configuration-manager';
+import { ConfigurationManager } from '../../../src/platform/acp/configuration-manager';
+import { PermissionPolicy } from '../../../src/platform/acp/types';
 
 // Mock vscode module
 vi.mock('vscode', () => {
@@ -120,7 +121,7 @@ describe('PermissionPolicyManager', () => {
     it('should show existing policies', async () => {
       const policies: PermissionPolicy[] = [
         { pattern: 'fs:*', action: 'allow', description: 'Allow file system' },
-        { pattern: 'terminal:*', action: 'reject', description: 'Reject terminal' }
+        { pattern: 'terminal:*', action: 'deny', description: 'Deny terminal' }
       ];
       vi.mocked(mockConfigManager.getPermissionPolicies).mockReturnValue(policies);
 
@@ -138,7 +139,7 @@ describe('PermissionPolicyManager', () => {
           expect.objectContaining({
             label: '$(shield) terminal:*',
             description: '✗ Auto-Reject',
-            detail: 'Reject terminal'
+            detail: 'Deny terminal'
           })
         ]),
         expect.any(Object)
@@ -229,7 +230,7 @@ describe('PermissionPolicyManager', () => {
       });
     });
 
-    it('should add reject policy', async () => {
+    it('should add deny policy', async () => {
       mockWindow.showQuickPick
         .mockResolvedValueOnce({ label: '$(add) Add Permission Policy' })
         .mockResolvedValueOnce({ label: '$(x) Auto-Reject' })
@@ -242,7 +243,7 @@ describe('PermissionPolicyManager', () => {
 
       expect(mockConfigManager.addPermissionPolicy).toHaveBeenCalledWith({
         pattern: 'terminal:*',
-        action: 'reject',
+        action: 'deny',
         description: 'Reject all terminal operations'
       });
     });
@@ -294,7 +295,7 @@ describe('PermissionPolicyManager', () => {
       );
     });
 
-    it('should toggle policy action from allow to reject', async () => {
+    it('should toggle policy action from allow to deny', async () => {
       const policy: PermissionPolicy = { pattern: 'fs:*', action: 'allow' };
       vi.mocked(mockConfigManager.getPermissionPolicies).mockReturnValue([policy]);
 
@@ -307,15 +308,15 @@ describe('PermissionPolicyManager', () => {
 
       expect(mockConfigManager.updatePermissionPolicy).toHaveBeenCalledWith('fs:*', {
         pattern: 'fs:*',
-        action: 'reject'
+        action: 'deny'
       });
       expect(mockWindow.showInformationMessage).toHaveBeenCalledWith(
         'Policy action changed to Auto-Reject: fs:*'
       );
     });
 
-    it('should toggle policy action from reject to allow', async () => {
-      const policy: PermissionPolicy = { pattern: 'terminal:*', action: 'reject' };
+    it('should toggle policy action from deny to allow', async () => {
+      const policy: PermissionPolicy = { pattern: 'terminal:*', action: 'deny' };
       vi.mocked(mockConfigManager.getPermissionPolicies).mockReturnValue([policy]);
 
       mockWindow.showQuickPick
@@ -407,9 +408,9 @@ describe('PermissionPolicyManager', () => {
       expect(result).toBe('allow');
     });
 
-    it('should return reject for exact match', () => {
+    it('should return deny for exact match', () => {
       vi.mocked(mockConfigManager.getPermissionPolicies).mockReturnValue([
-        { pattern: 'terminal:execute', action: 'reject' }
+        { pattern: 'terminal:execute', action: 'deny' }
       ]);
 
       const result = manager.checkPermission('terminal:execute');
@@ -440,7 +441,7 @@ describe('PermissionPolicyManager', () => {
 
     it('should use first matching policy', () => {
       vi.mocked(mockConfigManager.getPermissionPolicies).mockReturnValue([
-        { pattern: 'fs:*', action: 'reject' },
+        { pattern: 'fs:*', action: 'deny' },
         { pattern: 'fs:read', action: 'allow' }
       ]);
 

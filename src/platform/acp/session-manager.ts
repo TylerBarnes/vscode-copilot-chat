@@ -61,13 +61,13 @@ export class SessionManager {
 	/**
 	 * Create a new ACP session
 	 */
-	async createSession(
-		conversationId: string,
-		options: SessionOptions = {}
-	): Promise<SessionInfo> {
-		const sessionInfo = await this.client.newSession({
-			mode: options.mode || 'chat',
-		});
+    async createSession(
+        conversationId: string,
+        options: SessionOptions = {}
+    ): Promise<SessionInfo> {
+        const sessionInfo = await this.client.newSession({
+            cwd: process.cwd(),
+        });
 
 		// Store mapping
 		this.conversationToSession.set(conversationId, sessionInfo.sessionId);
@@ -82,18 +82,18 @@ export class SessionManager {
 	/**
 	 * Load an existing ACP session
 	 */
-	async loadSession(conversationId: string, sessionId: string): Promise<SessionInfo> {
-		const sessionInfo = await this.client.loadSession(sessionId);
+    async loadSession(conversationId: string, sessionId: string): Promise<SessionInfo> {
+        await this.client.loadSession({ sessionId });
 
-		// Store mapping
-		this.conversationToSession.set(conversationId, sessionInfo.sessionId);
-		this.sessionToConversation.set(sessionInfo.sessionId, conversationId);
+        // Store mapping
+        this.conversationToSession.set(conversationId, sessionId);
+        this.sessionToConversation.set(sessionId, conversationId);
 
-		// Persist mapping
-		await this.persistSessions();
+        // Persist mapping
+        await this.persistSessions();
 
-		return sessionInfo;
-	}
+        return { sessionId };
+    }
 
 	/**
 	 * Get ACP session ID for a conversation

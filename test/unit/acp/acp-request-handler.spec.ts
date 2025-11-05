@@ -8,9 +8,7 @@ import {
     ToolCallKind,
     ToolCallStatus,
     PermissionRequest,
-    PermissionResponse,
     AgentPlan,
-    ContentBlock,
 } from '../../../src/platform/acp/types';
 
 // Mock vscode module
@@ -69,7 +67,7 @@ describe('ACPRequestHandler', () => {
 
     describe('handleRequest', () => {
         it('should send prompt to ACP client', async () => {
-            vi.mocked(acpClient.prompt).mockResolvedValue(undefined);
+            vi.mocked(acpClient.prompt).mockResolvedValue({ stopReason: 'end_turn' });
 
             await handler.handleRequest('Hello, agent!', [], stream, token);
 
@@ -84,7 +82,7 @@ describe('ACPRequestHandler', () => {
         });
 
         it('should include references as embedded resources', async () => {
-            vi.mocked(acpClient.prompt).mockResolvedValue(undefined);
+            vi.mocked(acpClient.prompt).mockResolvedValue({ stopReason: 'end_turn' });
 
             const references: vscode.ChatPromptReference[] = [
                 {
@@ -115,7 +113,7 @@ describe('ACPRequestHandler', () => {
         });
 
         it('should return success result on completion', async () => {
-            vi.mocked(acpClient.prompt).mockResolvedValue(undefined);
+            vi.mocked(acpClient.prompt).mockResolvedValue({ stopReason: 'end_turn' });
 
             const result = await handler.handleRequest('Hello', [], stream, token);
 
@@ -231,6 +229,8 @@ describe('ACPRequestHandler', () => {
 
             const toolCall: ToolCall = {
                 id: 'tool-1',
+                toolCallId: 'tool-1',
+                title: 'Read Text File',
                 kind: ToolCallKind.ReadTextFile,
                 status: ToolCallStatus.Pending,
                 input: { path: '/test.ts' },
@@ -249,10 +249,11 @@ describe('ACPRequestHandler', () => {
 
             const toolCall: ToolCall = {
                 id: 'tool-1',
+                toolCallId: 'tool-1',
+                title: 'Read Text File',
                 kind: ToolCallKind.ReadTextFile,
                 status: ToolCallStatus.Completed,
                 input: { path: '/test.ts' },
-                output: { content: 'file content' },
             };
 
             await handler['handleToolCall'](toolCall);
@@ -268,6 +269,8 @@ describe('ACPRequestHandler', () => {
 
             const toolCall: ToolCall = {
                 id: 'tool-1',
+                toolCallId: 'tool-1',
+                title: 'Read Text File',
                 kind: ToolCallKind.ReadTextFile,
                 status: ToolCallStatus.Error,
                 input: { path: '/test.ts' },
@@ -286,12 +289,10 @@ describe('ACPRequestHandler', () => {
         it('should request permission from user', async () => {
             const request: PermissionRequest = {
                 id: 'perm-1',
-                toolCall: {
-                    id: 'tool-1',
-                    kind: ToolCallKind.WriteTextFile,
-                    status: ToolCallStatus.AwaitingPermission,
-                    input: { path: '/test.ts', content: 'new content' },
-                },
+                sessionId: 'session-1',
+                toolCallId: 'tool-1',
+                title: 'Write Text File',
+                kind: ToolCallKind.WriteTextFile,
             };
 
             // Mock user approval
@@ -307,12 +308,10 @@ describe('ACPRequestHandler', () => {
         it('should handle user rejection', async () => {
             const request: PermissionRequest = {
                 id: 'perm-1',
-                toolCall: {
-                    id: 'tool-1',
-                    kind: ToolCallKind.WriteTextFile,
-                    status: ToolCallStatus.AwaitingPermission,
-                    input: { path: '/test.ts', content: 'new content' },
-                },
+                sessionId: 'session-1',
+                toolCallId: 'tool-1',
+                title: 'Write Text File',
+                kind: ToolCallKind.WriteTextFile,
             };
 
             // Mock user rejection

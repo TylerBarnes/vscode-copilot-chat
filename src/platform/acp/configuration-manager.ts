@@ -321,9 +321,7 @@ export class ConfigurationManager {
    * Add an MCP server (compatibility method)
    */
   async addMcpServer(config: MCPServerConfig): Promise<void> {
-    const servers = this.getMcpServers();
-    servers.push(config);
-    await this.updateMcpServers(servers);
+    await this.updateMcpServer(config);
   }
 
   /**

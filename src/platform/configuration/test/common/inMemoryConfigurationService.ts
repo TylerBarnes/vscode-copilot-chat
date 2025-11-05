@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ConfigurationScope } from 'vscode';
-import { IExperimentationService } from '../../../telemetry/common/nullExperimentationService';
 import { AbstractConfigurationService, BaseConfig, Config, ExperimentBasedConfig, ExperimentBasedConfigType, IConfigurationService, InspectConfigResult } from '../../common/configurationService';
 
 /**
@@ -54,13 +53,13 @@ export class InMemoryConfigurationService extends AbstractConfigurationService {
 		return Promise.resolve();
 	}
 
-	override getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, experimentationService: IExperimentationService, scope?: ConfigurationScope): T {
-		const override = this.overrides.get(key);
-		if (override !== undefined) {
-			return override as T;
-		}
-		return this.baseConfigurationService.getExperimentBasedConfig(key, experimentationService);
-	}
+    override getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, scope?: ConfigurationScope): T {
+        const override = this.overrides.get(key);
+        if (override !== undefined) {
+            return override as T;
+        }
+        return this.baseConfigurationService.getExperimentBasedConfig(key);
+    }
 
 	dumpConfig(): { [key: string]: string } {
 		const config = this.baseConfigurationService.dumpConfig();

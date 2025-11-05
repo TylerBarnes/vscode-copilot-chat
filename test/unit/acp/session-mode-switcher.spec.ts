@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as vscode from 'vscode';
 import { SessionModeSwitcher } from '../../../src/platform/acp/session-mode-switcher';
-import type { SessionMode, SessionModes } from '../../../src/platform/acp/types';
+import type { SessionModes } from '../../../src/platform/acp/types';
+
+interface SessionModeQuickPickItem extends vscode.QuickPickItem {
+    mode: string;
+}
 
 vi.mock('vscode', () => ({
     window: {
@@ -146,7 +150,7 @@ describe('SessionModeSwitcher', () => {
                 label: '💻 code',
                 description: 'Code mode',
                 mode: 'code',
-            });
+            } as SessionModeQuickPickItem);
 
             await switcher.selectMode();
 
@@ -166,7 +170,7 @@ describe('SessionModeSwitcher', () => {
                 label: '💬 chat',
                 description: 'Chat mode',
                 mode: 'chat',
-            });
+            } as SessionModeQuickPickItem);
 
             await switcher.selectMode();
 
@@ -178,7 +182,7 @@ describe('SessionModeSwitcher', () => {
                 label: '💻 code',
                 description: 'Code mode',
                 mode: 'code',
-            });
+            } as SessionModeQuickPickItem);
 
             await switcher.selectMode();
 
@@ -199,7 +203,7 @@ describe('SessionModeSwitcher', () => {
                 label: 'code',
                 description: 'Code mode',
                 mode: 'code',
-            });
+            } as SessionModeQuickPickItem);
 
             await switcher.selectMode();
 

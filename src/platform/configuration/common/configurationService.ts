@@ -208,18 +208,7 @@ export abstract class AbstractConfigurationService extends Disposable implements
 		return key.defaultValue;
 	}
 
-	private _setUserInfo(userInfo: { isInternal: boolean; isTeamMember: boolean; teamMemberUsername?: string }): void {
-		if (this._isInternal === userInfo.isInternal && this._isTeamMember === userInfo.isTeamMember && this._teamMemberUsername === userInfo.teamMemberUsername) {
-			// no change
-			return;
-		}
 
-		this._isInternal = userInfo.isInternal;
-		this._isTeamMember = userInfo.isTeamMember;
-		this._teamMemberUsername = userInfo.teamMemberUsername;
-		// fire a fake change event to refresh all settings
-		this._onDidChangeConfiguration.fire({ affectsConfiguration: () => true });
-	}
 
 	abstract getConfig<T>(key: Config<T>, scope?: ConfigurationScope): T;
 	abstract inspectConfig<T>(key: BaseConfig<T>, scope?: ConfigurationScope): InspectConfigResult<T> | undefined;
@@ -475,12 +464,6 @@ class ConfigRegistry {
 }
 
 export const globalConfigRegistry = new ConfigRegistry();
-
-function defineValidatedSetting<T>(key: string, validator: IValidator<T>, defaultValue: T | DefaultValueWithTeamValue<T> | DefaultValueWithTeamAndInternalValue<T>, options?: ConfigOptions): Config<T> {
-	const value: Config<T> = { ...toBaseConfig(key, defaultValue, options), configType: ConfigType.Simple, validator };
-	globalConfigRegistry.registerConfig(value);
-	return value;
-}
 
 function defineSetting<T>(key: string, defaultValue: T | DefaultValueWithTeamValue<T> | DefaultValueWithTeamAndInternalValue<T>, options?: ConfigOptions): Config<T> {
 	const value: Config<T> = { ...toBaseConfig(key, defaultValue, options), configType: ConfigType.Simple };

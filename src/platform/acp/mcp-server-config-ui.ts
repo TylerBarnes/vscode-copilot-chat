@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { ConfigurationManager, McpServerConfig } from './configuration-manager';
-import { MCPManager } from './mcp-manager';
+import { ConfigurationManager } from './configuration-manager';
+import { MCPManager, MCPServerConfig } from './mcp-manager';
 
 /**
  * UI for managing MCP server configurations
@@ -125,16 +125,17 @@ export class McpServerConfigUI {
 			}
 		}
 
-		const config: McpServerConfig = {
-			name: name.trim(),
-			command: command.trim(),
-			args,
-			env,
-			enabled: true,
-		};
+        const config: MCPServerConfig = {
+            name: name.trim(),
+            command: command.trim(),
+            args,
+            env,
+            transport: 'stdio',
+            enabled: true,
+        };
 
-		await this.configManager.addMcpServer(config);
-		await this.mcpManager.startServer(config.name);
+        await this.configManager.addMcpServer(config);
+        await this.mcpManager.startServer(config);
 
 		vscode.window.showInformationMessage(`MCP server "${config.name}" added and started`);
 	}
@@ -202,16 +203,16 @@ export class McpServerConfigUI {
 			return;
 		}
 
-		const newEnabled = !server.enabled;
-		await this.configManager.updateMcpServer(serverName, { enabled: newEnabled });
+        const newEnabled = !server.enabled;
+        await this.configManager.updateMcpServer({ ...server, enabled: newEnabled });
 
-		if (newEnabled) {
-			await this.mcpManager.startServer(serverName);
-			vscode.window.showInformationMessage(`MCP server "${serverName}" enabled and started`);
-		} else {
-			await this.mcpManager.stopServer(serverName);
-			vscode.window.showInformationMessage(`MCP server "${serverName}" disabled and stopped`);
-		}
+        if (newEnabled) {
+            await this.mcpManager.startServer(server);
+            vscode.window.showInformationMessage(`MCP server \"${serverName}\" enabled and started`);
+        } else {
+            await this.mcpManager.stopServer(serverName);
+            vscode.window.showInformationMessage(`MCP server \"${serverName}\" disabled and stopped`);
+        }
 	}
 
 	/**
@@ -238,19 +239,19 @@ export class McpServerConfigUI {
 			return;
 		}
 
-		const argsInput = await vscode.window.showInputBox({
-			prompt: 'Enter server arguments (space-separated, optional)',
-			value: server.args.join(' '),
-		});
+        const argsInput = await vscode.window.showInputBox({
+            prompt: 'Enter server arguments (space-separated, optional)',
+            value: (server.args ?? []).join(' '),
+        });
 
 		const args = argsInput ? argsInput.split(' ').filter((a) => a.trim()) : [];
 
-		const envInput = await vscode.window.showInputBox({
-			prompt: 'Enter environment variables (KEY=VALUE, comma-separated, optional)',
-			value: Object.entries(server.env)
-				.map(([k, v]) => `${k}=${v}`)
-				.join(', '),
-		});
+        const envInput = await vscode.window.showInputBox({
+            prompt: 'Enter environment variables (KEY=VALUE, comma-separated, optional)',
+            value: Object.entries(server.env || {})
+                .map(([k, v]) => `${k}=${v}`)
+                .join(', '),
+        });
 
 		const env: Record<string, string> = {};
 		if (envInput) {
@@ -262,20 +263,23 @@ export class McpServerConfigUI {
 			}
 		}
 
-		await this.configManager.updateMcpServer(serverName, {
-			command: command.trim(),
-			args,
-			env,
-		});
+        const updatedConfig: MCPServerConfig = {
+            ...server,
+            command: command.trim(),
+            args,
+            env,
+        };
+        
+        await this.configManager.updateMcpServer(updatedConfig);
 
-		// Restart if enabled
-		if (server.enabled) {
-			await this.mcpManager.stopServer(serverName);
-			await this.mcpManager.startServer(serverName);
-			vscode.window.showInformationMessage(`MCP server "${serverName}" updated and restarted`);
-		} else {
-			vscode.window.showInformationMessage(`MCP server "${serverName}" updated`);
-		}
+        // Restart if enabled
+        if (server.enabled) {
+            await this.mcpManager.stopServer(serverName);
+            await this.mcpManager.startServer(updatedConfig);
+            vscode.window.showInformationMessage(`MCP server \"${serverName}\" updated and restarted`);
+        } else {
+            vscode.window.showInformationMessage(`MCP server \"${serverName}\" updated`);
+        }
 	}
 
 	/**
@@ -292,9 +296,9 @@ export class McpServerConfigUI {
 			return;
 		}
 
-		await this.mcpManager.stopServer(serverName);
-		await this.mcpManager.startServer(serverName);
-		vscode.window.showInformationMessage(`MCP server "${serverName}" restarted`);
+        await this.mcpManager.stopServer(serverName);
+        await this.mcpManager.startServer(server);
+        vscode.window.showInformationMessage(`MCP server \"${serverName}\" restarted`);
 	}
 
 	/**

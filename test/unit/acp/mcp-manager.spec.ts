@@ -141,7 +141,7 @@ beforeEach(() => {
             
             // Simulate process error
             setTimeout(() => {
-                mockProcess._errorCallback?.(new Error('Command not found'));
+                (mockProcess as any)._errorCallback?.(new Error('Command not found'));
             }, 10);
             
             // Wait a bit for the error to be processed

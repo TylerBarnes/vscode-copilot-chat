@@ -57,7 +57,7 @@ describe('ACP Integration Tests', () => {
 		// Initialize
 		const result = await client.initialize({
 			protocolVersion: '2025-01-13',
-			capabilities: {
+			clientCapabilities: {
 				fs: {
 					readTextFile: true,
 					writeTextFile: true,
@@ -76,11 +76,11 @@ describe('ACP Integration Tests', () => {
 			},
 		});
 
-		expect(result.protocolVersion).toBe('2025-01-13');
-		expect(result.agentCapabilities).toBeDefined();
-		expect(result.agentCapabilities.loadSession).toBe(true);
-		expect(result.agentInfo).toBeDefined();
-		expect(result.agentInfo.name).toBe('Mock ACP Agent');
+        expect(result.protocolVersion).toBe('2025-01-13');
+        expect(result.agentCapabilities).toBeDefined();
+        expect(result.agentCapabilities.loadSession).toBe(true);
+        expect(result.agentInfo).toBeDefined();
+        expect(result.agentInfo!.name).toBe('Mock ACP Agent');
 	});
 
 	it('should create a new session', async () => {
@@ -94,7 +94,7 @@ describe('ACP Integration Tests', () => {
 		client = new ACPClient(agentProcess);
 		await client.initialize({
 			protocolVersion: '2025-01-13',
-			capabilities: {},
+			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
 
@@ -119,7 +119,7 @@ describe('ACP Integration Tests', () => {
 		client = new ACPClient(agentProcess);
 		await client.initialize({
 			protocolVersion: '2025-01-13',
-			capabilities: {},
+			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
 
@@ -129,17 +129,19 @@ describe('ACP Integration Tests', () => {
 			mcpServers: [],
 		});
 
-		// Set up session update handler
-		const chunks: string[] = [];
-		client.onSessionUpdate((update) => {
-			if (update.sessionUpdate === 'agent_message_chunk' && update.content) {
-				for (const block of update.content) {
-					if (block.type === 'text') {
-						chunks.push(block.text);
-					}
-				}
-			}
-		});
+        // Set up session update handler
+        const chunks: string[] = [];
+        client.onSessionUpdate((update) => {
+            if (update.sessionUpdate === 'agent_message_chunk' && update.content) {
+                // Extract text from ContentBlock array
+                const contentBlocks = Array.isArray(update.content) ? update.content : [update.content];
+                for (const block of contentBlocks) {
+                    if (block.type === 'text' && 'text' in block) {
+                        chunks.push(block.text);
+                    }
+                }
+            }
+        });
 
 		// Send prompt
 		const promptResult = await client.prompt({
@@ -168,7 +170,7 @@ describe('ACP Integration Tests', () => {
 		client = new ACPClient(agentProcess);
 		const initResult = await client.initialize({
 			protocolVersion: '2025-01-13',
-			capabilities: {},
+			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
 
@@ -186,17 +188,19 @@ describe('ACP Integration Tests', () => {
 			prompt: [{ type: 'text', text: 'First message' }],
 		});
 
-		// Load the session
-		const chunks: string[] = [];
-		client.onSessionUpdate((update) => {
-			if (update.sessionUpdate === 'agent_message_chunk' && update.content) {
-				for (const block of update.content) {
-					if (block.type === 'text') {
-						chunks.push(block.text);
-					}
-				}
-			}
-		});
+        // Load the session
+        const chunks: string[] = [];
+        client.onSessionUpdate((update) => {
+            if (update.sessionUpdate === 'agent_message_chunk' && update.content) {
+                // Extract text from ContentBlock array
+                const contentBlocks = Array.isArray(update.content) ? update.content : [update.content];
+                for (const block of contentBlocks) {
+                    if (block.type === 'text' && 'text' in block) {
+                        chunks.push(block.text);
+                    }
+                }
+            }
+        });
 
 		await client.loadSession({
 			sessionId: sessionResult.sessionId,
@@ -217,7 +221,7 @@ describe('ACP Integration Tests', () => {
 		client = new ACPClient(agentProcess);
 		await client.initialize({
 			protocolVersion: '2025-01-13',
-			capabilities: {},
+			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
 
@@ -245,7 +249,7 @@ describe('ACP Integration Tests', () => {
 		await expect(
 			client.initialize({
 				protocolVersion: '1999-01-01',
-				capabilities: {},
+				clientCapabilities: {},
 				clientInfo: { name: 'Test', version: '1.0.0' },
 			})
 		).rejects.toThrow(/Unsupported protocol version/);
@@ -262,7 +266,7 @@ describe('ACP Integration Tests', () => {
 		client = new ACPClient(agentProcess);
 		await client.initialize({
 			protocolVersion: '2025-01-13',
-			capabilities: {},
+			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
 

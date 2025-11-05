@@ -11,7 +11,7 @@ import * as os from 'os';
  */
 
 // Mock vscode.workspace.getConfiguration using vi.hoisted
-const { mockGetConfiguration, mockConfig } = vi.hoisted(() => {
+const { mockGetConfiguration } = vi.hoisted((): { mockGetConfiguration: any; mockConfig: any } => {
     const defaults: Record<string, any> = {
         'agent.executable': '',
         'agent.args': [],

@@ -125,7 +125,7 @@ export class PermissionPolicyManager {
       return;
     }
 
-    const action = actionSelected.label.includes('Auto-Allow') ? 'allow' : 'reject';
+    const action = actionSelected.label.includes('Auto-Allow') ? 'allow' : 'deny';
 
     // Get optional description
     const description = await vscode.window.showInputBox({
@@ -213,7 +213,7 @@ export class PermissionPolicyManager {
    * Toggle policy action between allow and reject
    */
   private async togglePolicyAction(policy: PermissionPolicy): Promise<void> {
-    const newAction = policy.action === 'allow' ? 'reject' : 'allow';
+    const newAction = policy.action === 'allow' ? 'deny' : 'allow';
     const updatedPolicy: PermissionPolicy = {
       ...policy,
       action: newAction

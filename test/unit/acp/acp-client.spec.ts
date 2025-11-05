@@ -3,15 +3,9 @@ import { Readable, Writable } from 'stream';
 import { EventEmitter } from 'events';
 import { ACPClient } from '../../../src/platform/acp/acp-client';
 import type { 
-    InitializeParams, 
-    InitializeResult,
-    SessionNewParams,
-    SessionNewResult,
-    SessionPromptParams,
     SessionUpdateNotification,
     ToolCallKind,
-    ToolCallStatus,
-    ContentBlock
+    ToolCallStatus
 } from '../../../src/platform/acp/types';
 
 describe('ACPClient', () => {
@@ -322,8 +316,8 @@ describe('ACPClient', () => {
             const result = await promptPromise;
             expect(result.stopReason).toBe('end_turn');
             expect(updates).toHaveLength(2);
-            expect(updates[0].content).toBe('Hello, ');
-            expect(updates[1].content).toBe('human!');
+            expect((updates[0] as any).content).toBe('Hello, ');
+            expect((updates[1] as any).content).toBe('human!');
         });
 
         it('should handle tool calls in prompt response', async () => {

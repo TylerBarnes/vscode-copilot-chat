@@ -21,9 +21,9 @@ export class ThinkingStepsDisplay {
      * @param content The thinking content to display (string or ThinkingContent object)
      * @param stream The chat response stream
      */
-    displayThinking(content: string | { type: 'thinking'; content: string }, stream: vscode.ChatResponseStream): void {
+    displayThinking(content: string | { type: 'thinking'; thinking: string }, stream: vscode.ChatResponseStream): void {
         // Extract content string if ThinkingContent object is passed
-        const contentStr = typeof content === 'string' ? content : content.content;
+        const contentStr = typeof content === 'string' ? content : content.thinking;
         this.addStep(contentStr);
         const markdown = this.formatThinkingMarkdown();
         stream.markdown(markdown);

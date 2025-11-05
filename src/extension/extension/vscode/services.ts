@@ -57,8 +57,7 @@ import { TasksService } from '../../../platform/tasks/vscode/tasksService';
 import { ITerminalService } from '../../../platform/terminal/common/terminalService';
 import { TerminalServiceImpl } from '../../../platform/terminal/vscode/terminalServiceImpl';
 // Removed: ITestProvider, TestProvider (proprietary testing services)
-import { IWorkbenchService } from '../../../platform/workbench/common/workbenchService';
-import { WorkbenchServiceImpl } from '../../../platform/workbench/vscode/workbenchServiceImpt';
+// Removed: IWorkbenchService, WorkbenchServiceImpl (deleted files)
 import { IWorkspaceService } from '../../../platform/workspace/common/workspaceService';
 import { ExtensionTextDocumentManager } from '../../../platform/workspace/vscode/workspaceServiceImpl';
 import { IInstantiationServiceBuilder } from '../../../util/common/services';
@@ -93,7 +92,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(IUrlOpener, isTestMode && !isScenarioAutomation ? new NullUrlOpener() : new RealUrlOpener());
     builder.define(INotificationService, isTestMode && !isScenarioAutomation ? new NullNotificationService() : new NotificationService());
     builder.define(IVSCodeExtensionContext, <any>/*force _serviceBrand*/extensionContext);
-    builder.define(IWorkbenchService, new WorkbenchServiceImpl());
+    // Removed: IWorkbenchService registration (deleted files)
     // Removed IConversationOptions (proprietary chat service)
     // Removed IChatSessionService (chat deleted)
     builder.define(IConfigurationService, new SyncDescriptor(ConfigurationServiceImpl));

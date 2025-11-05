@@ -84,14 +84,7 @@ export function createInstantiationService(configuration: IExtensionActivationCo
 	const instantiationService = accessor.seal();
 	configuration.context.subscriptions.push(instantiationService);
 
-	instantiationService.invokeFunction(accessor => {
-
-		// Does the initial read of ignore files, but don't block
-		accessor.get(IIgnoreService).init();
-
-		// force create heatmap service
-		accessor.get(IHeatmapService);
-	});
+    // Removed: IIgnoreService and IHeatmapService initialization (proprietary services deleted)
 
 	return instantiationService;
 }

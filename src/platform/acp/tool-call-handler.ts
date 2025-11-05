@@ -65,20 +65,20 @@ ${JSON.stringify(toolCall.input, null, 2)}
 					return await this.executeTerminalKill(toolCall);
 				case ToolCallKind.TerminalGetOutput:
 					return await this.executeTerminalGetOutput(toolCall);
-				default:
-					return {
-						toolCallId: toolCall.id,
-						isError: true,
-						content: `Unknown tool kind: ${toolCall.kind}`,
-					};
-			}
-		} catch (error) {
-			return {
-				toolCallId: toolCall.id,
-				isError: true,
-				content: error instanceof Error ? error.message : String(error),
-			};
-		}
+                default:
+                    return {
+                        toolCallId: toolCall.id,
+                        error: `Unknown tool kind: ${toolCall.kind}`,
+                        content: [],
+                    };
+            }
+        } catch (error) {
+            return {
+                toolCallId: toolCall.id,
+                error: error instanceof Error ? error.message : String(error),
+                content: [],
+            };
+        }
 	}
 
 	/**
@@ -140,57 +140,58 @@ Do you want to allow this?`;
 		return parts.length > 1 ? parts[1] : kind;
 	}
 
-	private async executeReadTextFile(toolCall: ToolCall): Promise<ToolResult> {
-		const { path } = toolCall.input as { path: string };
-		const content = await this.fileSystemHandler.readTextFile(path);
-		return {
-			toolCallId: toolCall.id,
-			content,
-		};
-	}
+    private async executeReadTextFile(toolCall: ToolCall): Promise<ToolResult> {
+        const { path } = toolCall.input as { path: string };
+        const result = await this.fileSystemHandler.readTextFile({ path });
+        return {
+            toolCallId: toolCall.id,
+            content: [{ type: 'text', text: result.content }],
+        };
+    }
 
-	private async executeWriteTextFile(toolCall: ToolCall): Promise<ToolResult> {
-		const { path, content } = toolCall.input as { path: string; content: string };
-		await this.fileSystemHandler.writeTextFile(path, content);
-		return {
-			toolCallId: toolCall.id,
-			content: 'File written successfully',
-		};
-	}
+    private async executeWriteTextFile(toolCall: ToolCall): Promise<ToolResult> {
+        const { path, content } = toolCall.input as { path: string; content: string };
+        await this.fileSystemHandler.writeTextFile({ path, content });
+        return {
+            toolCallId: toolCall.id,
+            content: [{ type: 'text', text: 'File written successfully' }],
+        };
+    }
 
-	private async executeTerminalCreate(toolCall: ToolCall): Promise<ToolResult> {
-		const { name } = toolCall.input as { name?: string };
-		const terminalId = await this.terminalManager.createTerminal(name);
-		return {
-			toolCallId: toolCall.id,
-			content: JSON.stringify({ terminalId }),
-		};
-	}
+    private async executeTerminalCreate(toolCall: ToolCall): Promise<ToolResult> {
+        const { command, args, env, cwd } = toolCall.input as { command: string; args?: string[]; env?: Record<string, string>; cwd?: string };
+        const result = await this.terminalManager.createTerminal({ command, args, env, cwd });
+        return {
+            toolCallId: toolCall.id,
+            content: [{ type: 'text', text: JSON.stringify(result) }],
+        };
+    }
 
-	private async executeTerminalSendInput(toolCall: ToolCall): Promise<ToolResult> {
-		const { terminalId, input } = toolCall.input as { terminalId: string; input: string };
-		await this.terminalManager.sendInput(terminalId, input);
-		return {
-			toolCallId: toolCall.id,
-			content: 'Input sent to terminal',
-		};
-	}
+    private async executeTerminalSendInput(toolCall: ToolCall): Promise<ToolResult> {
+        // Terminal send input is not supported by the current TerminalManager
+        // The terminal is created with a command and runs to completion
+        return {
+            toolCallId: toolCall.id,
+            error: 'Terminal send input is not supported. Create a new terminal with the desired command instead.',
+            content: [],
+        };
+    }
 
-	private async executeTerminalKill(toolCall: ToolCall): Promise<ToolResult> {
-		const { terminalId } = toolCall.input as { terminalId: string };
-		await this.terminalManager.killTerminal(terminalId);
-		return {
-			toolCallId: toolCall.id,
-			content: 'Terminal killed',
-		};
-	}
+    private async executeTerminalKill(toolCall: ToolCall): Promise<ToolResult> {
+        const { terminalId } = toolCall.input as { terminalId: string };
+        await this.terminalManager.killTerminal({ terminalId });
+        return {
+            toolCallId: toolCall.id,
+            content: [{ type: 'text', text: 'Terminal killed' }],
+        };
+    }
 
     private async executeTerminalGetOutput(toolCall: ToolCall): Promise<ToolResult> {
         const { terminalId } = toolCall.input as { terminalId: string };
         const output = this.terminalManager.getOutput(terminalId);
         return {
             toolCallId: toolCall.id,
-            content: output,
+            content: [{ type: 'text', text: output }],
         };
     }
 

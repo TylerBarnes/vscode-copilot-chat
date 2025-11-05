@@ -10,16 +10,10 @@ import { ACPChatParticipant } from './acp-chat-participant';
 import { ACPClient } from './acp-client';
 import { ACPRequestHandler } from './acp-request-handler';
 import { AgentConfigManager } from './agent-config';
-import { AgentPlanViewer } from './agent-plan-viewer';
-import { ContentBlockMapper } from './content-block-mapper';
 import { FileSystemHandler } from './file-system-handler';
 import { MCPManager } from './mcp-manager';
-import { PermissionHandler } from './permission-handler';
 import { SessionManager } from './session-manager';
-import { SessionModeSwitcher } from './session-mode-switcher';
-import { SlashCommandProvider } from './slash-command-provider';
 import { TerminalManager } from './terminal-manager';
-import { ThinkingStepsDisplay } from './thinking-steps-display';
 import { ToolCallHandler } from './tool-call-handler';
 import { ChatViewProvider } from './chat-view-provider';
 import { IVSCodeExtensionContext } from '../extContext/common/extensionContext';
@@ -57,14 +51,8 @@ export class ACPContribution implements vscode.Disposable {
             const agentConfigManager = this.instantiationService.createInstance(AgentConfigManager as any);
             const fileSystemHandler = this.instantiationService.createInstance(FileSystemHandler as any) as FileSystemHandler;
             const terminalManager = this.instantiationService.createInstance(TerminalManager as any) as TerminalManager;
-            const permissionHandler = this.instantiationService.createInstance(PermissionHandler as any);
             const sessionManager = this.instantiationService.createInstance(SessionManager as any) as SessionManager;
-            const contentBlockMapper = this.instantiationService.createInstance(ContentBlockMapper as any);
             const toolCallHandler = this.instantiationService.createInstance(ToolCallHandler as any, fileSystemHandler, terminalManager);
-            const agentPlanViewer = this.instantiationService.createInstance(AgentPlanViewer as any);
-            const thinkingStepsDisplay = this.instantiationService.createInstance(ThinkingStepsDisplay as any);
-            const sessionModeSwitcher = this.instantiationService.createInstance(SessionModeSwitcher as any) as SessionModeSwitcher;
-            const slashCommandProvider = this.instantiationService.createInstance(SlashCommandProvider as any);
 
 			// Initialize MCP Manager
 			this.mcpManager = this.instantiationService.createInstance(MCPManager);
@@ -82,36 +70,37 @@ export class ACPContribution implements vscode.Disposable {
 
 			this.logService.info(`[ACP] Using agent profile: ${activeProfile.name}`);
 
-			// Create ACP client
-			this.acpClient = this.instantiationService.createInstance(
-				ACPClient,
-				activeProfile.command,
-				activeProfile.args || []
-			);
-			this.disposables.push(this.acpClient);
+            // Create ACP client
+            const { spawn } = await import('child_process');
+            const agentProcess = spawn(activeProfile.command, activeProfile.args || [], {
+                stdio: ['pipe', 'pipe', 'pipe'],
+                env: { ...process.env, ...activeProfile.env }
+            });
+            
+            this.acpClient = this.instantiationService.createInstance(
+                ACPClient,
+                agentProcess
+            ) as any;
+            if (this.acpClient) {
+                this.disposables.push(this.acpClient);
+            }
 
-			// Create request handler
-			const requestHandler = this.instantiationService.createInstance(
-				ACPRequestHandler,
-				this.acpClient,
-				contentBlockMapper,
-				toolCallHandler,
-				permissionHandler,
-				agentPlanViewer,
-				thinkingStepsDisplay,
-				sessionModeSwitcher,
-				slashCommandProvider
-			);
+            // Create request handler
+            if (!this.acpClient) {
+                throw new Error('Failed to create ACP client');
+            }
+            
+            const requestHandler = this.instantiationService.createInstance(
+                ACPRequestHandler,
+                this.acpClient
+            ) as any;
 
             // Register custom chat view provider
             this.chatViewProvider = new ChatViewProvider(
                 this.extensionContext.extensionUri,
                 this.acpClient,
                 sessionManager,
-                toolCallHandler,
-                contentBlockMapper,
-                thinkingStepsDisplay,
-                agentPlanViewer
+                toolCallHandler
             );
             
             const chatViewDisposable = vscode.window.registerWebviewViewProvider(
@@ -125,8 +114,7 @@ export class ACPContribution implements vscode.Disposable {
                 ACPChatParticipant,
                 this.acpClient,
                 requestHandler,
-                sessionManager,
-                agentConfigManager
+                sessionManager
             );
             this.disposables.push(this.chatParticipant);
 
@@ -142,17 +130,23 @@ export class ACPContribution implements vscode.Disposable {
 			return;
 		}
 
-		const config = vscode.workspace.getConfiguration('acp');
-		const mcpServers = config.get<Record<string, { command: string; args?: string[]; env?: Record<string, string> }>>('mcpServers', {});
+        const config = vscode.workspace.getConfiguration('acp');
+        const mcpServers = config.get<Record<string, { command: string; args?: string[]; env?: Record<string, string> }>>('mcpServers', {});
 
-		for (const [name, serverConfig] of Object.entries(mcpServers)) {
-			try {
-				this.logService.info(`[ACP] Starting MCP server: ${name}`);
-				await this.mcpManager.startServer(name, serverConfig.command, serverConfig.args, serverConfig.env);
-			} catch (error) {
-				this.logService.error(`[ACP] Failed to start MCP server ${name}`, error);
-			}
-		}
+        for (const [name, serverConfig] of Object.entries(mcpServers)) {
+            try {
+                this.logService.info(`[ACP] Starting MCP server: ${name}`);
+                await this.mcpManager.startServer({
+                    name,
+                    command: serverConfig.command,
+                    args: serverConfig.args,
+                    env: serverConfig.env,
+                    transport: 'stdio'
+                });
+            } catch (error) {
+                this.logService.error(`[ACP] Failed to start MCP server ${name}`, error);
+            }
+        }
 	}
 
 	dispose(): void {

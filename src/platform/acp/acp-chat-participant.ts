@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 import { ACPClient } from './acp-client';
 import { ACPRequestHandler } from './acp-request-handler';
 import { SessionManager } from './session-manager';
-import { AgentConfigManager } from './agent-config';
-import { ContentBlock } from './types';
 
 /**
  * ACP Chat Participant for VS Code
@@ -21,8 +19,7 @@ export class ACPChatParticipant {
     constructor(
         private acpClient: ACPClient,
         private requestHandler: ACPRequestHandler,
-        private sessionManager: SessionManager,
-        private agentConfig: AgentConfigManager
+        private sessionManager: SessionManager
     ) {
         // Register the chat participant
         this.participant = vscode.chat.createChatParticipant(
@@ -34,7 +31,14 @@ export class ACPChatParticipant {
         this.participant.iconPath = vscode.Uri.file('resources/acp-icon.png');
 
         // Initialize the ACP client
-        this.acpClient.initialize().catch(err => {
+        this.acpClient.initialize({
+            protocolVersion: '1.0.0',
+            clientCapabilities: {},
+            clientInfo: {
+                name: 'vscode-copilot-chat-acp',
+                version: '0.33.0'
+            }
+        }).catch(err => {
             console.error('Failed to initialize ACP client:', err);
         });
 
@@ -60,7 +64,8 @@ export class ACPChatParticipant {
             // Get or create session
             let sessionId = this.sessionManager.getSessionId(conversationId);
             if (!sessionId) {
-                sessionId = await this.sessionManager.createSession(conversationId);
+                const sessionInfo = await this.sessionManager.createSession(conversationId);
+                sessionId = sessionInfo.sessionId;
             }
 
             // Handle cancellation
@@ -102,46 +107,7 @@ export class ACPChatParticipant {
         return contextId;
     }
 
-    /**
-     * Map VS Code chat references to ACP embedded resources
-     */
-    private mapReferencesToEmbeddedResources(
-        references: readonly vscode.ChatPromptReference[]
-    ): ContentBlock[] {
-        return references.map(ref => {
-            // Handle file references
-            if (ref.value && typeof ref.value === 'object' && 'uri' in ref.value) {
-                const uri = (ref.value as any).uri;
-                return {
-                    type: 'embedded_resource' as const,
-                    resource: {
-                        type: 'file' as const,
-                        uri: uri.toString(),
-                    },
-                };
-            }
 
-            // Handle text references
-            if (typeof ref.value === 'string') {
-                return {
-                    type: 'embedded_resource' as const,
-                    resource: {
-                        type: 'text' as const,
-                        text: ref.value,
-                    },
-                };
-            }
-
-            // Fallback: treat as text
-            return {
-                type: 'embedded_resource' as const,
-                resource: {
-                    type: 'text' as const,
-                    text: String(ref.value),
-                },
-            };
-        });
-    }
 
     /**
      * Dispose of all resources

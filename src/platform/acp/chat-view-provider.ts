@@ -2,9 +2,6 @@ import * as vscode from 'vscode';
 import { ACPClient } from './acp-client';
 import { SessionManager } from './session-manager';
 import { ToolCallHandler } from './tool-call-handler';
-import { ContentBlockMapper } from './content-block-mapper';
-import { ThinkingStepsDisplay } from './thinking-steps-display';
-import { AgentPlanViewer } from './agent-plan-viewer';
 
 interface ChatMessage {
 	id: string;
@@ -29,10 +26,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         private readonly extensionUri: vscode.Uri,
         private readonly acpClient: ACPClient,
         private readonly sessionManager: SessionManager,
-        private readonly toolCallHandler: ToolCallHandler,
-        private readonly _contentBlockMapper: ContentBlockMapper,
-        private readonly _thinkingStepsDisplay: ThinkingStepsDisplay,
-        private readonly _agentPlanViewer: AgentPlanViewer
+        private readonly toolCallHandler: ToolCallHandler
     ) {}
 
     public resolveWebviewView(
@@ -103,16 +97,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 		this.messages.push(userMessage);
 		this.updateWebview();
 
-		try {
-			// Send to ACP agent
-			if (!this.currentSessionId) {
-				this.currentSessionId = await this.sessionManager.createSession();
-			}
+        try {
+            // Send to ACP agent
+            if (!this.currentSessionId) {
+                const sessionInfo = await this.sessionManager.createSession('default-conversation');
+                this.currentSessionId = sessionInfo.sessionId;
+            }
 
-			await this.acpClient.sendPrompt({
-				sessionId: this.currentSessionId,
-				prompt: text
-			});
+            await this.acpClient.prompt({
+                sessionId: this.currentSessionId,
+                prompt: [{
+                    type: 'text',
+                    text
+                }]
+            });
 		} catch (error) {
 			vscode.window.showErrorMessage(`Failed to send message: ${error}`);
 		}
@@ -184,20 +182,23 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 		return undefined;
 	}
 
-	private async startNewChat(): Promise<void> {
-		this.messages = [];
-		this.currentSessionId = await this.sessionManager.createSession();
-		this.updateWebview();
-	}
+    private async startNewChat(): Promise<void> {
+        this.messages = [];
+        const sessionInfo = await this.sessionManager.createSession('default-conversation');
+        this.currentSessionId = sessionInfo.sessionId;
+        this.updateWebview();
+    }
 
-	private async loadSessionMessages(sessionId: string): Promise<void> {
-		// Load messages from session history
-		const session = await this.sessionManager.getSession(sessionId);
-		if (session) {
-			this.messages = session.messages || [];
-			this.updateWebview();
-		}
-	}
+    private async loadSessionMessages(sessionId: string): Promise<void> {
+        // Load messages from session history
+        const session = this.sessionManager.getSession(sessionId);
+        if (session) {
+            // Session doesn't contain messages in current implementation
+            // Messages would need to be loaded from agent via session/load
+            this.messages = [];
+            this.updateWebview();
+        }
+    }
 
 	private updateWebview(): void {
 		if (this.view) {

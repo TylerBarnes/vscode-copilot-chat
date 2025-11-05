@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ThinkingStepsDisplay } from '../../../src/platform/acp/thinking-steps-display';
 import type { ThinkingContent } from '../../../src/platform/acp/types';
-import * as vscode from 'vscode';
 
 // Mock vscode module
 vi.mock('vscode', () => ({
@@ -29,7 +28,7 @@ describe('ThinkingStepsDisplay', () => {
         it('should display a single thinking step', () => {
             const thinking: ThinkingContent = {
                 type: 'thinking',
-                content: 'Analyzing the user request...',
+                thinking: 'Analyzing the user request...',
             };
 
             display.displayThinking(thinking, mockStream as any);
@@ -43,11 +42,11 @@ describe('ThinkingStepsDisplay', () => {
         it('should accumulate multiple thinking steps', () => {
             const thinking1: ThinkingContent = {
                 type: 'thinking',
-                content: 'Step 1: Understanding the problem',
+                thinking: 'Step 1: Understanding the problem',
             };
             const thinking2: ThinkingContent = {
                 type: 'thinking',
-                content: 'Step 2: Planning the solution',
+                thinking: 'Step 2: Planning the solution',
             };
 
             display.displayThinking(thinking1, mockStream as any);
@@ -63,7 +62,7 @@ describe('ThinkingStepsDisplay', () => {
         it('should format thinking steps as collapsible section', () => {
             const thinking: ThinkingContent = {
                 type: 'thinking',
-                content: 'Analyzing code structure',
+                thinking: 'Analyzing code structure',
             };
 
             display.displayThinking(thinking, mockStream as any);
@@ -82,12 +81,12 @@ describe('ThinkingStepsDisplay', () => {
             ];
 
             for (const step of steps) {
-                display.displayThinking({ type: 'thinking', content: step }, mockStream as any);
+                display.displayThinking({ type: 'thinking', thinking: step }, mockStream as any);
                 mockStream.markdown.mockClear();
             }
 
             // Display final state
-            display.displayThinking({ type: 'thinking', content: 'Final step' }, mockStream as any);
+            display.displayThinking({ type: 'thinking', thinking: 'Final step' }, mockStream as any);
 
             const markdown = mockStream.markdown.mock.calls[0][0];
             expect(markdown).toContain('(4 steps)');
@@ -96,7 +95,7 @@ describe('ThinkingStepsDisplay', () => {
         it('should handle empty thinking content', () => {
             const thinking: ThinkingContent = {
                 type: 'thinking',
-                content: '',
+                thinking: '',
             };
 
             display.displayThinking(thinking, mockStream as any);
@@ -109,7 +108,7 @@ describe('ThinkingStepsDisplay', () => {
         it('should handle multiline thinking content', () => {
             const thinking: ThinkingContent = {
                 type: 'thinking',
-                content: `First line of thought
+                thinking: `First line of thought
 Second line of thought
 Third line of thought`,
             };

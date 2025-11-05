@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TerminalManager } from '../../../src/platform/acp/terminal-manager';
-import { spawn } from 'child_process';
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs/promises';
@@ -307,7 +306,7 @@ describe('TerminalManager', () => {
                 outputs.push(data);
             });
 
-            const result = await terminalManager.createTerminal({
+            await terminalManager.createTerminal({
                 command: 'sh',
                 args: ['-c', 'echo line1 && echo line2']
             });

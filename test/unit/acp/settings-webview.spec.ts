@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SettingsWebviewProvider } from '../../../src/platform/acp/settings-webview';
-import type { AgentProfile, McpServerConfig, PermissionPolicy, SessionConfig } from '../../../src/platform/acp/types';
+import type { AgentProfile, PermissionPolicy } from '../../../src/platform/acp/types';
+import type { MCPServerConfig } from '../../../src/platform/acp/mcp-manager';
+import type { SessionConfig } from '../../../src/platform/acp/configuration-manager';
 
 // Mock vscode module
 const mockWebview = {
@@ -75,16 +77,16 @@ describe('SettingsWebviewProvider', () => {
 			removeMcpServer: vi.fn(),
 			updatePermissionPolicy: vi.fn(),
 			removePermissionPolicy: vi.fn(),
-			updateSessionConfig: vi.fn(),
-			onConfigChange: vi.fn((callback) => {
-				// Store callback for testing
-				return { dispose: vi.fn() };
-			})
-		};
+            updateSessionConfig: vi.fn(),
+            onDidChangeConfiguration: vi.fn((callback) => {
+                // Store callback for testing
+                return { dispose: vi.fn() };
+            })
+        };
 
-		mockProfileSelector = {
-			showProfileSelector: vi.fn()
-		};
+        mockProfileSelector = {
+            selectProfile: vi.fn()
+        };
 
 		mockMcpServerUI = {
 			showManagementUI: vi.fn()
@@ -141,7 +143,7 @@ describe('SettingsWebviewProvider', () => {
 		it('should register config change listener', () => {
 			provider.resolveWebviewView(mockWebviewView as any, {} as any, {} as any);
 
-			expect(mockConfigManager.onConfigChange).toHaveBeenCalledTimes(1);
+        expect(mockConfigManager.onDidChangeConfiguration).toHaveBeenCalledTimes(1);
 		});
 
 		it('should send initial config', () => {
@@ -195,13 +197,14 @@ describe('SettingsWebviewProvider', () => {
 			});
 		});
 
-		it('should handle updateMcpServer message', async () => {
-			const server: McpServerConfig = {
-				name: 'test-server',
-				command: 'node',
-				args: ['server.js'],
-				enabled: true
-			};
+        it('should handle updateMcpServer message', async () => {
+            const server: MCPServerConfig = {
+                name: 'test-server',
+                command: 'node',
+                args: ['server.js'],
+                transport: 'stdio',
+                enabled: true
+            };
 
 			await messageHandler({ type: 'updateMcpServer', server });
 
@@ -222,15 +225,16 @@ describe('SettingsWebviewProvider', () => {
 			});
 		});
 
-		it('should handle updatePermissionPolicy message', async () => {
-			const policy: PermissionPolicy = {
-				pattern: 'fs:*',
-				description: 'Allow all file system operations'
-			};
+        it('should handle updatePermissionPolicy message', async () => {
+            const policy: PermissionPolicy = {
+                pattern: 'fs:*',
+                action: 'allow',
+                description: 'Allow all file system operations'
+            };
 
 			await messageHandler({ type: 'updatePermissionPolicy', policy });
 
-			expect(mockConfigManager.updatePermissionPolicy).toHaveBeenCalledWith(policy);
+            expect(mockConfigManager.updatePermissionPolicy).toHaveBeenCalledWith('fs:*', policy);
 			expect(mockWebview.postMessage).toHaveBeenCalledWith({
 				type: 'config',
 				config: expect.any(Object)
@@ -247,12 +251,13 @@ describe('SettingsWebviewProvider', () => {
 			});
 		});
 
-		it('should handle updateSessionConfig message', async () => {
-			const config: SessionConfig = {
-				autoSave: true,
-				defaultMode: 'chat',
-				maxHistory: 50
-			};
+        it('should handle updateSessionConfig message', async () => {
+            const config: SessionConfig = {
+                maxMessages: 50,
+                persistHistory: true,
+                autoSave: true,
+                defaultMode: 'chat'
+            };
 
 			await messageHandler({ type: 'updateSessionConfig', config });
 
@@ -266,7 +271,7 @@ describe('SettingsWebviewProvider', () => {
 		it('should handle openAgentProfileSelector message', async () => {
 			await messageHandler({ type: 'openAgentProfileSelector' });
 
-			expect(mockProfileSelector.showProfileSelector).toHaveBeenCalledTimes(1);
+            expect(mockProfileSelector.selectProfile).toHaveBeenCalledTimes(1);
 		});
 
 		it('should handle openMcpServerUI message', async () => {
@@ -284,11 +289,11 @@ describe('SettingsWebviewProvider', () => {
 
 	describe('config updates', () => {
 		it('should send config when config changes', () => {
-			let configChangeCallback: () => void;
-			mockConfigManager.onConfigChange.mockImplementation((callback: () => void) => {
-				configChangeCallback = callback;
-				return { dispose: vi.fn() };
-			});
+        let configChangeCallback: () => void;
+        mockConfigManager.onDidChangeConfiguration.mockImplementation((callback: () => void) => {
+            configChangeCallback = callback;
+            return { dispose: vi.fn() };
+        });
 
 			provider.resolveWebviewView(mockWebviewView as any, {} as any, {} as any);
 			mockWebview.postMessage.mockClear();
@@ -326,11 +331,11 @@ describe('SettingsWebviewProvider', () => {
 			});
 		});
 
-		it('should include MCP servers in config', () => {
-			const servers: McpServerConfig[] = [
-				{ name: 'server1', command: 'node', args: ['server1.js'], enabled: true },
-				{ name: 'server2', command: 'node', args: ['server2.js'], enabled: false }
-			];
+        it('should include MCP servers in config', () => {
+            const servers: MCPServerConfig[] = [
+                { name: 'server1', command: 'node', args: ['server1.js'], transport: 'stdio', enabled: true },
+                { name: 'server2', command: 'node', args: ['server2.js'], transport: 'stdio', enabled: false }
+            ];
 
 			mockConfigManager.getConfiguration.mockReturnValue({
 				agentProfiles: [],
@@ -350,13 +355,13 @@ describe('SettingsWebviewProvider', () => {
 			});
 		});
 
-		it('should include permission policies in config', () => {
-			const autoAllow: PermissionPolicy[] = [
-				{ pattern: 'fs:read:*', description: 'Allow all reads' }
-			];
-			const autoReject: PermissionPolicy[] = [
-				{ pattern: 'fs:delete:*', description: 'Reject all deletes' }
-			];
+        it('should include permission policies in config', () => {
+            const autoAllow: PermissionPolicy[] = [
+                { pattern: 'fs:read:*', action: 'allow', description: 'Allow all reads' }
+            ];
+            const autoReject: PermissionPolicy[] = [
+                { pattern: 'fs:delete:*', action: 'deny', description: 'Reject all deletes' }
+            ];
 
 			mockConfigManager.getConfiguration.mockReturnValue({
 				agentProfiles: [],
@@ -376,12 +381,13 @@ describe('SettingsWebviewProvider', () => {
 			});
 		});
 
-		it('should include session config', () => {
-			const session: SessionConfig = {
-				autoSave: true,
-				defaultMode: 'code',
-				maxHistory: 100
-			};
+        it('should include session config', () => {
+            const session: SessionConfig = {
+                maxMessages: 100,
+                persistHistory: true,
+                autoSave: true,
+                defaultMode: 'code'
+            };
 
 			mockConfigManager.getConfiguration.mockReturnValue({
 				agentProfiles: [],
