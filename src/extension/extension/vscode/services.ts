@@ -91,18 +91,12 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(ITerminalService, new SyncDescriptor(TerminalServiceImpl));
 	// Removed: ITestProvider (proprietary testing service)
 	builder.define(IUrlOpener, isTestMode && !isScenarioAutomation ? new NullUrlOpener() : new RealUrlOpener());
-	builder.define(INotificationService, isTestMode && !isScenarioAutomation ? new NullNotificationService() : new NotificationService());
-	builder.define(IVSCodeExtensionContext, <any>/*force _serviceBrand*/extensionContext);
-	builder.define(IWorkbenchService, new WorkbenchServiceImpl());
-	builder.define(IConversationOptions, {
-		_serviceBrand: undefined,
-		maxResponseTokens: undefined,
-		temperature: 0.1,
-		topP: 1,
-		rejectionMessage: l10n.t('Sorry, but I can only assist with programming related questions.'),
-	});
-	// Removed IChatSessionService (chat deleted)
-	builder.define(IConfigurationService, new SyncDescriptor(ConfigurationServiceImpl));
+    builder.define(INotificationService, isTestMode && !isScenarioAutomation ? new NullNotificationService() : new NotificationService());
+    builder.define(IVSCodeExtensionContext, <any>/*force _serviceBrand*/extensionContext);
+    builder.define(IWorkbenchService, new WorkbenchServiceImpl());
+    // Removed IConversationOptions (proprietary chat service)
+    // Removed IChatSessionService (chat deleted)
+    builder.define(IConfigurationService, new SyncDescriptor(ConfigurationServiceImpl));
 	builder.define(ILogService, new SyncDescriptor(LogServiceImpl, [[new NewOutputChannelLogTarget(extensionContext)]]));
 	// Removed IChatQuotaService (chat deleted)
 	builder.define(ITasksService, new SyncDescriptor(TasksService));
@@ -117,7 +111,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
     builder.define(IExtensionsService, new SyncDescriptor(VSCodeExtensionsService));
     // Removed ICombinedEmbeddingIndex (proprietary)
     // Removed IProjectTemplatesIndex (projectTemplatesIndex deleted)
-    builder.define(IBlockedExtensionService, new SyncDescriptor(BlockedExtensionService));
+    // Removed IBlockedExtensionService (proprietary)
     // Removed IEditLogService and IMultiFileEditInternalTelemetryService (multiFileEdit deleted)
     // Removed ICustomInstructionsService (customInstructions - proprietary)
     // Removed ILaunchConfigService (onboardDebug deleted)
