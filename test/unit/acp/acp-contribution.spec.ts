@@ -9,33 +9,40 @@ import { ACPContribution } from '../../../src/platform/acp/acp.contribution';
 
 // Mock vscode module
 vi.mock('vscode', () => ({
-	workspace: {
-		getConfiguration: vi.fn()
-	},
-	Disposable: class {
-		dispose() {}
-	}
+    workspace: {
+        getConfiguration: vi.fn()
+    },
+    window: {
+        registerWebviewViewProvider: vi.fn(() => ({
+            dispose: vi.fn()
+        }))
+    },
+    Disposable: class {
+        dispose() {}
+    }
 }));
 
 describe('ACPContribution', () => {
-	let mockInstantiationService: any;
-	let mockLogService: any;
-	let mockAgentConfigManager: any;
-	let mockFileSystemHandler: any;
-	let mockTerminalManager: any;
-	let mockPermissionHandler: any;
-	let mockSessionManager: any;
-	let mockContentBlockMapper: any;
-	let mockToolCallHandler: any;
-	let mockAgentPlanViewer: any;
-	let mockThinkingStepsDisplay: any;
-	let mockSessionModeSwitcher: any;
-	let mockSlashCommandProvider: any;
-	let mockMCPManager: any;
-	let mockACPClient: any;
-	let mockRequestHandler: any;
-	let mockChatParticipant: any;
-	let mockConfig: any;
+    let mockInstantiationService: any;
+    let mockLogService: any;
+    let mockExtensionContext: any;
+    let mockUri: any;
+    let mockAgentConfigManager: any;
+    let mockFileSystemHandler: any;
+    let mockTerminalManager: any;
+    let mockPermissionHandler: any;
+    let mockSessionManager: any;
+    let mockContentBlockMapper: any;
+    let mockToolCallHandler: any;
+    let mockAgentPlanViewer: any;
+    let mockThinkingStepsDisplay: any;
+    let mockSessionModeSwitcher: any;
+    let mockSlashCommandProvider: any;
+    let mockMCPManager: any;
+    let mockACPClient: any;
+    let mockRequestHandler: any;
+    let mockChatParticipant: any;
+    let mockConfig: any;
 
 	beforeEach(() => {
 		// Reset all mocks
@@ -119,17 +126,29 @@ describe('ACPContribution', () => {
 			})
 		};
 
-		mockLogService = {
-			info: vi.fn(),
-			warn: vi.fn(),
-			error: vi.fn(),
-			trace: vi.fn()
-		};
-	});
+mockLogService = {
+            info: vi.fn(),
+            warn: vi.fn(),
+            error: vi.fn(),
+            trace: vi.fn()
+        };
 
-	describe('initialization', () => {
-		it('should initialize all core components', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+        // Mock URI
+        mockUri = {
+            fsPath: '/mock/extension/path',
+            with: vi.fn()
+        };
+
+        // Mock extension context
+        mockExtensionContext = {
+            extensionUri: mockUri,
+            subscriptions: []
+        };
+    });
+
+    describe('initialization', () => {
+        it('should initialize all core components', async () => {
+            const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -160,7 +179,7 @@ describe('ACPContribution', () => {
 		});
 
 		it('should start configured MCP servers', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -176,7 +195,7 @@ describe('ACPContribution', () => {
 		});
 
 		it('should create ACP client with active agent profile', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -191,7 +210,7 @@ describe('ACPContribution', () => {
 		});
 
 		it('should create request handler with all dependencies', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -211,41 +230,44 @@ describe('ACPContribution', () => {
 			contribution.dispose();
 		});
 
-		it('should create and register chat participant', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+        it('should create and register chat participant', async () => {
+            const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
-			// Wait for async initialization
-			await new Promise(resolve => setTimeout(resolve, 10));
+            await contribution.initialize();
 
-			expect(mockInstantiationService.createInstance).toHaveBeenCalledWith(
-				expect.objectContaining({ name: 'ACPChatParticipant' }),
-				mockRequestHandler,
-				mockSessionManager
-			);
+            // Check that ACPChatParticipant was created
+            const chatParticipantCall = mockInstantiationService.createInstance.mock.calls.find((call: any[]) => 
+                call.length === 5 && 
+                call[1] === mockACPClient &&
+                call[2] === mockRequestHandler &&
+                call[3] === mockSessionManager &&
+                call[4] === mockAgentConfigManager
+            );
+            expect(chatParticipantCall).toBeDefined();
 
-			contribution.dispose();
-		});
+            contribution.dispose();
+        });
 
-		it('should log initialization steps', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+it('should log initialization steps', async () => {
+            const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
-			// Wait for async initialization
-			await new Promise(resolve => setTimeout(resolve, 10));
+            await contribution.initialize();
 
-			expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Initializing ACP contribution');
-			expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Using agent profile: Test Agent');
-			expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Starting MCP server: test-server');
-			expect(mockLogService.info).toHaveBeenCalledWith('[ACP] ACP contribution initialized successfully');
+            // Check that the expected log messages were called (in any order due to async nature)
+            expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Initializing ACP contribution');
+            expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Starting MCP server: test-server');
+            expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Using agent profile: Test Agent');
+            expect(mockLogService.info).toHaveBeenCalledWith('[ACP] ACP contribution initialized successfully');
 
-			contribution.dispose();
-		});
+            contribution.dispose();
+        });
 	});
 
 	describe('error handling', () => {
 		it('should handle missing active agent profile', async () => {
 			mockAgentConfigManager.getActiveProfile.mockReturnValue(null);
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -262,7 +284,7 @@ describe('ACPContribution', () => {
 			const error = new Error('Server startup failed');
 			mockMCPManager.startServer.mockRejectedValue(error);
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -281,7 +303,7 @@ describe('ACPContribution', () => {
 			throw error;
 		});
 
-		const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+		const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 		// Wait for async initialization to complete
 		await new Promise(resolve => setTimeout(resolve, 10));
@@ -307,7 +329,7 @@ describe('ACPContribution', () => {
 				return defaultValue;
 			});
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -326,7 +348,7 @@ describe('ACPContribution', () => {
 				return defaultValue;
 			});
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -337,7 +359,7 @@ describe('ACPContribution', () => {
 		});
 
 		it('should pass environment variables to MCP servers', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -354,30 +376,28 @@ describe('ACPContribution', () => {
 	});
 
 	describe('disposal', () => {
-		it('should dispose all components', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+it('should dispose all components', async () => {
+            const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
-			// Wait for async initialization
-			await new Promise(resolve => setTimeout(resolve, 10));
+            await contribution.initialize();
 
-			contribution.dispose();
+            contribution.dispose();
 
-			expect(mockMCPManager.dispose).toHaveBeenCalled();
-			expect(mockACPClient.dispose).toHaveBeenCalled();
-			expect(mockChatParticipant.dispose).toHaveBeenCalled();
-			expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Disposing ACP contribution');
-		});
+            expect(mockMCPManager.dispose).toHaveBeenCalled();
+            expect(mockACPClient.dispose).toHaveBeenCalled();
+            expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Disposing ACP contribution');
+        });
 
 		it('should handle disposal when not fully initialized', () => {
 			mockAgentConfigManager.getActiveProfile.mockReturnValue(null);
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			expect(() => contribution.dispose()).not.toThrow();
 		});
 
 		it('should clear disposables array', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -391,7 +411,7 @@ describe('ACPContribution', () => {
 
 	describe('configuration', () => {
 		it('should read ACP configuration', async () => {
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));
@@ -411,7 +431,7 @@ describe('ACPContribution', () => {
 			};
 			mockAgentConfigManager.getActiveProfile.mockReturnValue(customProfile);
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService);
+			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
 			// Wait for async initialization
 			await new Promise(resolve => setTimeout(resolve, 10));

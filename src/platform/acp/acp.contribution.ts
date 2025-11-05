@@ -50,9 +50,7 @@ export class ACPContribution implements vscode.Disposable {
     }
 
     private async initialize(): Promise<void> {
-        console.log('[ACPContribution] initialize() called');
         try {
-            console.log('[ACPContribution] Logging initialization...');
             this.logService.info('[ACP] Initializing ACP contribution');
 
 			// Create core components
@@ -106,8 +104,6 @@ export class ACPContribution implements vscode.Disposable {
 			);
 
             // Register custom chat view provider
-            console.log('[ACPContribution] Creating ChatViewProvider...');
-            console.log('[ACPContribution] Extension URI:', this.extensionContext.extensionUri.toString());
             this.chatViewProvider = new ChatViewProvider(
                 this.extensionContext.extensionUri,
                 this.acpClient,
@@ -118,19 +114,19 @@ export class ACPContribution implements vscode.Disposable {
                 agentPlanViewer
             );
             
-            console.log('[ACPContribution] Registering webview view provider for acp.copilot.chatView');
             const chatViewDisposable = vscode.window.registerWebviewViewProvider(
                 'acp.copilot.chatView',
                 this.chatViewProvider
             );
             this.disposables.push(chatViewDisposable);
-            console.log('[ACPContribution] ChatViewProvider registered successfully');
 
             // Create and register chat participant (for command palette integration)
             this.chatParticipant = this.instantiationService.createInstance(
                 ACPChatParticipant,
+                this.acpClient,
                 requestHandler,
-                sessionManager
+                sessionManager,
+                agentConfigManager
             );
             this.disposables.push(this.chatParticipant);
 
