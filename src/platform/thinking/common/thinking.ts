@@ -4,27 +4,27 @@
  *--------------------------------------------------------------------------------------------*/
 
 export interface ThinkingDataInMessage {
-	// Azure Open AI fields for Completions
-	cot_id?: string;
-	cot_summary?: string;
+    // Chain-of-thought fields (Azure OpenAI format)
+    cot_id?: string;
+    cot_summary?: string;
 
-	// Copilot API fields for Completions
-	reasoning_opaque?: string;
-	reasoning_text?: string;
+    // Reasoning fields (alternative format)
+    reasoning_opaque?: string;
+    reasoning_text?: string;
 }
 
 export interface RawThinkingDelta {
-	// Azure Open AI fields
-	cot_id?: string;
-	cot_summary?: string;
+    // Chain-of-thought fields (Azure OpenAI format)
+    cot_id?: string;
+    cot_summary?: string;
 
-	// Copilot API fields
-	reasoning_opaque?: string;
-	reasoning_text?: string;
+    // Reasoning fields (alternative format)
+    reasoning_opaque?: string;
+    reasoning_text?: string;
 
-	// Anthropic fields
-	thinking?: string;
-	signature?: string;
+    // Thinking fields (Anthropic format)
+    thinking?: string;
+    signature?: string;
 }
 
 export type ThinkingDelta = {
