@@ -121,7 +121,8 @@ export type ContentBlock =
     | ImageContent
     | AudioContent
     | EmbeddedResourceContent
-    | ResourceLinkContent;
+    | ResourceLinkContent
+    | ThinkingContent;
 
 export interface TextContent {
     type: 'text';
@@ -143,6 +144,7 @@ export interface AudioContent {
 export interface EmbeddedResourceContent {
     type: 'embedded_resource';
     resource: {
+        type?: 'file' | 'text';
         uri: string;
         mimeType?: string;
         text?: string;
@@ -154,13 +156,26 @@ export interface ResourceLinkContent {
     uri: string;
 }
 
+/**
+ * Thinking content block from agent
+ * Represents a single thinking step in the agent's reasoning process
+ */
+export interface ThinkingContent {
+    type: 'thinking';
+    thinking: string;
+}
+
 // ============================================================================
 // Prompt Turn
 // ============================================================================
 
 export interface SessionPromptParams {
-    sessionId: string;
-    prompt: ContentBlock[];
+    sessionId?: string;
+    prompt?: ContentBlock[];
+    messages?: Array<{
+        role: 'user' | 'assistant';
+        content: ContentBlock[];
+    }>;
 }
 
 export type StopReason = 
@@ -182,6 +197,7 @@ export enum ToolCallKind {
     WriteTextFile = 'fs/write_text_file',
     TerminalCreate = 'terminal/create',
     TerminalSendInput = 'terminal/send_input',
+    TerminalSendText = 'terminal/send_text', // Alias for send_input
     TerminalGetOutput = 'terminal/get_output',
     TerminalKill = 'terminal/kill',
     MCPToolCall = 'mcp/tool_call',
@@ -216,6 +232,7 @@ export interface ToolCall {
     status: ToolCallStatus;
     content?: ToolCallContent | string;
     locations?: ToolCallLocation[];
+    error?: string; // Error message if status is 'error'
 }
 
 // ============================================================================
@@ -264,6 +281,9 @@ export interface PlanUpdate {
     sessionId: string;
     sessionUpdate: 'plan';
     plan: PlanEntry[];
+    // Optional properties for single-step updates
+    description?: string;
+    status?: 'pending' | 'in_progress' | 'completed' | 'failed';
 }
 
 /**
@@ -275,15 +295,6 @@ export interface AgentPlan {
         description: string;
         status: 'pending' | 'in_progress' | 'completed' | 'failed';
     }>;
-}
-
-/**
- * Thinking content block from agent
- * Represents a single thinking step in the agent's reasoning process
- */
-export interface ThinkingContent {
-    type: 'thinking';
-    content: string;
 }
 
 /**
@@ -353,6 +364,7 @@ export type PermissionDecision =
     | 'reject_always';
 
 export interface SessionRequestPermissionParams {
+    id?: string; // Optional request ID
     sessionId: string;
     toolCallId: string;
     title: string;
@@ -362,6 +374,7 @@ export interface SessionRequestPermissionParams {
 }
 
 export interface SessionRequestPermissionResult {
+    id?: string; // Optional response ID (matches request ID)
     decision: PermissionDecision;
 }
 
@@ -434,4 +447,42 @@ export interface TerminalReleaseParams {
 
 export interface TerminalReleaseResult {
     // Empty object on success
+}
+
+// ============================================================================
+// Type Aliases for Convenience
+// ============================================================================
+
+/**
+ * Agent message content - alias for ContentBlock
+ */
+export type AgentMessageContent = ContentBlock;
+
+/**
+ * Permission request - alias for SessionRequestPermissionParams
+ */
+export type PermissionRequest = SessionRequestPermissionParams;
+
+/**
+ * Permission response - alias for SessionRequestPermissionResult
+ */
+export type PermissionResponse = SessionRequestPermissionResult;
+
+/**
+ * Prompt request - alias for SessionPromptParams
+ */
+export type PromptRequest = SessionPromptParams;
+
+/**
+ * Agent profile configuration
+ */
+export interface AgentProfile {
+    id?: string; // Optional - can be auto-generated
+    name: string;
+    description?: string;
+    command?: string; // Optional - can use executable instead
+    executable?: string; // Alternative to command
+    args?: string[];
+    env?: Record<string, string>;
+    cwd?: string;
 }

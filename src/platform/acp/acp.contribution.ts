@@ -53,18 +53,18 @@ export class ACPContribution implements vscode.Disposable {
         try {
             this.logService.info('[ACP] Initializing ACP contribution');
 
-			// Create core components
-			const agentConfigManager = this.instantiationService.createInstance(AgentConfigManager);
-			const fileSystemHandler = this.instantiationService.createInstance(FileSystemHandler);
-			const terminalManager = this.instantiationService.createInstance(TerminalManager);
-			const permissionHandler = this.instantiationService.createInstance(PermissionHandler);
-			const sessionManager = this.instantiationService.createInstance(SessionManager);
-			const contentBlockMapper = this.instantiationService.createInstance(ContentBlockMapper);
-			const toolCallHandler = this.instantiationService.createInstance(ToolCallHandler, fileSystemHandler, terminalManager);
-			const agentPlanViewer = this.instantiationService.createInstance(AgentPlanViewer);
-			const thinkingStepsDisplay = this.instantiationService.createInstance(ThinkingStepsDisplay);
-			const sessionModeSwitcher = this.instantiationService.createInstance(SessionModeSwitcher);
-			const slashCommandProvider = this.instantiationService.createInstance(SlashCommandProvider);
+            // Create core components
+            const agentConfigManager = this.instantiationService.createInstance(AgentConfigManager as any);
+            const fileSystemHandler = this.instantiationService.createInstance(FileSystemHandler as any) as FileSystemHandler;
+            const terminalManager = this.instantiationService.createInstance(TerminalManager as any) as TerminalManager;
+            const permissionHandler = this.instantiationService.createInstance(PermissionHandler as any);
+            const sessionManager = this.instantiationService.createInstance(SessionManager as any) as SessionManager;
+            const contentBlockMapper = this.instantiationService.createInstance(ContentBlockMapper as any);
+            const toolCallHandler = this.instantiationService.createInstance(ToolCallHandler as any, fileSystemHandler, terminalManager);
+            const agentPlanViewer = this.instantiationService.createInstance(AgentPlanViewer as any);
+            const thinkingStepsDisplay = this.instantiationService.createInstance(ThinkingStepsDisplay as any);
+            const sessionModeSwitcher = this.instantiationService.createInstance(SessionModeSwitcher as any) as SessionModeSwitcher;
+            const slashCommandProvider = this.instantiationService.createInstance(SlashCommandProvider as any);
 
 			// Initialize MCP Manager
 			this.mcpManager = this.instantiationService.createInstance(MCPManager);

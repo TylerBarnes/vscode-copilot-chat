@@ -1,12 +1,13 @@
 import { spawn, ChildProcess } from 'child_process';
 
 export interface MCPServerConfig {
-	name: string;
-	command: string;
-	args?: string[];
-	env?: Record<string, string>;
-	transport: 'stdio' | 'http' | 'sse';
-	url?: string; // For http/sse transports
+    name: string;
+    command: string;
+    args?: string[];
+    env?: Record<string, string>;
+    transport: 'stdio' | 'http' | 'sse';
+    url?: string; // For http/sse transports
+    enabled?: boolean; // Whether the server is enabled
 }
 
 interface MCPServer {
@@ -150,17 +151,31 @@ export class MCPManager {
 		}
 	}
 
-	offMessage(name: string, callback: (message: any) => void): void {
-		const server = this.servers.get(name);
-		if (server) {
-			server.messageCallbacks.delete(callback);
-		}
-	}
+    offMessage(name: string, callback: (message: any) => void): void {
+        const server = this.servers.get(name);
+        if (server) {
+            server.messageCallbacks.delete(callback);
+        }
+    }
 
-	async dispose(): Promise<void> {
-		const stopPromises = Array.from(this.servers.keys()).map(name => 
-			this.stopServer(name)
-		);
-		await Promise.all(stopPromises);
-	}
+    /**
+     * Get available tools from an MCP server (compatibility method)
+     */
+    async getTools(serverName: string): Promise<any[]> {
+        const server = this.servers.get(serverName);
+        if (!server) {
+            return [];
+        }
+        
+        // This is a stub - in a full implementation, this would query the MCP server
+        // for its available tools via the MCP protocol
+        return [];
+    }
+
+    async dispose(): Promise<void> {
+        const stopPromises = Array.from(this.servers.keys()).map(name => 
+            this.stopServer(name)
+        );
+        await Promise.all(stopPromises);
+    }
 }

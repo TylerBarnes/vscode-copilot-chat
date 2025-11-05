@@ -341,4 +341,54 @@ export class ConfigurationManager {
       }
     });
   }
+
+  /**
+   * Alias for onConfigurationChanged (compatibility)
+   */
+  onDidChangeConfiguration(callback: () => void): vscode.Disposable {
+    return this.onConfigurationChanged(() => callback());
+  }
+
+  /**
+   * Get a specific MCP server by name (compatibility method)
+   */
+  getMcpServer(serverName: string): MCPServerConfig | undefined {
+    const servers = this.getMcpServers();
+    return servers.find(s => s.name === serverName);
+  }
+
+  /**
+   * Add an MCP server (compatibility method)
+   */
+  async addMcpServer(config: MCPServerConfig): Promise<void> {
+    const servers = this.getMcpServers();
+    servers.push(config);
+    await this.updateMcpServers(servers);
+  }
+
+  /**
+   * Get all permission policies (compatibility method)
+   */
+  getPermissionPolicies(): PermissionPolicy[] {
+    // Return all permission policies as an array
+    const policies: PermissionPolicy[] = [];
+    const fsPolicy = this.getPermissionPolicy('filesystem');
+    const terminalPolicy = this.getPermissionPolicy('terminal');
+    
+    if (fsPolicy) {
+      policies.push({ resource: 'filesystem', ...fsPolicy } as PermissionPolicy);
+    }
+    if (terminalPolicy) {
+      policies.push({ resource: 'terminal', ...terminalPolicy } as PermissionPolicy);
+    }
+    
+    return policies;
+  }
+
+  /**
+   * Add a permission policy (compatibility method)
+   */
+  async addPermissionPolicy(policy: PermissionPolicy): Promise<void> {
+    await this.updatePermissionPolicy(policy.resource, policy);
+  }
 }

@@ -133,26 +133,45 @@ export class SessionManager {
 		}
 	}
 
-	/**
-	 * Get all active session mappings
-	 */
-	getAllSessions(): SessionMapping[] {
-		const sessions: SessionMapping[] = [];
-		for (const [conversationId, sessionId] of this.conversationToSession.entries()) {
-			sessions.push({ conversationId, sessionId });
-		}
-		return sessions;
-	}
+    /**
+     * Get all active session mappings
+     */
+    getAllSessions(): SessionMapping[] {
+        const sessions: SessionMapping[] = [];
+        for (const [conversationId, sessionId] of this.conversationToSession.entries()) {
+            sessions.push({ conversationId, sessionId });
+        }
+        return sessions;
+    }
 
-	/**
-	 * Persist session mappings to storage
-	 */
-	private async persistSessions(): Promise<void> {
-		const sessions: Record<string, string> = {};
-		for (const [conversationId, sessionId] of this.conversationToSession.entries()) {
-			sessions[conversationId] = sessionId;
-		}
+    /**
+     * Get session by ID (compatibility method)
+     */
+    getSession(sessionId: string): { sessionId: string; conversationId?: string } | undefined {
+        const conversationId = this.sessionToConversation.get(sessionId);
+        if (conversationId) {
+            return { sessionId, conversationId };
+        }
+        return undefined;
+    }
 
-		await fs.writeFile(this.storageFile, JSON.stringify(sessions, null, 2), 'utf-8');
-	}
+    /**
+     * Event emitter for session changes (compatibility method)
+     */
+    onDidChangeSession(handler: (sessionId: string) => void): void {
+        // This is a stub for compatibility
+        // In a full implementation, this would emit events when sessions change
+    }
+
+    /**
+     * Persist session mappings to storage
+     */
+    private async persistSessions(): Promise<void> {
+        const sessions: Record<string, string> = {};
+        for (const [conversationId, sessionId] of this.conversationToSession.entries()) {
+            sessions[conversationId] = sessionId;
+        }
+
+        await fs.writeFile(this.storageFile, JSON.stringify(sessions, null, 2), 'utf-8');
+    }
 }

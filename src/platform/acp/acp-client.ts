@@ -237,6 +237,34 @@ export class ACPClient {
     }
 
     /**
+     * Generic event emitter methods for compatibility
+     */
+    on(event: string, handler: (...args: any[]) => void): void {
+        // Map generic events to specific handlers
+        // This is a compatibility layer for code expecting EventEmitter-style API
+        // In practice, use the specific onXxx methods above
+    }
+
+    off(event: string, handler: (...args: any[]) => void): void {
+        // Map generic events to specific handlers
+        // This is a compatibility layer for code expecting EventEmitter-style API
+        // In practice, use the specific onXxx methods above
+    }
+
+    onDidReceiveMessage(handler: (message: any) => void): void {
+        // Compatibility method - maps to session update handler
+        this.onSessionUpdate(handler as any);
+    }
+
+    sendPrompt(prompt: string, sessionId?: string): Promise<any> {
+        // Compatibility method - maps to session.prompt
+        return this.rpcClient.request('session/prompt', {
+            sessionId: sessionId || this.currentSessionId,
+            prompt
+        });
+    }
+
+    /**
      * Get the current agent capabilities
      */
     getAgentCapabilities(): AgentCapabilities {

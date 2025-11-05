@@ -25,14 +25,25 @@ export class ToolCallHandler {
 		const statusIcon = this.getStatusIcon(toolCall.status);
 		const kindDisplay = this.formatToolKind(toolCall.kind);
 
-		stream.markdown(`🔧 **Tool Call:** ${kindDisplay}\n\n${statusIcon} Status: ${toolCall.status}\n\n`);
+		stream.markdown(`🔧 **Tool Call:** ${kindDisplay}
 
-		if (toolCall.input && Object.keys(toolCall.input).length > 0) {
-			stream.markdown('**Input:**\n```json\n' + JSON.stringify(toolCall.input, null, 2) + '\n```\n\n');
+${statusIcon} Status: ${toolCall.status}
+
+`);
+
+        if (toolCall.input && Object.keys(toolCall.input).length > 0) {
+            stream.markdown(`**Input:**
+\`\`\`json
+${JSON.stringify(toolCall.input, null, 2)}
+\`\`\`
+
+`);
 		}
 
 		if (toolCall.error) {
-			stream.markdown(`❌ **Error:** ${toolCall.error}\n\n`);
+			stream.markdown(`❌ **Error:** ${toolCall.error}
+
+`);
 		}
 	}
 
@@ -77,7 +88,11 @@ export class ToolCallHandler {
 		const kindDisplay = this.formatToolKind(toolCall.kind);
 		const inputPreview = JSON.stringify(toolCall.input, null, 2);
 
-		const message = `The agent wants to execute: **${kindDisplay}**\n\n${inputPreview}\n\nDo you want to allow this?`;
+		const message = `The agent wants to execute: **${kindDisplay}**
+
+${inputPreview}
+
+Do you want to allow this?`;
 
 		const choice = await vscode.window.showWarningMessage(
 			message,
@@ -170,12 +185,28 @@ export class ToolCallHandler {
 		};
 	}
 
-	private async executeTerminalGetOutput(toolCall: ToolCall): Promise<ToolResult> {
-		const { terminalId } = toolCall.input as { terminalId: string };
-		const output = this.terminalManager.getOutput(terminalId);
-		return {
-			toolCallId: toolCall.id,
-			content: output,
-		};
-	}
+    private async executeTerminalGetOutput(toolCall: ToolCall): Promise<ToolResult> {
+        const { terminalId } = toolCall.input as { terminalId: string };
+        const output = this.terminalManager.getOutput(terminalId);
+        return {
+            toolCallId: toolCall.id,
+            content: output,
+        };
+    }
+
+    /**
+     * Approve a tool call (compatibility method for UI)
+     */
+    async approveTool(toolCallId: string): Promise<void> {
+        // This is a stub for compatibility with the chat UI
+        // In a full implementation, this would approve a pending tool call
+    }
+
+    /**
+     * Reject a tool call (compatibility method for UI)
+     */
+    async rejectTool(toolCallId: string): Promise<void> {
+        // This is a stub for compatibility with the chat UI
+        // In a full implementation, this would reject a pending tool call
+    }
 }
