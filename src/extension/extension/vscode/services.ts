@@ -45,7 +45,7 @@ import { RealUrlOpener } from '../../../platform/open/vscode/opener';
 // Removed ProjectTemplatesIndex (projectTemplatesIndex deleted)
 // Removed IPromptPathRepresentationService, PromptPathRepresentationService (prompts - proprietary)
 // Removed ReleaseNotesService (releaseNotes deleted)
-import { IRemoteRepositoriesService, RemoteRepositoriesService } from '../../../platform/remoteRepositories/vscode/remoteRepositories';
+// Removed IRemoteRepositoriesService, RemoteRepositoriesService (remoteRepositories - proprietary)
 // Removed IReviewService, ReviewServiceImpl (review - proprietary)
 // Removed ISimulationTestContext, NulSimulationTestContext (simulationTestContext - proprietary)
 // Removed SnippyService (snippy deleted)
@@ -86,7 +86,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
     builder.define(IEnvService, new EnvServiceImpl());
     builder.define(IFileSystemService, new VSCodeFileSystemService());
     // Notebook and networking services removed - no longer needed
-    builder.define(IRemoteRepositoriesService, new RemoteRepositoriesService());
+    // Removed IRemoteRepositoriesService (proprietary - remoteRepositories deleted)
 	builder.define(ITabsAndEditorsService, new TabsAndEditorsServiceImpl());
 	builder.define(ITerminalService, new SyncDescriptor(TerminalServiceImpl));
 	// Removed: ITestProvider (proprietary testing service)

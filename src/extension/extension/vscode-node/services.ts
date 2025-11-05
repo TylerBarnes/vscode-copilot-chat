@@ -22,14 +22,12 @@ import { IGitDiffService } from '../../../platform/git/common/gitDiffService';
 // Removed ICompletionsFetchService (proprietary - nesFetch deleted)
 // Removed CompletionsFetchService (proprietary - nesFetch deleted)
 // Removed proprietary networking services
-import { IParserService } from '../../../platform/parser/node/parserService';
-import { ParserServiceImpl } from '../../../platform/parser/node/parserServiceImpl';
+// Removed IParserService (proprietary - parser deleted)
 // Removed proprietary remote code search services
 // Removed proprietary code search authentication services
 // Removed IDocsSearchClient (remoteSearch deleted)
 import { IRequestLogger } from '../../../platform/requestLogger/node/requestLogger';
-import { IScopeSelector } from '../../../platform/scopeSelection/common/scopeSelection';
-import { ScopeSelectorImpl } from '../../../platform/scopeSelection/vscode-node/scopeSelectionImpl';
+// Removed IScopeSelector, ScopeSelectorImpl (proprietary - scopeSelection deleted)
 import { ISearchService } from '../../../platform/search/common/searchService';
 // Removed SearchServiceImpl (using StubSearchService instead)
 import { StubSearchService } from '../../../platform/acp/stub-search-service';
@@ -98,15 +96,15 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
     // Removed IAuthenticationService (proprietary - authentication deleted)
 
     // Removed ITestGenInfoStorage, IIntentService (proprietary - intents deleted)
-    builder.define(IParserService, new SyncDescriptor(ParserServiceImpl, [/*useWorker*/ true]));
+    // Removed IParserService (proprietary - parser deleted)
 // Removed IIgnoreService, INaiveChunkingService (proprietary)
 // Removed IWorkspaceFileIndex, IChunkingEndpointClient (proprietary)
 	// Removed ICommandService (proprietary - commands deleted)
     // Removed IDocsSearchClient (remoteSearch deleted)
 // Search - Use stub service to avoid findFiles2 API proposal dependency
-		builder.define(ISearchService, new SyncDescriptor(StubSearchService));
-	// Removed: ITestDepsResolver, ISetupTestsDetector, IWorkspaceMutationManager (proprietary testing services)
-	builder.define(IScopeSelector, new SyncDescriptor(ScopeSelectorImpl));
+        builder.define(ISearchService, new SyncDescriptor(StubSearchService));
+    // Removed: ITestDepsResolver, ISetupTestsDetector, IWorkspaceMutationManager (proprietary testing services)
+    // Removed IScopeSelector (proprietary - scopeSelection deleted)
 	builder.define(IGitDiffService, new SyncDescriptor(GitDiffService));
 	builder.define(IGitCommitMessageService, new SyncDescriptor(GitCommitMessageServiceImpl));
 // Removed IGithubRepositoryService (proprietary)

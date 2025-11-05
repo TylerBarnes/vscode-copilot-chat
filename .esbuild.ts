@@ -176,7 +176,7 @@ const nodeExtHostBuildOptions = {
 	...baseNodeBuildOptions,
     entryPoints: [
         { in: './src/extension/extension/vscode-node/extension.ts', out: 'extension' },
-        { in: './src/platform/parser/node/parserWorker.ts', out: 'worker2' },
+        // Removed parserWorker (proprietary - parser deleted)
         // Removed tikTokenizerWorker (proprietary - tokenizer deleted)
         { in: './src/platform/diff/node/diffWorkerMain.ts', out: 'diffWorker' },
         { in: './src/platform/tfidf/node/tfidfWorker.ts', out: 'tfidfWorker' },

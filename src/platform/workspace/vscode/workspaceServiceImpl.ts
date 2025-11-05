@@ -7,19 +7,17 @@ import { FileSystem, NotebookData, NotebookDocument, TextDocument, Uri, window, 
 import { findNotebook } from '../../../util/common/notebooks';
 import { URI } from '../../../util/vs/base/common/uri';
 import { ILogService } from '../../log/common/logService';
-import { isGitHubRemoteRepository } from '../../remoteRepositories/common/utils';
-import { IRemoteRepositoriesService } from '../../remoteRepositories/vscode/remoteRepositories';
+// Removed remoteRepositories imports (proprietary - deleted)
 import { AbstractWorkspaceService } from '../common/workspaceService';
 
 export class ExtensionTextDocumentManager extends AbstractWorkspaceService {
 	private _fullyLoadedPromise: Promise<void> | undefined;
 
-	constructor(
-		@ILogService private readonly _logService: ILogService,
-		@IRemoteRepositoriesService private readonly _remoteRepositoriesService: IRemoteRepositoriesService,
-	) {
-		super();
-	}
+    constructor(
+        @ILogService private readonly _logService: ILogService,
+    ) {
+        super();
+    }
 
 	get textDocuments(): readonly TextDocument[] {
 		return workspace.textDocuments;
@@ -87,20 +85,9 @@ export class ExtensionTextDocumentManager extends AbstractWorkspaceService {
 	// so we shouldn't need to handle when the workspace folders change... but something to be
 	// aware of if we ever do support multi-root workspaces
 	override ensureWorkspaceIsFullyLoaded(): Promise<void> {
-		this._fullyLoadedPromise ??= (async () => {
-			for (const uri of this.getWorkspaceFolders()) {
-				if (isGitHubRemoteRepository(uri)) {
-					this._logService.debug(`Preloading virtual workspace contents for ${uri}`);
-					try {
-						const result = await this._remoteRepositoriesService.loadWorkspaceContents(uri);
-						this._logService.info(`loading virtual workspace contents resulted in ${result} for: ${uri}`);
-					} catch (e) {
-						this._logService.error(`Error loading virtual workspace contents for ${uri}: ${e}`);
-					}
-				}
-			}
-		})();
-		return this._fullyLoadedPromise;
+        // Removed GitHub remote repository preloading (proprietary - remoteRepositories deleted)
+        this._fullyLoadedPromise ??= Promise.resolve();
+        return this._fullyLoadedPromise;
 	}
 	override async showWorkspaceFolderPicker(): Promise<WorkspaceFolder | undefined> {
 		const workspaceFolders = this.getWorkspaceFolders();
