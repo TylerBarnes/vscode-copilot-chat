@@ -8,7 +8,7 @@ import { ExtensionContext, ExtensionMode, env } from 'vscode';
 import { StubTokenManager } from '../../../platform/acp/stub-token-manager';
 // Removed proprietary chat services
 // Removed proprietary chunking services
-import { IDevContainerConfigurationService } from '../../../platform/devcontainer/common/devContainerConfigurationService';
+// import { IDevContainerConfigurationService } from '../../../platform/devcontainer/common/devContainerConfigurationService'; // Removed - proprietary
 import { IDiffService } from '../../../platform/diff/common/diffService';
 import { DiffServiceImpl } from '../../../platform/diff/node/diffServiceImpl';
 // Removed proprietary endpoint services
@@ -108,7 +108,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(IGitDiffService, new SyncDescriptor(GitDiffService));
 	builder.define(IGitCommitMessageService, new SyncDescriptor(GitCommitMessageServiceImpl));
 // Removed IGithubRepositoryService (proprietary)
-    builder.define(IDevContainerConfigurationService, new SyncDescriptor(DevContainerConfigurationServiceImpl));
+    // builder.define(IDevContainerConfigurationService, new SyncDescriptor(DevContainerConfigurationServiceImpl)); // Removed - proprietary
     // Removed IChatAgentService (proprietary)
     // Removed ILinkifyService registration (proprietary - linkify deleted)
     // Removed IChatMLFetcher (proprietary)

@@ -179,7 +179,7 @@ const nodeExtHostBuildOptions = {
         // Removed parserWorker (proprietary - parser deleted)
         // Removed tikTokenizerWorker (proprietary - tokenizer deleted)
         { in: './src/platform/diff/node/diffWorkerMain.ts', out: 'diffWorker' },
-        { in: './src/platform/tfidf/node/tfidfWorker.ts', out: 'tfidfWorker' },
+        // Removed tfidfWorker (proprietary - tfidf deleted)
         // Removed copilotDebugCommand (proprietary - onboardDebug deleted)
         // Removed copilotCLIShim (proprietary - chatSessions deleted)
         // Removed test-extension and sanity-test-extension (simulation tests deleted)

@@ -10,8 +10,8 @@ import { ExtensionContext, ExtensionMode, l10n } from 'vscode';
 import { IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { ConfigurationServiceImpl } from '../../../platform/configuration/vscode/configurationServiceImpl';
 // Removed CustomInstructionsService, ICustomInstructionsService (customInstructions - proprietary)
-import { IDebugOutputService } from '../../../platform/debug/common/debugOutputService';
-import { DebugOutputServiceImpl } from '../../../platform/debug/vscode/debugOutputServiceImpl';
+// import { IDebugOutputService } from '../../../platform/debug/common/debugOutputService'; // Removed - proprietary
+// import { DebugOutputServiceImpl } from '../../../platform/debug/vscode/debugOutputServiceImpl'; // Removed - proprietary
 import { IDialogService } from '../../../platform/dialog/common/dialogService';
 import { DialogServiceImpl } from '../../../platform/dialog/vscode/dialogServiceImpl';
 // Removed EditSurvivalTrackerService (editSurvivalTracking deleted)
@@ -81,7 +81,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 
     // Removed IInteractionService (chat deleted)
     // CopilotTokenStore removed - no longer needed for ACP
-    builder.define(IDebugOutputService, new DebugOutputServiceImpl());
+    // builder.define(IDebugOutputService, new DebugOutputServiceImpl()); // Removed - proprietary
 	builder.define(IDialogService, new DialogServiceImpl());
     builder.define(IEnvService, new EnvServiceImpl());
     builder.define(IFileSystemService, new VSCodeFileSystemService());
