@@ -4,51 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ACPContribution } from '../../../platform/acp/acp.contribution';
-import { AuthenticationContrib } from '../../authentication/vscode-node/authentication.contribution';
-import { BYOKContrib } from '../../byok/vscode-node/byokContribution';
-import { ChatQuotaContribution } from '../../chat/vscode-node/chatQuota.contribution';
-import { ChatSessionsContrib } from '../../chatSessions/vscode-node/chatSessions';
-import * as chatBlockLanguageContribution from '../../codeBlocks/vscode-node/chatBlockLanguageFeatures.contribution';
 import { IExtensionContributionFactory, asContributionFactory } from '../../common/contributions';
-import { CompletionsCoreContribution } from '../../completions/vscode-node/completionsCoreContribution';
-// import { CompletionsUnificationContribution } from '../../completions/vscode-node/completionsUnificationContribution'; // Removed: requires inlineCompletionsAdditions API
-import { ConfigurationMigrationContribution } from '../../configuration/vscode-node/configurationMigration';
 import { ContextKeysContribution } from '../../contextKeys/vscode-node/contextKeys.contribution';
-import { PlaceholderViewContribution } from '../../contextKeys/vscode-node/placeholderView.contribution';
-import { AiMappedEditsContrib } from '../../conversation/vscode-node/aiMappedEditsContrib';
-import { ConversationFeature } from '../../conversation/vscode-node/conversationFeature';
-import { FeedbackCommandContribution } from '../../conversation/vscode-node/feedbackContribution';
-import { LanguageModelAccess } from '../../conversation/vscode-node/languageModelAccess';
-import { LogWorkspaceStateContribution } from '../../conversation/vscode-node/logWorkspaceState';
-import { RemoteAgentContribution } from '../../conversation/vscode-node/remoteAgents';
-import { LanguageModelProxyContrib } from '../../externalAgents/vscode-node/lmProxyContrib';
-import { WalkthroughCommandContribution } from '../../getting-started/vscode-node/commands';
-import * as newWorkspaceContribution from '../../getting-started/vscode-node/newWorkspace.contribution';
-import { IgnoredFileProviderContribution } from '../../ignore/vscode-node/ignoreProvider';
-import { InlineChatHintFeature } from '../../inlineChat/vscode-node/inlineChatHint';
-import { InlineEditProviderFeature } from '../../inlineEdits/vscode-node/inlineEditProviderFeature';
-import { FixTestFailureContribution } from '../../intents/vscode-node/fixTestFailureContributions';
-import { TestGenLensContribution } from '../../intents/vscode-node/testGenLens';
-import { LoggingActionsContrib } from '../../log/vscode-node/loggingActions';
-import { RequestLogTree } from '../../log/vscode-node/requestLogTree';
-import { McpSetupCommands } from '../../mcp/vscode-node/commands';
-import { NotebookFollowCommands } from '../../notebook/vscode-node/followActions';
-import { CopilotDebugCommandContribution } from '../../onboardDebug/vscode-node/copilotDebugCommandContribution';
-import { OnboardTerminalTestsContribution } from '../../onboardDebug/vscode-node/onboardTerminalTestsContribution';
-import { DebugCommandsContribution } from '../../prompt/vscode-node/debugCommands';
-import { RenameSuggestionsContrib } from '../../prompt/vscode-node/renameSuggestions';
-import { PromptFileContextContribution } from '../../promptFileContext/vscode-node/promptFileContextService';
-import { RelatedFilesProviderContribution } from '../../relatedFiles/vscode-node/relatedFiles.contribution';
-import { ChatReplayContribution } from '../../replay/vscode-node/chatReplayContrib';
-import { SearchPanelCommands } from '../../search/vscode-node/commands';
-import { SettingsSchemaFeature } from '../../settingsSchema/vscode-node/settingsSchemaFeature';
-import { SurveyCommandContribution } from '../../survey/vscode-node/surveyCommands';
-import { SetupTestsContribution } from '../../testing/vscode/setupTestContributions';
-import { ToolsContribution } from '../../tools/vscode-node/tools';
-import { InlineCompletionContribution } from '../../typescriptContext/vscode-node/languageContextService';
-import * as workspaceChunkSearchContribution from '../../workspaceChunkSearch/node/workspaceChunkSearch.contribution';
-import * as workspaceIndexingContribution from '../../workspaceChunkSearch/vscode-node/workspaceChunkSearch.contribution';
-import { WorkspaceRecorderFeature } from '../../workspaceRecorder/vscode-node/workspaceRecorderFeature';
 import vscodeContributions from '../vscode/contributions';
 
 // ###################################################################################################
@@ -58,61 +15,34 @@ import vscodeContributions from '../vscode/contributions';
 // ### !!! Prefer to list contributions in ../vscode/contributions.ts to support them anywhere !!! ###
 // ###                                                                                             ###
 // ###################################################################################################
+//
+// ACP Transformation Phase 1: All proprietary GitHub Copilot contributions have been removed.
+// Only ACP-compatible contributions remain:
+// - ACPContribution: Core ACP client functionality (JSON-RPC, agent communication, protocol)
+// - ContextKeysContribution: Simplified context key management (renamed to acp.copilot.*)
+//
+// Removed contributions (50+ total):
+// - All chat/completion/inline edit features (ConversationFeature, CompletionsCoreContribution, etc.)
+// - All authentication/token management (AuthenticationContrib)
+// - All telemetry (LifecycleTelemetryContrib, GithubTelemetryForwardingContrib, etc.)
+// - All tools/related files (ToolsContribution, RelatedFilesProviderContribution)
+// - All proprietary VS Code API integrations (LanguageModelAccess, InlineCompletionContribution, etc.)
+// - All notebook/testing/debugging features
+// - All workspace indexing/search features
+// - All BYOK/external agent features
+//
+// These will be replaced with ACP-native implementations in subsequent phases.
 
 export const vscodeNodeContributions: IExtensionContributionFactory[] = [
     ...vscodeContributions,
     asContributionFactory(ACPContribution),
-    asContributionFactory(ConversationFeature),
-	workspaceChunkSearchContribution,
-	asContributionFactory(AuthenticationContrib),
-	chatBlockLanguageContribution,
-	asContributionFactory(LoggingActionsContrib),
-	asContributionFactory(ContextKeysContribution),
-	asContributionFactory(PlaceholderViewContribution),
-	asContributionFactory(CopilotDebugCommandContribution),
-	asContributionFactory(DebugCommandsContribution),
-	asContributionFactory(LanguageModelAccess),
-	asContributionFactory(WalkthroughCommandContribution),
-	asContributionFactory(InlineEditProviderFeature),
-	asContributionFactory(SettingsSchemaFeature),
-	asContributionFactory(WorkspaceRecorderFeature),
-	asContributionFactory(SurveyCommandContribution),
-	asContributionFactory(FeedbackCommandContribution),
-	asContributionFactory(InlineCompletionContribution),
-	asContributionFactory(SearchPanelCommands),
-	asContributionFactory(ChatQuotaContribution),
-	asContributionFactory(NotebookFollowCommands),
-	asContributionFactory(PromptFileContextContribution),
-	asContributionFactory(ChatReplayContribution),
-	asContributionFactory(CompletionsCoreContribution),
-	// asContributionFactory(CompletionsUnificationContribution), // Removed: requires inlineCompletionsAdditions API
-	workspaceIndexingContribution,
-	asContributionFactory(ChatSessionsContrib)
+    asContributionFactory(ContextKeysContribution),
 ];
 
 /**
- * These contributions are special in that they are only instantiated
- * when the user is logged in and chat is enabled.
- * Anything that contributes a copilot chat feature that doesn't need
- * to run when chat is not enabled should be added here.
-*/
+ * ACP Transformation: Chat-specific contributions are no longer needed.
+ * All chat functionality is now handled through the ACP protocol.
+ */
 export const vscodeNodeChatContributions: IExtensionContributionFactory[] = [
-	asContributionFactory(ConfigurationMigrationContribution),
-	asContributionFactory(TestGenLensContribution),
-	asContributionFactory(RequestLogTree),
-	asContributionFactory(InlineChatHintFeature),
-	asContributionFactory(OnboardTerminalTestsContribution),
-	asContributionFactory(ToolsContribution),
-	asContributionFactory(RemoteAgentContribution),
-	asContributionFactory(AiMappedEditsContrib),
-	asContributionFactory(RenameSuggestionsContrib),
-	asContributionFactory(LogWorkspaceStateContribution),
-	asContributionFactory(SetupTestsContribution),
-	asContributionFactory(FixTestFailureContribution),
-	asContributionFactory(IgnoredFileProviderContribution),
-	asContributionFactory(RelatedFilesProviderContribution),
-	asContributionFactory(BYOKContrib),
-	asContributionFactory(McpSetupCommands),
-	asContributionFactory(LanguageModelProxyContrib),
-	newWorkspaceContribution,
+    // All proprietary chat contributions removed for ACP compatibility
 ];

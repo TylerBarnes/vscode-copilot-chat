@@ -3,11 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { NesActivationTelemetryContribution } from '../../../platform/inlineEdits/common/nesActivationStatusTelemetry.contribution';
-import { asContributionFactory, IExtensionContributionFactory } from '../../common/contributions';
-import * as contextContribution from '../../context/vscode/context.contribution';
-import { LifecycleTelemetryContrib } from '../../telemetry/common/lifecycleTelemetryContrib';
-import { GithubTelemetryForwardingContrib } from '../../telemetry/vscode/githubTelemetryForwardingContrib';
+import { IExtensionContributionFactory } from '../../common/contributions';
 
 // ###############################################################################
 // ###                                                                         ###
@@ -16,12 +12,12 @@ import { GithubTelemetryForwardingContrib } from '../../telemetry/vscode/githubT
 // ###  !!! Prefer to list contributions in HERE to support them anywhere !!!  ###
 // ###                                                                         ###
 // ###############################################################################
+// 
+// ACP Transformation: All proprietary GitHub Copilot contributions have been
+// removed. Only ACP-compatible contributions remain.
 
 const vscodeContributions: IExtensionContributionFactory[] = [
-	asContributionFactory(LifecycleTelemetryContrib),
-	asContributionFactory(NesActivationTelemetryContribution),
-	asContributionFactory(GithubTelemetryForwardingContrib),
-	contextContribution,
+    // All telemetry and proprietary contributions removed for ACP compatibility
 ];
 
 export default vscodeContributions;
