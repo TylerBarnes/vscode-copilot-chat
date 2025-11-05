@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { join } from 'path';
 import { IInstantiationService } from '../../util/vs/platform/instantiation/common/instantiation';
 import { ILogService } from '../log/common/logService';
 import { ACPChatParticipant } from './acp-chat-participant';
@@ -49,19 +48,38 @@ export class ACPContribution implements vscode.Disposable {
             this.logService.info('[ACP] Initializing ACP contribution');
 
             // Create core components with proper config path
-            const configPath = join(this.extensionContext.globalStorageUri.fsPath, 'agent-config.json');
-            const agentConfigManager = new AgentConfigManager(configPath);
+            const storageUri = this.extensionContext.globalStorageUri;
+            
+            if (!storageUri) {
+                throw new Error('Extension global storage URI is not available');
+            }
+            
+            // Ensure storage directory exists using VS Code's file system API
+            try {
+                await vscode.workspace.fs.stat(storageUri);
+            } catch {
+                // Directory doesn't exist, create it
+                await vscode.workspace.fs.createDirectory(storageUri);
+            }
+            
+            // Create config file URI using VS Code's joinPath
+            const configFileUri = vscode.Uri.joinPath(storageUri, 'agent-config.json');
+            const agentConfigManager = new AgentConfigManager(configFileUri.fsPath);
+            
+            // Initialize agent config manager and wait for it to load
+            await agentConfigManager.initialize();
+            
             const fileSystemHandler = this.instantiationService.createInstance(FileSystemHandler as any) as FileSystemHandler;
             const terminalManager = this.instantiationService.createInstance(TerminalManager as any) as TerminalManager;
             const sessionManager = this.instantiationService.createInstance(SessionManager as any) as SessionManager;
             const toolCallHandler = this.instantiationService.createInstance(ToolCallHandler as any, fileSystemHandler, terminalManager);
 
-			// Initialize MCP Manager
-			this.mcpManager = this.instantiationService.createInstance(MCPManager);
-			this.disposables.push(this.mcpManager);
+            // Initialize MCP Manager
+            this.mcpManager = this.instantiationService.createInstance(MCPManager);
+            this.disposables.push(this.mcpManager);
 
-			// Start configured MCP servers
-			await this.startMCPServers();
+            // Start configured MCP servers
+            await this.startMCPServers();
 
             // Get active agent profile
             const activeProfile = agentConfigManager.getActiveProfile();

@@ -10,11 +10,24 @@ import { ACPContribution } from '../../../src/platform/acp/acp.contribution';
 // Mock vscode module
 vi.mock('vscode', () => ({
     workspace: {
-        getConfiguration: vi.fn()
+        getConfiguration: vi.fn(),
+        fs: {
+            stat: vi.fn(async () => ({ type: 2 })), // 2 = Directory
+            createDirectory: vi.fn(async () => {}),
+            readFile: vi.fn(async () => Buffer.from('{}')),
+            writeFile: vi.fn(async () => {})
+        }
     },
     window: {
         registerWebviewViewProvider: vi.fn(() => ({
             dispose: vi.fn()
+        })),
+        showWarningMessage: vi.fn(async () => undefined)
+    },
+    Uri: {
+        file: vi.fn((path: string) => ({ fsPath: path })),
+        joinPath: vi.fn((base: any, ...segments: string[]) => ({
+            fsPath: `${base.fsPath}/${segments.join('/')}`
         }))
     },
     Disposable: class {
@@ -42,6 +55,7 @@ vi.mock('child_process', () => ({
 // Mock AgentConfigManager
 vi.mock('../../../src/platform/acp/agent-config', () => ({
     AgentConfigManager: vi.fn().mockImplementation(() => ({
+        initialize: vi.fn(async () => {}),
         getActiveProfile: vi.fn(() => ({
             id: 'test-agent',
             name: 'Test Agent',
@@ -283,6 +297,7 @@ it('should log initialization steps', async () => {
             // Mock AgentConfigManager to return null for this test
             const { AgentConfigManager } = await import('../../../src/platform/acp/agent-config');
             vi.mocked(AgentConfigManager).mockImplementationOnce(() => ({
+                initialize: vi.fn(async () => {}),
                 getActiveProfile: vi.fn(() => null),
                 getAllProfiles: vi.fn(() => []),
                 addProfile: vi.fn(),
@@ -489,6 +504,7 @@ it('should dispose all components', async () => {
             // Mock AgentConfigManager to return custom profile for this test
             const { AgentConfigManager } = await import('../../../src/platform/acp/agent-config');
             vi.mocked(AgentConfigManager).mockImplementationOnce(() => ({
+                initialize: vi.fn(async () => {}),
                 getActiveProfile: vi.fn(() => customProfile),
                 getAllProfiles: vi.fn(() => [customProfile]),
                 addProfile: vi.fn(),

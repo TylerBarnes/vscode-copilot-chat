@@ -5,6 +5,24 @@ import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
 import { AgentConfigManager, AgentProfile } from '../../../src/platform/acp/agent-config';
 
+// Mock VS Code API
+vi.mock('vscode', () => ({
+    workspace: {
+        fs: {
+            readFile: vi.fn(async (uri: any) => {
+                const data = await fs.readFile(uri.fsPath, 'utf-8');
+                return Buffer.from(data, 'utf-8');
+            }),
+            writeFile: vi.fn(async (uri: any, content: Uint8Array) => {
+                await fs.writeFile(uri.fsPath, content);
+            }),
+        },
+    },
+    Uri: {
+        file: vi.fn((path: string) => ({ fsPath: path })),
+    },
+}));
+
 describe('AgentConfigManager', () => {
 	let testDir: string;
 	let configPath: string;

@@ -1,6 +1,4 @@
-import { promises as fs } from 'fs';
-import { join } from 'path';
-import { homedir } from 'os';
+import * as vscode from 'vscode';
 
 export interface AgentProfileData {
 	id: string;
@@ -51,23 +49,23 @@ interface AgentConfigData {
 }
 
 export class AgentConfigManager {
-	private configPath: string;
-	private profiles: Map<string, AgentProfile> = new Map();
-	private activeProfileId?: string;
-	private readonly CONFIG_VERSION = '1.0.0';
+    private readonly configUri: vscode.Uri;
+    private profiles: Map<string, AgentProfile> = new Map();
+    private activeProfileId?: string;
+    private readonly CONFIG_VERSION = '1.0.0';
 
-	constructor(configPath?: string) {
-		this.configPath = configPath || join(homedir(), '.vscode-acp', 'agent-config.json');
-	}
+    constructor(configPath: string) {
+        this.configUri = vscode.Uri.file(configPath);
+    }
 
-	async initialize(): Promise<void> {
-		try {
-			await this.load();
-		} catch (error) {
-			// If config doesn't exist, initialize with default profiles
-			await this.initializeDefaults();
-		}
-	}
+    async initialize(): Promise<void> {
+        try {
+            await this.load();
+        } catch (error) {
+            // If config doesn't exist, initialize with default profiles
+            await this.initializeDefaults();
+        }
+    }
 
 	private async initializeDefaults(): Promise<void> {
 		// Add some common default profiles
@@ -85,42 +83,34 @@ export class AgentConfigManager {
 		}
 	}
 
-	async load(): Promise<void> {
-		const configDir = join(this.configPath, '..');
-		await fs.mkdir(configDir, { recursive: true });
+    async load(): Promise<void> {
+        try {
+            const data = await vscode.workspace.fs.readFile(this.configUri);
+            const config: AgentConfigData = JSON.parse(Buffer.from(data).toString('utf-8'));
 
-		try {
-			const data = await fs.readFile(this.configPath, 'utf-8');
-			const config: AgentConfigData = JSON.parse(data);
+            this.profiles.clear();
+            for (const profileData of config.profiles) {
+                const profile = new AgentProfile(profileData);
+                this.profiles.set(profile.id, profile);
+            }
 
-			this.profiles.clear();
-			for (const profileData of config.profiles) {
-				const profile = new AgentProfile(profileData);
-				this.profiles.set(profile.id, profile);
-			}
+            this.activeProfileId = config.activeProfileId;
+        } catch (error) {
+            // File doesn't exist, will be created on save
+            throw error;
+        }
+    }
 
-			this.activeProfileId = config.activeProfileId;
-		} catch (error) {
-			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-				throw error;
-			}
-			// File doesn't exist, will be created on save
-			throw error;
-		}
-	}
+    async save(): Promise<void> {
+        const config: AgentConfigData = {
+            version: this.CONFIG_VERSION,
+            activeProfileId: this.activeProfileId,
+            profiles: Array.from(this.profiles.values()).map(p => p.toJSON()),
+        };
 
-	async save(): Promise<void> {
-		const configDir = join(this.configPath, '..');
-		await fs.mkdir(configDir, { recursive: true });
-
-		const config: AgentConfigData = {
-			version: this.CONFIG_VERSION,
-			activeProfileId: this.activeProfileId,
-			profiles: Array.from(this.profiles.values()).map(p => p.toJSON()),
-		};
-
-		await fs.writeFile(this.configPath, JSON.stringify(config, null, 2), 'utf-8');
-	}
+        const content = Buffer.from(JSON.stringify(config, null, 2), 'utf-8');
+        await vscode.workspace.fs.writeFile(this.configUri, content);
+    }
 
 	getProfiles(): AgentProfile[] {
 		return Array.from(this.profiles.values());
