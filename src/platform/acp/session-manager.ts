@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { ACPClient } from './acp-client';
 import type { SessionInfo, SessionMode } from './types';
 
@@ -8,15 +6,15 @@ import type { SessionInfo, SessionMode } from './types';
  * Session creation options
  */
 export interface SessionOptions {
-	mode?: SessionMode;
+    mode?: SessionMode;
 }
 
 /**
  * Session mapping entry
  */
 export interface SessionMapping {
-	conversationId: string;
-	sessionId: string;
+    conversationId: string;
+    sessionId: string;
 }
 
 /**
@@ -24,28 +22,28 @@ export interface SessionMapping {
  * Maps VS Code conversation IDs to ACP session IDs
  */
 export class SessionManager {
-	private conversationToSession = new Map<string, string>();
-	private sessionToConversation = new Map<string, string>();
-	private storageFile: string;
+    private conversationToSession = new Map<string, string>();
+    private sessionToConversation = new Map<string, string>();
+    private storageFileUri: vscode.Uri;
 
-	constructor(
-		private client: ACPClient,
-		private storageUri: vscode.Uri
-	) {
-		this.storageFile = path.join(storageUri.fsPath, 'sessions.json');
-	}
+    constructor(
+        private client: ACPClient,
+        private storageUri: vscode.Uri
+    ) {
+        this.storageFileUri = vscode.Uri.joinPath(storageUri, 'sessions.json');
+    }
 
-	/**
-	 * Initialize the session manager by loading persisted sessions
-	 */
-	async initialize(): Promise<void> {
-		try {
-			// Ensure storage directory exists
-			await fs.mkdir(this.storageUri.fsPath, { recursive: true });
+    /**
+     * Initialize the session manager by loading persisted sessions
+     */
+    async initialize(): Promise<void> {
+        try {
+            // Ensure storage directory exists
+            await vscode.workspace.fs.createDirectory(this.storageUri);
 
-			// Load persisted sessions
-			const data = await fs.readFile(this.storageFile, 'utf-8');
-			const sessions = JSON.parse(data) as Record<string, string>;
+            // Load persisted sessions
+            const data = await vscode.workspace.fs.readFile(this.storageFileUri);
+            const sessions = JSON.parse(Buffer.from(data).toString('utf-8')) as Record<string, string>;
 
 			// Restore mappings
 			for (const [conversationId, sessionId] of Object.entries(sessions)) {
@@ -172,6 +170,7 @@ export class SessionManager {
             sessions[conversationId] = sessionId;
         }
 
-        await fs.writeFile(this.storageFile, JSON.stringify(sessions, null, 2), 'utf-8');
+        const content = Buffer.from(JSON.stringify(sessions, null, 2), 'utf-8');
+        await vscode.workspace.fs.writeFile(this.storageFileUri, content);
     }
 }

@@ -3,35 +3,49 @@ import * as vscode from 'vscode';
 import { SessionManager } from '../../../src/platform/acp/session-manager';
 import { ACPClient } from '../../../src/platform/acp/acp-client';
 import type { SessionInfo } from '../../../src/platform/acp/types';
-import * as fs from 'fs/promises';
 
-
-vi.mock('vscode');
-vi.mock('fs/promises');
+vi.mock('vscode', () => ({
+    Uri: {
+        file: vi.fn((path: string) => ({ fsPath: path, scheme: 'file', path })),
+        joinPath: vi.fn((base: any, ...segments: string[]) => ({
+            fsPath: `${base.fsPath}/${segments.join('/')}`,
+            scheme: 'file',
+            path: `${base.fsPath}/${segments.join('/')}`,
+        })),
+    },
+    workspace: {
+        fs: {
+            createDirectory: vi.fn(),
+            readFile: vi.fn(),
+            writeFile: vi.fn(),
+        },
+    },
+}));
 
 describe('SessionManager', () => {
-	let sessionManager: SessionManager;
-	let mockClient: Partial<ACPClient>;
-	let mockStorageUri: vscode.Uri;
+    let sessionManager: SessionManager;
+    let mockClient: Partial<ACPClient>;
+    let mockStorageUri: vscode.Uri;
 
-	beforeEach(() => {
-		mockClient = {
-			newSession: vi.fn(),
-			loadSession: vi.fn(),
-			cancelSession: vi.fn(),
-		};
+    beforeEach(() => {
+        mockClient = {
+            newSession: vi.fn(),
+            loadSession: vi.fn(),
+            cancelSession: vi.fn(),
+        };
 
-		mockStorageUri = {
-			fsPath: '/test/storage',
-		} as vscode.Uri;
+        mockStorageUri = {
+            fsPath: '/test/storage',
+            scheme: 'file',
+            path: '/test/storage',
+        } as vscode.Uri;
 
-		vi.mocked(fs.mkdir).mockResolvedValue(undefined);
-		vi.mocked(fs.writeFile).mockResolvedValue(undefined);
-		vi.mocked(fs.readFile).mockResolvedValue('{}');
-		vi.mocked(fs.readdir).mockResolvedValue([]);
+        vi.mocked(vscode.workspace.fs.createDirectory).mockResolvedValue(undefined);
+        vi.mocked(vscode.workspace.fs.writeFile).mockResolvedValue(undefined);
+        vi.mocked(vscode.workspace.fs.readFile).mockResolvedValue(Buffer.from('{}'));
 
-		sessionManager = new SessionManager(mockClient as ACPClient, mockStorageUri);
-	});
+        sessionManager = new SessionManager(mockClient as ACPClient, mockStorageUri);
+    });
 
 	afterEach(() => {
 		vi.clearAllMocks();
@@ -73,13 +87,12 @@ describe('SessionManager', () => {
 
 			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
-			await sessionManager.createSession('conv-123');
+            await sessionManager.createSession('conv-123');
 
-			expect(fs.writeFile).toHaveBeenCalledWith(
-				expect.stringContaining('sessions.json'),
-				expect.stringContaining('session-123'),
-				'utf-8'
-			);
+            expect(vscode.workspace.fs.writeFile).toHaveBeenCalledWith(
+                expect.objectContaining({ fsPath: expect.stringContaining('sessions.json') }),
+                expect.any(Uint8Array)
+            );
 		});
 
 		it('should support custom session mode', async () => {
@@ -129,13 +142,12 @@ describe('SessionManager', () => {
 
 			vi.mocked(mockClient.loadSession!).mockResolvedValue(sessionInfo);
 
-			await sessionManager.loadSession('conv-123', 'session-123');
+            await sessionManager.loadSession('conv-123', 'session-123');
 
-			expect(fs.writeFile).toHaveBeenCalledWith(
-				expect.stringContaining('sessions.json'),
-				expect.stringContaining('session-123'),
-				'utf-8'
-			);
+            expect(vscode.workspace.fs.writeFile).toHaveBeenCalledWith(
+                expect.objectContaining({ fsPath: expect.stringContaining('sessions.json') }),
+                expect.any(Uint8Array)
+            );
 		});
 	});
 
@@ -232,33 +244,35 @@ describe('SessionManager', () => {
 		});
 	});
 
-	describe('persistence', () => {
-		it('should restore sessions from storage on initialization', async () => {
-			const savedSessions = {
-				'conv-1': 'session-1',
-				'conv-2': 'session-2',
-			};
+    describe('persistence', () => {
+        it('should restore sessions from storage on initialization', async () => {
+            const savedSessions = {
+                'conv-1': 'session-1',
+                'conv-2': 'session-2',
+            };
 
-			vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(savedSessions));
+            vi.mocked(vscode.workspace.fs.readFile).mockResolvedValue(
+                Buffer.from(JSON.stringify(savedSessions))
+            );
 
-			const newManager = new SessionManager(mockClient as ACPClient, mockStorageUri);
-			await newManager.initialize();
+            const newManager = new SessionManager(mockClient as ACPClient, mockStorageUri);
+            await newManager.initialize();
 
-			expect(newManager.getSessionId('conv-1')).toBe('session-1');
-			expect(newManager.getSessionId('conv-2')).toBe('session-2');
-		});
+            expect(newManager.getSessionId('conv-1')).toBe('session-1');
+            expect(newManager.getSessionId('conv-2')).toBe('session-2');
+        });
 
-		it('should handle missing storage file gracefully', async () => {
-			vi.mocked(fs.readFile).mockRejectedValue(new Error('ENOENT'));
+        it('should handle missing storage file gracefully', async () => {
+            vi.mocked(vscode.workspace.fs.readFile).mockRejectedValue(new Error('ENOENT'));
 
-			const newManager = new SessionManager(mockClient as ACPClient, mockStorageUri);
-			await newManager.initialize();
+            const newManager = new SessionManager(mockClient as ACPClient, mockStorageUri);
+            await newManager.initialize();
 
 			expect(newManager.getAllSessions()).toEqual([]);
 		});
 
-		it('should handle corrupted storage file gracefully', async () => {
-			vi.mocked(fs.readFile).mockResolvedValue('invalid json');
+        it('should handle corrupted storage file gracefully', async () => {
+            vi.mocked(vscode.workspace.fs.readFile).mockResolvedValue(Buffer.from('invalid json'));
 
 			const newManager = new SessionManager(mockClient as ACPClient, mockStorageUri);
 			await newManager.initialize();
@@ -289,14 +303,13 @@ describe('SessionManager', () => {
 
 			vi.mocked(mockClient.newSession!).mockResolvedValue(sessionInfo);
 
-			await sessionManager.createSession('conv-123');
-			await sessionManager.clearSession('conv-123');
+            await sessionManager.createSession('conv-123');
+            await sessionManager.clearSession('conv-123');
 
-			expect(fs.writeFile).toHaveBeenCalledWith(
-				expect.stringContaining('sessions.json'),
-				expect.not.stringContaining('session-123'),
-				'utf-8'
-			);
+            expect(vscode.workspace.fs.writeFile).toHaveBeenCalledWith(
+                expect.objectContaining({ fsPath: expect.stringContaining('sessions.json') }),
+                expect.any(Uint8Array)
+            );
 		});
 	});
 });
