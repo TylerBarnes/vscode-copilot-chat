@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { join } from 'path';
 import { IInstantiationService } from '../../util/vs/platform/instantiation/common/instantiation';
 import { ILogService } from '../log/common/logService';
 import { ACPChatParticipant } from './acp-chat-participant';
@@ -47,8 +48,9 @@ export class ACPContribution implements vscode.Disposable {
         try {
             this.logService.info('[ACP] Initializing ACP contribution');
 
-            // Create core components
-            const agentConfigManager = this.instantiationService.createInstance(AgentConfigManager as any);
+            // Create core components with proper config path
+            const configPath = join(this.extensionContext.globalStorageUri.fsPath, 'agent-config.json');
+            const agentConfigManager = new AgentConfigManager(configPath);
             const fileSystemHandler = this.instantiationService.createInstance(FileSystemHandler as any) as FileSystemHandler;
             const terminalManager = this.instantiationService.createInstance(TerminalManager as any) as TerminalManager;
             const sessionManager = this.instantiationService.createInstance(SessionManager as any) as SessionManager;
@@ -61,18 +63,29 @@ export class ACPContribution implements vscode.Disposable {
 			// Start configured MCP servers
 			await this.startMCPServers();
 
-			// Get active agent profile
-			const activeProfile = agentConfigManager.getActiveProfile();
-			if (!activeProfile) {
-				this.logService.warn('[ACP] No active agent profile configured');
-				return;
-			}
+            // Get active agent profile
+            const activeProfile = agentConfigManager.getActiveProfile();
+            if (!activeProfile) {
+                this.logService.warn('[ACP] No active agent profile configured. Please configure an ACP agent profile in settings.');
+                
+                // Show a helpful message
+                vscode.window.showWarningMessage(
+                    'ACP Chat: No agent profile configured. Please add an ACP agent profile in the extension settings.',
+                    'Open Settings'
+                ).then(selection => {
+                    if (selection === 'Open Settings') {
+                        vscode.commands.executeCommand('workbench.action.openSettings', 'acp');
+                    }
+                });
+                
+                return;
+            }
 
 			this.logService.info(`[ACP] Using agent profile: ${activeProfile.name}`);
 
             // Create ACP client
             const { spawn } = await import('child_process');
-            const agentProcess = spawn(activeProfile.command, activeProfile.args || [], {
+            const agentProcess = spawn(activeProfile.executable, activeProfile.args || [], {
                 stdio: ['pipe', 'pipe', 'pipe'],
                 env: { ...process.env, ...activeProfile.env }
             });

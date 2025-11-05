@@ -39,12 +39,28 @@ vi.mock('child_process', () => ({
     })
 }));
 
+// Mock AgentConfigManager
+vi.mock('../../../src/platform/acp/agent-config', () => ({
+    AgentConfigManager: vi.fn().mockImplementation(() => ({
+        getActiveProfile: vi.fn(() => ({
+            id: 'test-agent',
+            name: 'Test Agent',
+            executable: 'test-agent',
+            args: ['--mode', 'test']
+        })),
+        getAllProfiles: vi.fn(() => []),
+        addProfile: vi.fn(),
+        updateProfile: vi.fn(),
+        deleteProfile: vi.fn(),
+        setActiveProfile: vi.fn()
+    }))
+}));
+
 describe('ACPContribution', () => {
     let mockInstantiationService: any;
     let mockLogService: any;
     let mockExtensionContext: any;
     let mockUri: any;
-    let mockAgentConfigManager: any;
     let mockFileSystemHandler: any;
     let mockTerminalManager: any;
     let mockPermissionHandler: any;
@@ -81,19 +97,10 @@ describe('ACPContribution', () => {
 			})
 		};
 
-		(vscode.workspace.getConfiguration as any).mockReturnValue(mockConfig);
+        (vscode.workspace.getConfiguration as any).mockReturnValue(mockConfig);
 
-		// Mock component instances
-		mockAgentConfigManager = {
-			getActiveProfile: vi.fn(() => ({
-				id: 'test-agent',
-				name: 'Test Agent',
-				command: 'test-agent',
-				args: ['--mode', 'test']
-			}))
-		};
-
-		mockFileSystemHandler = { dispose: vi.fn() };
+        // Mock component instances
+        mockFileSystemHandler = { dispose: vi.fn() };
 		mockTerminalManager = { dispose: vi.fn() };
 		mockPermissionHandler = { dispose: vi.fn() };
 		mockSessionManager = { dispose: vi.fn() };
@@ -121,11 +128,10 @@ describe('ACPContribution', () => {
 			dispose: vi.fn()
 		};
 
-		// Mock instantiation service
-		mockInstantiationService = {
-			createInstance: vi.fn((ctor: any, ...args: any[]) => {
-				if (ctor.name === 'AgentConfigManager') return mockAgentConfigManager;
-				if (ctor.name === 'FileSystemHandler') return mockFileSystemHandler;
+        // Mock instantiation service
+        mockInstantiationService = {
+            createInstance: vi.fn((ctor: any, ...args: any[]) => {
+                if (ctor.name === 'FileSystemHandler') return mockFileSystemHandler;
 				if (ctor.name === 'TerminalManager') return mockTerminalManager;
 				if (ctor.name === 'PermissionHandler') return mockPermissionHandler;
 				if (ctor.name === 'SessionManager') return mockSessionManager;
@@ -159,6 +165,9 @@ mockLogService = {
         // Mock extension context
         mockExtensionContext = {
             extensionUri: mockUri,
+            globalStorageUri: {
+                fsPath: '/mock/global/storage'
+            },
             subscriptions: []
         };
     });
@@ -174,9 +183,10 @@ mockLogService = {
             // Note: We check by function reference, not by name property
             const calls = (mockInstantiationService.createInstance as any).mock.calls;
             
-            // Should have created: AgentConfigManager, FileSystemHandler, TerminalManager, 
+            // Should have created: FileSystemHandler, TerminalManager, 
             // SessionManager, ToolCallHandler, MCPManager, ACPClient, ACPRequestHandler, ACPChatParticipant
-            expect(calls.length).toBeGreaterThanOrEqual(9);
+            // (AgentConfigManager is now directly instantiated, not via createInstance)
+            expect(calls.length).toBeGreaterThanOrEqual(8);
 
             contribution.dispose();
         });
@@ -268,22 +278,33 @@ it('should log initialization steps', async () => {
         });
 	});
 
-	describe('error handling', () => {
-		it('should handle missing active agent profile', async () => {
-			mockAgentConfigManager.getActiveProfile.mockReturnValue(null);
+    describe('error handling', () => {
+        it('should handle missing active agent profile', async () => {
+            // Mock AgentConfigManager to return null for this test
+            const { AgentConfigManager } = await import('../../../src/platform/acp/agent-config');
+            vi.mocked(AgentConfigManager).mockImplementationOnce(() => ({
+                getActiveProfile: vi.fn(() => null),
+                getAllProfiles: vi.fn(() => []),
+                addProfile: vi.fn(),
+                updateProfile: vi.fn(),
+                deleteProfile: vi.fn(),
+                setActiveProfile: vi.fn()
+            } as any));
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
+            const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
-			// Wait for async initialization
-			await new Promise(resolve => setTimeout(resolve, 10));
+            // Wait for async initialization
+            await new Promise(resolve => setTimeout(resolve, 10));
 
-			expect(mockLogService.warn).toHaveBeenCalledWith('[ACP] No active agent profile configured');
-			expect(mockInstantiationService.createInstance).not.toHaveBeenCalledWith(
-				expect.objectContaining({ name: 'ACPClient' })
-			);
+            expect(mockLogService.warn).toHaveBeenCalledWith(
+                expect.stringContaining('No active agent profile configured')
+            );
+            expect(mockInstantiationService.createInstance).not.toHaveBeenCalledWith(
+                expect.objectContaining({ name: 'ACPClient' })
+            );
 
-			contribution.dispose();
-		});
+            contribution.dispose();
+        });
 
 		it('should handle MCP server startup errors', async () => {
 			const error = new Error('Server startup failed');
@@ -411,13 +432,25 @@ it('should dispose all components', async () => {
             expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Disposing ACP contribution');
         });
 
-		it('should handle disposal when not fully initialized', () => {
-			mockAgentConfigManager.getActiveProfile.mockReturnValue(null);
+        it('should handle disposal when not fully initialized', async () => {
+            // Mock AgentConfigManager to return null for this test
+            const { AgentConfigManager } = await import('../../../src/platform/acp/agent-config');
+            vi.mocked(AgentConfigManager).mockImplementationOnce(() => ({
+                getActiveProfile: vi.fn(() => null),
+                getAllProfiles: vi.fn(() => []),
+                addProfile: vi.fn(),
+                updateProfile: vi.fn(),
+                deleteProfile: vi.fn(),
+                setActiveProfile: vi.fn()
+            } as any));
 
-			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
+            const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
-			expect(() => contribution.dispose()).not.toThrow();
-		});
+            // Wait for async initialization
+            await new Promise(resolve => setTimeout(resolve, 10));
+
+            expect(() => contribution.dispose()).not.toThrow();
+        });
 
 		it('should clear disposables array', async () => {
 			const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
@@ -449,10 +482,20 @@ it('should dispose all components', async () => {
             const customProfile = {
                 id: 'custom-agent',
                 name: 'Custom Agent',
-                command: 'custom-cmd',
+                executable: 'custom-cmd',
                 args: ['--custom']
             };
-            mockAgentConfigManager.getActiveProfile.mockReturnValue(customProfile);
+            
+            // Mock AgentConfigManager to return custom profile for this test
+            const { AgentConfigManager } = await import('../../../src/platform/acp/agent-config');
+            vi.mocked(AgentConfigManager).mockImplementationOnce(() => ({
+                getActiveProfile: vi.fn(() => customProfile),
+                getAllProfiles: vi.fn(() => [customProfile]),
+                addProfile: vi.fn(),
+                updateProfile: vi.fn(),
+                deleteProfile: vi.fn(),
+                setActiveProfile: vi.fn()
+            } as any));
 
             const contribution = new ACPContribution(mockInstantiationService, mockLogService, mockExtensionContext);
 
