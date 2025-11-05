@@ -200,7 +200,7 @@ export class CopilotChatSessionsProvider extends Disposable implements vscode.Ch
 					return state !== 'CLOSED' && state !== 'MERGED';
 				});
 
-			vscode.commands.executeCommand('setContext', 'github.copilot.chat.cloudSessionsEmpty', filteredSessions.length === 0);
+			vscode.commands.executeCommand('setContext', 'acp.copilot.chat.cloudSessionsEmpty', filteredSessions.length === 0);
 			return filteredSessions;
 		})().finally(() => {
 			this.chatSessionItemsPromise = undefined;

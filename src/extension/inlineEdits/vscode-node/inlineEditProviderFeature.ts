@@ -38,7 +38,7 @@ import { VSCodeWorkspace } from './parts/vscodeWorkspace';
 import { makeSettable } from './utils/observablesUtils';
 
 const TRIGGER_INLINE_EDIT_ON_ACTIVE_EDITOR_CHANGE = false; // otherwise, eg, NES would trigger just when going through search results
-const useEnhancedNotebookNESContextKey = 'github.copilot.chat.enableEnhancedNotebookNES';
+const useEnhancedNotebookNESContextKey = 'acp.copilot.chat.enableEnhancedNotebookNES';
 
 export class InlineEditProviderFeature extends Disposable implements IExtensionContribution {
 
@@ -223,9 +223,9 @@ export class InlineEditProviderFeature extends Disposable implements IExtensionC
 	}
 }
 
-export const learnMoreCommandId = 'github.copilot.debug.inlineEdit.learnMore';
+export const learnMoreCommandId = 'acp.copilot.debug.inlineEdit.learnMore';
 
 export const learnMoreLink = 'https://aka.ms/vscode-nes';
 
-const clearCacheCommandId = 'github.copilot.debug.inlineEdit.clearCache';
-const reportNotebookNESIssueCommandId = 'github.copilot.debug.inlineEdit.reportNotebookNESIssue';
+const clearCacheCommandId = 'acp.copilot.debug.inlineEdit.clearCache';
+const reportNotebookNESIssueCommandId = 'acp.copilot.debug.inlineEdit.reportNotebookNESIssue';

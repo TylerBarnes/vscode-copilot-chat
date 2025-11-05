@@ -81,7 +81,7 @@ export class QuickFixesProvider implements vscode.CodeActionProvider {
 		if (altTextQuickFixes) {
 			altTextQuickFixes.command = {
 				title: altTextQuickFixes.title,
-				command: 'github.copilot.chat.generateAltText',
+				command: 'acp.copilot.chat.generateAltText',
 				arguments: [
 					{
 						type: altTextQuickFixes.type,
@@ -97,7 +97,7 @@ export class QuickFixesProvider implements vscode.CodeActionProvider {
 			const reviewAction = new AICodeAction(vscode.l10n.t('Review'), QuickFixesProvider.reviewKind);
 			reviewAction.command = {
 				title: reviewAction.title,
-				command: 'github.copilot.chat.review',
+				command: 'acp.copilot.chat.review',
 			};
 			codeActions.push(reviewAction);
 		}
@@ -132,7 +132,7 @@ export class QuickFixesProvider implements vscode.CodeActionProvider {
 		const query = `@${workspaceIntentId} /${Intent.Explain} ${diagnostics}`;
 		explainAction.command = {
 			title: explainAction.title,
-			command: 'github.copilot.chat.explain',
+			command: 'acp.copilot.chat.explain',
 			arguments: [query],
 		};
 
@@ -385,7 +385,7 @@ export class RefactorsProvider implements vscode.CodeActionProvider {
 
 		codeAction.command = {
 			title,
-			command: 'github.copilot.chat.generateTests',
+			command: 'acp.copilot.chat.generateTests',
 		};
 
 		return codeAction;

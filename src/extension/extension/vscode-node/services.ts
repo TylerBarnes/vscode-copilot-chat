@@ -10,6 +10,7 @@ import { StaticGitHubAuthenticationService } from '../../../platform/authenticat
 import { createStaticGitHubTokenProvider, getOrCreateTestingCopilotTokenManager } from '../../../platform/authentication/node/copilotTokenManager';
 import { AuthenticationService } from '../../../platform/authentication/vscode-node/authenticationService';
 import { VSCodeCopilotTokenManager } from '../../../platform/authentication/vscode-node/copilotTokenManager';
+import { StubTokenManager } from '../../../platform/acp/stub-token-manager';
 import { IChatAgentService } from '../../../platform/chat/common/chatAgents';
 import { IChatMLFetcher } from '../../../platform/chat/common/chatMLFetcher';
 import { IChunkingEndpointClient } from '../../../platform/chunking/common/chunkingEndpointClient';
@@ -53,6 +54,7 @@ import { IScopeSelector } from '../../../platform/scopeSelection/common/scopeSel
 import { ScopeSelectorImpl } from '../../../platform/scopeSelection/vscode-node/scopeSelectionImpl';
 import { ISearchService } from '../../../platform/search/common/searchService';
 import { SearchServiceImpl } from '../../../platform/search/vscode-node/searchServiceImpl';
+import { StubSearchService } from '../../../platform/acp/stub-search-service';
 import { ISettingsEditorSearchService } from '../../../platform/settingsEditor/common/settingsEditorSearchService';
 import { IExperimentationService, NullExperimentationService } from '../../../platform/telemetry/common/nullExperimentationService';
 import { NullTelemetryService } from '../../../platform/telemetry/common/nullTelemetryService';
@@ -117,9 +119,12 @@ import { registerServices as registerCommonServices } from '../vscode/services';
 // ###########################################################################################
 
 export function registerServices(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext): void {
-	const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
+    const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
 
-	registerCommonServices(builder, extensionContext);
+    // Register IExperimentationService first to avoid dependency injection issues
+    setupMSFTExperimentationService(builder, extensionContext);
+
+    registerCommonServices(builder, extensionContext);
 
 	builder.define(IAutomodeService, new SyncDescriptor(AutomodeService));
 	builder.define(IConversationStore, new ConversationStore());
@@ -138,18 +143,9 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	const internalAIKey = extensionContext.extension.packageJSON.internalAIKey ?? '';
 	const internalLargeEventAIKey = extensionContext.extension.packageJSON.internalLargeStorageAriaKey ?? '';
 	const ariaKey = extensionContext.extension.packageJSON.ariaKey ?? '';
-	if (isTestMode || isScenarioAutomation) {
-		setupTelemetry(builder, extensionContext, internalAIKey, internalLargeEventAIKey, ariaKey);
-		// If we're in testing mode, then most code will be called from an actual test,
-		// and not from here. However, some objects will capture the `accessor` we pass
-		// here and then re-use it later. This is particularly the case for those objects
-		// which implement VSCode interfaces so can't be changed to take `accessor` in their
-		// method parameters.
-		builder.define(ICopilotTokenManager, getOrCreateTestingCopilotTokenManager(env.devDeviceId));
-	} else {
-		setupTelemetry(builder, extensionContext, internalAIKey, internalLargeEventAIKey, ariaKey);
-		builder.define(ICopilotTokenManager, new SyncDescriptor(VSCodeCopilotTokenManager));
-	}
+// Use stub token manager for ACP - we don't need GitHub Copilot authentication
+    // This avoids the devDeviceId proposed API dependency
+    builder.define(ICopilotTokenManager, new SyncDescriptor(StubTokenManager));
 
 	if (isScenarioAutomation) {
 		builder.define(IAuthenticationService, new SyncDescriptor(StaticGitHubAuthenticationService, [createStaticGitHubTokenProvider()]));
@@ -169,7 +165,8 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(IChunkingEndpointClient, new SyncDescriptor(ChunkingEndpointClientImpl));
 	builder.define(ICommandService, new SyncDescriptor(CommandServiceImpl));
 	builder.define(IDocsSearchClient, new SyncDescriptor(DocsSearchClient));
-	builder.define(ISearchService, new SyncDescriptor(SearchServiceImpl));
+// Search - Use stub service to avoid findFiles2 API proposal dependency
+		builder.define(ISearchService, new SyncDescriptor(StubSearchService));
 	builder.define(ITestDepsResolver, new SyncDescriptor(TestDepsResolver));
 	builder.define(ISetupTestsDetector, new SyncDescriptor(SetupTestsDetector));
 	builder.define(IWorkspaceMutationManager, new SyncDescriptor(WorkspaceMutationManager));
@@ -207,12 +204,8 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 }
 
 function setupMSFTExperimentationService(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext) {
-	if (ExtensionMode.Production === extensionContext.extensionMode && !isScenarioAutomation) {
-		// Intitiate the experimentation service
-		builder.define(IExperimentationService, new SyncDescriptor(MicrosoftExperimentationService));
-	} else {
-		builder.define(IExperimentationService, new NullExperimentationService());
-	}
+    // Always use NullExperimentationService for ACP to avoid devDeviceId dependency
+    builder.define(IExperimentationService, new NullExperimentationService());
 }
 
 function setupTelemetry(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext, internalAIKey: string, internalLargeEventAIKey: string, externalAIKey: string) {

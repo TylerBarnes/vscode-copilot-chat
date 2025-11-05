@@ -135,71 +135,71 @@ export class ConfigurationMigrationContribution implements IExtensionContributio
 }
 
 ConfigurationMigrationRegistry.registerConfigurationMigrations([{
-	key: 'github.copilot.chat.experimental.setupTests.enabled',
+	key: 'acp.copilot.chat.experimental.setupTests.enabled',
 	migrateFn: async (value: any) => {
 		return [
-			['github.copilot.chat.setupTests.enabled', { value }],
-			['github.copilot.chat.experimental.setupTests.enabled', { value: undefined }]
+			['acp.copilot.chat.setupTests.enabled', { value }],
+			['acp.copilot.chat.experimental.setupTests.enabled', { value: undefined }]
 		];
 	}
 }]);
 
 ConfigurationMigrationRegistry.registerConfigurationMigrations([{
-	key: 'github.copilot.chat.experimental.codeGeneration.instructions',
+	key: 'acp.copilot.chat.experimental.codeGeneration.instructions',
 	migrateFn: async (value: any) => {
 		return [
-			['github.copilot.chat.codeGeneration.instructions', { value }],
-			['github.copilot.chat.experimental.codeGeneration.instructions', { value: undefined }]
+			['acp.copilot.chat.codeGeneration.instructions', { value }],
+			['acp.copilot.chat.experimental.codeGeneration.instructions', { value: undefined }]
 		];
 	}
 }]);
 
 ConfigurationMigrationRegistry.registerConfigurationMigrations([{
-	key: 'github.copilot.chat.experimental.codeGeneration.useInstructionFiles',
+	key: 'acp.copilot.chat.experimental.codeGeneration.useInstructionFiles',
 	migrateFn: async (value: any) => {
 		return [
-			['github.copilot.chat.codeGeneration.useInstructionFiles', { value }],
-			['github.copilot.chat.experimental.codeGeneration.useInstructionFiles', { value: undefined }]
+			['acp.copilot.chat.codeGeneration.useInstructionFiles', { value }],
+			['acp.copilot.chat.experimental.codeGeneration.useInstructionFiles', { value: undefined }]
 		];
 	}
 }]);
 
 ConfigurationMigrationRegistry.registerConfigurationMigrations([{
-	key: 'github.copilot.chat.experimental.testGeneration.instructions',
+	key: 'acp.copilot.chat.experimental.testGeneration.instructions',
 	migrateFn: async (value: any) => {
 		return [
-			['github.copilot.chat.testGeneration.instructions', { value }],
-			['github.copilot.chat.experimental.testGeneration.instructions', { value: undefined }]
+			['acp.copilot.chat.testGeneration.instructions', { value }],
+			['acp.copilot.chat.experimental.testGeneration.instructions', { value: undefined }]
 		];
 	}
 }]);
 
 ConfigurationMigrationRegistry.registerConfigurationMigrations([{
-	key: 'github.copilot.chat.experimental.generateTests.codeLens',
+	key: 'acp.copilot.chat.experimental.generateTests.codeLens',
 	migrateFn: async (value: any) => {
 		return [
-			['github.copilot.chat.generateTests.codeLens', { value }],
-			['github.copilot.chat.experimental.generateTests.codeLens', { value: undefined }]
+			['acp.copilot.chat.generateTests.codeLens', { value }],
+			['acp.copilot.chat.experimental.generateTests.codeLens', { value: undefined }]
 		];
 	}
 }]);
 
 ConfigurationMigrationRegistry.registerConfigurationMigrations([{
-	key: 'github.copilot.chat.experimental.temporalContext.enabled',
+	key: 'acp.copilot.chat.experimental.temporalContext.enabled',
 	migrateFn: async (value: any) => {
 		return [
-			['github.copilot.chat.editor.temporalContext.enabled', { value }],
-			['github.copilot.chat.experimental.temporalContext.enabled', { value: undefined }]
+			['acp.copilot.chat.editor.temporalContext.enabled', { value }],
+			['acp.copilot.chat.experimental.temporalContext.enabled', { value: undefined }]
 		];
 	}
 }]);
 
 ConfigurationMigrationRegistry.registerConfigurationMigrations([{
-	key: 'github.copilot.chat.temporalContext.enabled',
+	key: 'acp.copilot.chat.temporalContext.enabled',
 	migrateFn: async (value: any) => {
 		return [
-			['github.copilot.chat.editor.temporalContext.enabled', { value }],
-			['github.copilot.chat.temporalContext.enabled', { value: undefined }]
+			['acp.copilot.chat.editor.temporalContext.enabled', { value }],
+			['acp.copilot.chat.temporalContext.enabled', { value: undefined }]
 		];
 	}
 }]);

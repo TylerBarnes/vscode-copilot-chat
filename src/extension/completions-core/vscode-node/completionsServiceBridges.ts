@@ -185,7 +185,7 @@ export function createContext(serviceAccessor: ServicesAccessor): IInstantiation
 	ctx.set(EditorAndPluginInfo, new VSCodeEditorInfo());
 	ctx.set(CopilotExtensionStatus, new CopilotExtensionStatus());
 	ctx.set(CopilotTokenManager, instantiationService.createInstance(CopilotTokenManagerImpl, false));
-	ctx.set(StatusReporter, instantiationService.createInstance(CopilotStatusBar, 'github.copilot.languageStatus'));
+	ctx.set(StatusReporter, instantiationService.createInstance(CopilotStatusBar, 'acp.copilot.languageStatus'));
 	ctx.set(TextDocumentManager, instantiationService.createInstance(ExtensionTextDocumentManager));
 	ctx.set(ObservableWorkspace, instantiationService.createInstance(VSCodeWorkspace));
 	ctx.set(RecentEditsProvider, instantiationService.createInstance(FullRecentEditsProvider, undefined));

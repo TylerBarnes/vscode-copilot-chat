@@ -42,7 +42,7 @@ export class CompletionsCoreContribution extends Disposable {
 				reader.store.add(languages.registerInlineCompletionItemProvider({ pattern: '**' }, provider, { debounceDelayMs: 0, excludes: ['github.copilot'], groupId: 'completions' }));
 			}
 
-			void commands.executeCommand('setContext', 'github.copilot.extensionUnification.activated', extensionUnification);
+			void commands.executeCommand('setContext', 'acp.copilot.extensionUnification.activated', extensionUnification);
 
 			if (extensionUnification && this._completionsInstantiationService) {
 				reader.store.add(this._completionsInstantiationService.invokeFunction(registerUnificationCommands));
@@ -51,7 +51,7 @@ export class CompletionsCoreContribution extends Disposable {
 
 		this._register(autorun(reader => {
 			const token = this._copilotToken.read(reader);
-			void commands.executeCommand('setContext', 'github.copilot.activated', token !== undefined);
+			void commands.executeCommand('setContext', 'acp.copilot.activated', token !== undefined);
 		}));
 	}
 

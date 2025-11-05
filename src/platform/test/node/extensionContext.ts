@@ -63,7 +63,7 @@ function constructGlobalStoragePath(globalStoragePath: string): URI {
 
 export class MockExtensionContext implements BrandedService {
 	_serviceBrand = undefined;
-	extension = { id: 'GitHub.copilot-chat' } as any;
+    extension = { id: 'TylerBarnes.copilot-chat-acp' } as any;
 	extensionMode = ExtensionMode.Test;
 	subscriptions = [];
 	globalStorageUri: Uri;

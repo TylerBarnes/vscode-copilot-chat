@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ACPContribution } from '../../../platform/acp/acp.contribution';
 import { AuthenticationContrib } from '../../authentication/vscode-node/authentication.contribution';
 import { BYOKContrib } from '../../byok/vscode-node/byokContribution';
 import { ChatQuotaContribution } from '../../chat/vscode-node/chatQuota.contribution';
@@ -10,7 +11,7 @@ import { ChatSessionsContrib } from '../../chatSessions/vscode-node/chatSessions
 import * as chatBlockLanguageContribution from '../../codeBlocks/vscode-node/chatBlockLanguageFeatures.contribution';
 import { IExtensionContributionFactory, asContributionFactory } from '../../common/contributions';
 import { CompletionsCoreContribution } from '../../completions/vscode-node/completionsCoreContribution';
-import { CompletionsUnificationContribution } from '../../completions/vscode-node/completionsUnificationContribution';
+// import { CompletionsUnificationContribution } from '../../completions/vscode-node/completionsUnificationContribution'; // Removed: requires inlineCompletionsAdditions API
 import { ConfigurationMigrationContribution } from '../../configuration/vscode-node/configurationMigration';
 import { ContextKeysContribution } from '../../contextKeys/vscode-node/contextKeys.contribution';
 import { PlaceholderViewContribution } from '../../contextKeys/vscode-node/placeholderView.contribution';
@@ -59,8 +60,9 @@ import vscodeContributions from '../vscode/contributions';
 // ###################################################################################################
 
 export const vscodeNodeContributions: IExtensionContributionFactory[] = [
-	...vscodeContributions,
-	asContributionFactory(ConversationFeature),
+    ...vscodeContributions,
+    asContributionFactory(ACPContribution),
+    asContributionFactory(ConversationFeature),
 	workspaceChunkSearchContribution,
 	asContributionFactory(AuthenticationContrib),
 	chatBlockLanguageContribution,
@@ -83,7 +85,7 @@ export const vscodeNodeContributions: IExtensionContributionFactory[] = [
 	asContributionFactory(PromptFileContextContribution),
 	asContributionFactory(ChatReplayContribution),
 	asContributionFactory(CompletionsCoreContribution),
-	asContributionFactory(CompletionsUnificationContribution),
+	// asContributionFactory(CompletionsUnificationContribution), // Removed: requires inlineCompletionsAdditions API
 	workspaceIndexingContribution,
 	asContributionFactory(ChatSessionsContrib)
 ];

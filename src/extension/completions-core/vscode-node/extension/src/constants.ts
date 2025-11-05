@@ -10,32 +10,32 @@
 // - These IDs should be used in package.json
 // - These IDs should only be registered if they appear in the package.json (meaning the command palette) or if the command needs to be supported when both extensions are loaded/active.
 
-export const CMDOpenPanelClient = 'github.copilot.generate';
-export const CMDOpenPanelChat = 'github.copilot.chat.openSuggestionsPanel'; // "github.copilot.chat.generate" is already being used
+export const CMDOpenPanelClient = 'acp.copilot.generate';
+export const CMDOpenPanelChat = 'acp.copilot.chat.openSuggestionsPanel'; // "acp.copilot.chat.generate" is already being used
 
-export const CMDAcceptCursorPanelSolutionClient = 'github.copilot.acceptCursorPanelSolution';
-export const CMDNavigatePreviousPanelSolutionClient = 'github.copilot.previousPanelSolution';
-export const CMDNavigateNextPanelSolutionClient = 'github.copilot.nextPanelSolution';
+export const CMDAcceptCursorPanelSolutionClient = 'acp.copilot.acceptCursorPanelSolution';
+export const CMDNavigatePreviousPanelSolutionClient = 'acp.copilot.previousPanelSolution';
+export const CMDNavigateNextPanelSolutionClient = 'acp.copilot.nextPanelSolution';
 
-export const CMDToggleStatusMenuClient = 'github.copilot.toggleStatusMenu';
-export const CMDToggleStatusMenuChat = 'github.copilot.chat.toggleStatusMenu';
+export const CMDToggleStatusMenuClient = 'acp.copilot.toggleStatusMenu';
+export const CMDToggleStatusMenuChat = 'acp.copilot.chat.toggleStatusMenu';
 
 // Needs to be supported in both extensions when they are loaded/active. Requires a different ID.
-export const CMDSendCompletionsFeedbackChat = 'github.copilot.chat.sendCompletionFeedback';
+export const CMDSendCompletionsFeedbackChat = 'acp.copilot.chat.sendCompletionFeedback';
 
-export const CMDEnableCompletionsChat = 'github.copilot.chat.completions.enable';
-export const CMDDisableCompletionsChat = 'github.copilot.chat.completions.disable';
-export const CMDToggleCompletionsChat = 'github.copilot.chat.completions.toggle';
-export const CMDEnableCompletionsClient = 'github.copilot.completions.enable';
-export const CMDDisableCompletionsClient = 'github.copilot.completions.disable';
-export const CMDToggleCompletionsClient = 'github.copilot.completions.toggle';
+export const CMDEnableCompletionsChat = 'acp.copilot.chat.completions.enable';
+export const CMDDisableCompletionsChat = 'acp.copilot.chat.completions.disable';
+export const CMDToggleCompletionsChat = 'acp.copilot.chat.completions.toggle';
+export const CMDEnableCompletionsClient = 'acp.copilot.completions.enable';
+export const CMDDisableCompletionsClient = 'acp.copilot.completions.disable';
+export const CMDToggleCompletionsClient = 'acp.copilot.completions.toggle';
 
-export const CMDOpenLogsClient = 'github.copilot.openLogs';
-export const CMDOpenDocumentationClient = 'github.copilot.openDocs';
+export const CMDOpenLogsClient = 'acp.copilot.openLogs';
+export const CMDOpenDocumentationClient = 'acp.copilot.openDocs';
 
 // Existing chat command reused for diagnostics
-export const CMDCollectDiagnosticsChat = 'github.copilot.debug.collectDiagnostics';
+export const CMDCollectDiagnosticsChat = 'acp.copilot.debug.collectDiagnostics';
 
 // Context variable that enable/disable panel-specific commands
-export const CopilotPanelVisible = 'github.copilot.panelVisible';
-export const ComparisonPanelVisible = 'github.copilot.comparisonPanelVisible';
+export const CopilotPanelVisible = 'acp.copilot.panelVisible';
+export const ComparisonPanelVisible = 'acp.copilot.comparisonPanelVisible';

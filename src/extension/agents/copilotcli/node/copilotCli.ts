@@ -12,7 +12,7 @@ import { createServiceIdentifier } from '../../../../util/common/services';
 import { Lazy } from '../../../../util/vs/base/common/lazy';
 import { ensureNodePtyShim } from './nodePtyShim';
 
-const COPILOT_CLI_MODEL_MEMENTO_KEY = 'github.copilot.cli.sessionModel';
+const COPILOT_CLI_MODEL_MEMENTO_KEY = 'acp.copilot.cli.sessionModel';
 const DEFAULT_CLI_MODEL: ModelProvider = {
 	type: 'anthropic',
 	model: 'claude-sonnet-4.5'

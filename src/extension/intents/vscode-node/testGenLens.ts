@@ -127,7 +127,7 @@ class TestGenLensProvider implements vscode.CodeLensProvider<vscode.CodeLens>, I
 			range,
 			{
 				title: TestGenLensProvider.codeLensTitle,
-				command: 'github.copilot.chat.generateTests',
+				command: 'acp.copilot.chat.generateTests',
 				arguments: [{ document, selection: range }],
 			}
 		);

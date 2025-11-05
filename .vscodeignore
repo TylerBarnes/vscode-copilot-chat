@@ -1,6 +1,7 @@
 **
 !assets/
 assets/walkthroughs/**
+!media/
 !dist/compiled/**
 !dist/extension.js
 !dist/extension.js.LICENSE.txt

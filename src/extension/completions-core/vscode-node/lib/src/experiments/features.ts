@@ -257,7 +257,7 @@ export class Features {
 
 	getContextProviderExpSettings(languageId: string): ContextProviderExpSettings | undefined {
 		const expService = this.ctx.get(CompletionsExperimentationServiceBridge).experimentationService;
-		const value = expService.getTreatmentVariable<string>(`config.github.copilot.chat.contextprovider.${languageId}`);
+		const value = expService.getTreatmentVariable<string>(`config.acp.copilot.chat.contextprovider.${languageId}`);
 		if (typeof value === 'string') {
 			try {
 				const parsed: Partial<InternalContextProviderExpSettings> = JSON.parse(value);

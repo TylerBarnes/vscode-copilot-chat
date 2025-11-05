@@ -99,7 +99,7 @@ export class ConversationFeature implements IExtensionContribution {
 		this._enabled = value;
 
 		// Set context value that is used to show/hide th sidebar icon
-		vscode.commands.executeCommand('setContext', 'github.copilot.interactiveSession.disabled', !value);
+		vscode.commands.executeCommand('setContext', 'acp.copilot.interactiveSession.disabled', !value);
 	}
 
 	get activated() {
@@ -196,12 +196,12 @@ export class ConversationFeature implements IExtensionContribution {
 		const disposables = new DisposableStore();
 
 		[
-			vscode.commands.registerCommand('github.copilot.interactiveSession.feedback', async () => {
+			vscode.commands.registerCommand('acp.copilot.interactiveSession.feedback', async () => {
 				return vscode.env.openExternal(vscode.Uri.parse(FEEDBACK_URL));
 			}),
-			vscode.commands.registerCommand('github.copilot.terminal.explainTerminalLastCommand', async () => this.triggerTerminalChat({ query: `/${TerminalExplainIntent.intentName} #terminalLastCommand` })),
-			vscode.commands.registerCommand('github.copilot.terminal.fixTerminalLastCommand', async () => generateTerminalFixes(this.instantiationService)),
-			vscode.commands.registerCommand('github.copilot.terminal.generateCommitMessage', async () => {
+			vscode.commands.registerCommand('acp.copilot.terminal.explainTerminalLastCommand', async () => this.triggerTerminalChat({ query: `/${TerminalExplainIntent.intentName} #terminalLastCommand` })),
+			vscode.commands.registerCommand('acp.copilot.terminal.fixTerminalLastCommand', async () => generateTerminalFixes(this.instantiationService)),
+			vscode.commands.registerCommand('acp.copilot.terminal.generateCommitMessage', async () => {
 				const workspaceFolders = vscode.workspace.workspaceFolders;
 
 				if (!workspaceFolders?.length) {
@@ -225,7 +225,7 @@ export class ConversationFeature implements IExtensionContribution {
 					vscode.window.activeTerminal?.sendText(message, false);
 				}
 			}),
-			vscode.commands.registerCommand('github.copilot.git.generateCommitMessage', async (rootUri: vscode.Uri | undefined, _: vscode.SourceControlInputBoxValueProviderContext[], cancellationToken: vscode.CancellationToken | undefined) => {
+			vscode.commands.registerCommand('acp.copilot.git.generateCommitMessage', async (rootUri: vscode.Uri | undefined, _: vscode.SourceControlInputBoxValueProviderContext[], cancellationToken: vscode.CancellationToken | undefined) => {
 				const repository = this.gitCommitMessageService.getRepository(rootUri);
 				if (!repository) {
 					return;
@@ -236,14 +236,14 @@ export class ConversationFeature implements IExtensionContribution {
 					repository.inputBox.value = commitMessage;
 				}
 			}),
-			vscode.commands.registerCommand('github.copilot.git.resolveMergeConflicts', async (...resourceStates: (vscode.Uri | vscode.SourceControlResourceState)[]) => {
+			vscode.commands.registerCommand('acp.copilot.git.resolveMergeConflicts', async (...resourceStates: (vscode.Uri | vscode.SourceControlResourceState)[]) => {
 				const resources = resourceStates.filter(r => !!r).map(r => isUri(r) ? r : r.resourceUri);
 				await this.mergeConflictService.resolveMergeConflicts(resources, undefined);
 			}),
-			vscode.commands.registerCommand('github.copilot.devcontainer.generateDevContainerConfig', async (args: DevContainerConfigGeneratorArguments, cancellationToken = new vscode.CancellationTokenSource().token) => {
+			vscode.commands.registerCommand('acp.copilot.devcontainer.generateDevContainerConfig', async (args: DevContainerConfigGeneratorArguments, cancellationToken = new vscode.CancellationTokenSource().token) => {
 				return this.devContainerConfigurationService.generateConfiguration(args, cancellationToken);
 			}),
-			vscode.commands.registerCommand('github.copilot.chat.openUserPreferences', async () => {
+			vscode.commands.registerCommand('acp.copilot.chat.openUserPreferences', async () => {
 				const uri = URI.joinPath(this.extensionContext.globalStorageUri, 'copilotUserPreferences.md');
 				return vscode.commands.executeCommand('vscode.open', uri);
 			}),
@@ -322,11 +322,11 @@ export class ConversationFeature implements IExtensionContribution {
 					setLastCommandMatchResult(commandMatchResult);
 					return [
 						{
-							command: 'github.copilot.terminal.fixTerminalLastCommand',
+							command: 'acp.copilot.terminal.fixTerminalLastCommand',
 							title: vscode.l10n.t('Fix using Copilot')
 						},
 						{
-							command: 'github.copilot.terminal.explainTerminalLastCommand',
+							command: 'acp.copilot.terminal.explainTerminalLastCommand',
 							title: vscode.l10n.t('Explain using Copilot')
 						}
 					];
@@ -335,7 +335,7 @@ export class ConversationFeature implements IExtensionContribution {
 			vscode.window.registerTerminalQuickFixProvider('copilot-chat.generateCommitMessage', {
 				provideTerminalQuickFixes: (commandMatchResult, token) => {
 					return this.enabled ? [{
-						command: 'github.copilot.terminal.generateCommitMessage',
+						command: 'acp.copilot.terminal.generateCommitMessage',
 						title: vscode.l10n.t('Generate Commit Message')
 					}] : [];
 				},
@@ -345,7 +345,7 @@ export class ConversationFeature implements IExtensionContribution {
 }
 
 function registerSearchIntentCommand(): IDisposable {
-	return vscode.commands.registerCommand('github.copilot.executeSearch', async (arg: FindInFilesArgs) => {
+	return vscode.commands.registerCommand('acp.copilot.executeSearch', async (arg: FindInFilesArgs) => {
 		const show = arg.filesToExclude.length > 0 || arg.filesToInclude.length > 0;
 		vscode.commands.executeCommand('workbench.view.search.focus').then(() =>
 			vscode.commands.executeCommand('workbench.action.search.toggleQueryDetails', { show })

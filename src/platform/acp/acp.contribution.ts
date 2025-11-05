@@ -21,6 +21,8 @@ import { SlashCommandProvider } from './slash-command-provider';
 import { TerminalManager } from './terminal-manager';
 import { ThinkingStepsDisplay } from './thinking-steps-display';
 import { ToolCallHandler } from './tool-call-handler';
+import { ChatViewProvider } from './chat-view-provider';
+import { IVSCodeExtensionContext } from '../extContext/common/extensionContext';
 
 /**
  * ACP (Agent Client Protocol) Contribution
@@ -28,25 +30,30 @@ import { ToolCallHandler } from './tool-call-handler';
  * Initializes and manages the ACP client infrastructure:
  * - Loads agent profiles from configuration
  * - Starts configured MCP servers
+ * - Registers custom chat view provider
  * - Registers ACP chat participant
  * - Manages component lifecycle
  */
 export class ACPContribution implements vscode.Disposable {
-	private readonly disposables: vscode.Disposable[] = [];
-	private acpClient: ACPClient | undefined;
-	private mcpManager: MCPManager | undefined;
-	private chatParticipant: ACPChatParticipant | undefined;
+    private readonly disposables: vscode.Disposable[] = [];
+    private acpClient: ACPClient | undefined;
+    private mcpManager: MCPManager | undefined;
+    private chatParticipant: ACPChatParticipant | undefined;
+    private chatViewProvider: ChatViewProvider | undefined;
 
-	constructor(
-		@IInstantiationService private readonly instantiationService: IInstantiationService,
-		@ILogService private readonly logService: ILogService
-	) {
-		this.initialize();
-	}
+    constructor(
+        @IInstantiationService private readonly instantiationService: IInstantiationService,
+        @ILogService private readonly logService: ILogService,
+        @IVSCodeExtensionContext private readonly extensionContext: IVSCodeExtensionContext
+    ) {
+        this.initialize();
+    }
 
-	private async initialize(): Promise<void> {
-		try {
-			this.logService.info('[ACP] Initializing ACP contribution');
+    private async initialize(): Promise<void> {
+        console.log('[ACPContribution] initialize() called');
+        try {
+            console.log('[ACPContribution] Logging initialization...');
+            this.logService.info('[ACP] Initializing ACP contribution');
 
 			// Create core components
 			const agentConfigManager = this.instantiationService.createInstance(AgentConfigManager);
@@ -98,15 +105,36 @@ export class ACPContribution implements vscode.Disposable {
 				slashCommandProvider
 			);
 
-			// Create and register chat participant
-			this.chatParticipant = this.instantiationService.createInstance(
-				ACPChatParticipant,
-				requestHandler,
-				sessionManager
-			);
-			this.disposables.push(this.chatParticipant);
+            // Register custom chat view provider
+            console.log('[ACPContribution] Creating ChatViewProvider...');
+            console.log('[ACPContribution] Extension URI:', this.extensionContext.extensionUri.toString());
+            this.chatViewProvider = new ChatViewProvider(
+                this.extensionContext.extensionUri,
+                this.acpClient,
+                sessionManager,
+                toolCallHandler,
+                contentBlockMapper,
+                thinkingStepsDisplay,
+                agentPlanViewer
+            );
+            
+            console.log('[ACPContribution] Registering webview view provider for acp.copilot.chatView');
+            const chatViewDisposable = vscode.window.registerWebviewViewProvider(
+                'acp.copilot.chatView',
+                this.chatViewProvider
+            );
+            this.disposables.push(chatViewDisposable);
+            console.log('[ACPContribution] ChatViewProvider registered successfully');
 
-			this.logService.info('[ACP] ACP contribution initialized successfully');
+            // Create and register chat participant (for command palette integration)
+            this.chatParticipant = this.instantiationService.createInstance(
+                ACPChatParticipant,
+                requestHandler,
+                sessionManager
+            );
+            this.disposables.push(this.chatParticipant);
+
+            this.logService.info('[ACP] ACP contribution initialized successfully');
 		} catch (error) {
 			this.logService.error('[ACP] Failed to initialize ACP contribution', error);
 			// Don't re-throw since initialization is async

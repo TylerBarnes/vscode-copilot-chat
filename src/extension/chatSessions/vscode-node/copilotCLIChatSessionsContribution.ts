@@ -27,8 +27,8 @@ const ISOLATION_OPTION_ID = 'isolation';
 const _sessionModel: Map<string, vscode.ChatSessionProviderOptionItem | undefined> = new Map();
 
 export class CopilotCLIWorktreeManager {
-	static COPILOT_CLI_DEFAULT_ISOLATION_MEMENTO_KEY = 'github.copilot.cli.sessionIsolation';
-	static COPILOT_CLI_SESSION_WORKTREE_MEMENTO_KEY = 'github.copilot.cli.sessionWorktrees';
+	static COPILOT_CLI_DEFAULT_ISOLATION_MEMENTO_KEY = 'acp.copilot.cli.sessionIsolation';
+	static COPILOT_CLI_SESSION_WORKTREE_MEMENTO_KEY = 'acp.copilot.cli.sessionWorktrees';
 
 	private _sessionIsolation: Map<string, boolean> = new Map();
 	private _sessionWorktrees: Map<string, string> = new Map();
@@ -156,7 +156,7 @@ export class CopilotCLIChatSessionItemProvider extends Disposable implements vsc
 		const diskSessions = sessions.map(session => this._toChatSessionItem(session));
 
 		const count = diskSessions.length;
-		vscode.commands.executeCommand('setContext', 'github.copilot.chat.cliSessionsEmpty', count === 0);
+		vscode.commands.executeCommand('setContext', 'acp.copilot.chat.cliSessionsEmpty', count === 0);
 
 		return diskSessions;
 	}
@@ -457,13 +457,13 @@ export class CopilotCLIChatSessionParticipant {
 
 export function registerCLIChatCommands(copilotcliSessionItemProvider: CopilotCLIChatSessionItemProvider, copilotCLISessionService: ICopilotCLISessionService): IDisposable {
 	const disposableStore = new DisposableStore();
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.copilotcli.sessions.refresh', () => {
+	disposableStore.add(vscode.commands.registerCommand('acp.copilot.copilotcli.sessions.refresh', () => {
 		copilotcliSessionItemProvider.refresh();
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.refresh', () => {
+	disposableStore.add(vscode.commands.registerCommand('acp.copilot.cli.sessions.refresh', () => {
 		copilotcliSessionItemProvider.refresh();
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.delete', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('acp.copilot.cli.sessions.delete', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (sessionItem?.resource) {
 			const deleteLabel = l10n.t('Delete');
 			const result = await vscode.window.showWarningMessage(
@@ -479,13 +479,13 @@ export function registerCLIChatCommands(copilotcliSessionItemProvider: CopilotCL
 			}
 		}
 	}));
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.resumeInTerminal', async (sessionItem?: vscode.ChatSessionItem) => {
+	disposableStore.add(vscode.commands.registerCommand('acp.copilot.cli.sessions.resumeInTerminal', async (sessionItem?: vscode.ChatSessionItem) => {
 		if (sessionItem?.resource) {
 			await copilotcliSessionItemProvider.resumeCopilotCLISessionInTerminal(sessionItem);
 		}
 	}));
 
-	disposableStore.add(vscode.commands.registerCommand('github.copilot.cli.sessions.newTerminalSession', async () => {
+	disposableStore.add(vscode.commands.registerCommand('acp.copilot.cli.sessions.newTerminalSession', async () => {
 		await copilotcliSessionItemProvider.createCopilotCLITerminal();
 	}));
 	return disposableStore;

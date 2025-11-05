@@ -23,11 +23,11 @@ export class ChatReplayContribution extends Disposable {
 		this.registerEnableWorkspaceEditTracingCommand();
 		this.registerDisableWorkspaceEditTracingCommand();
 
-		commands.executeCommand('setContext', 'github.copilot.chat.replay.workspaceEditTracing', false);
+		commands.executeCommand('setContext', 'acp.copilot.chat.replay.workspaceEditTracing', false);
 	}
 
 	private registerStartReplayCommand() {
-		this._register(commands.registerCommand('github.copilot.chat.replay', async () => {
+		this._register(commands.registerCommand('acp.copilot.chat.replay', async () => {
 			const editor = window.activeTextEditor;
 			if (!editor || editor.document.languageId !== 'chatReplay') {
 				window.showInformationMessage('Open a chat replay file to debug.');
@@ -47,18 +47,18 @@ export class ChatReplayContribution extends Disposable {
 	}
 
 	private registerEnableWorkspaceEditTracingCommand() {
-		this._register(commands.registerCommand('github.copilot.chat.replay.enableWorkspaceEditTracing', async () => {
+		this._register(commands.registerCommand('acp.copilot.chat.replay.enableWorkspaceEditTracing', async () => {
 			const logger = this._instantiationService.invokeFunction(accessor => accessor.get(IRequestLogger));
 			logger.enableWorkspaceEditTracing();
-			await commands.executeCommand('setContext', 'github.copilot.chat.replay.workspaceEditTracing', true);
+			await commands.executeCommand('setContext', 'acp.copilot.chat.replay.workspaceEditTracing', true);
 		}));
 	}
 
 	private registerDisableWorkspaceEditTracingCommand() {
-		this._register(commands.registerCommand('github.copilot.chat.replay.disableWorkspaceEditTracing', async () => {
+		this._register(commands.registerCommand('acp.copilot.chat.replay.disableWorkspaceEditTracing', async () => {
 			const logger = this._instantiationService.invokeFunction(accessor => accessor.get(IRequestLogger));
 			logger.disableWorkspaceEditTracing();
-			await commands.executeCommand('setContext', 'github.copilot.chat.replay.workspaceEditTracing', false);
+			await commands.executeCommand('setContext', 'acp.copilot.chat.replay.workspaceEditTracing', false);
 		}));
 	}
 }

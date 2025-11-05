@@ -10,32 +10,33 @@ import { VSCodeFileSystemService } from '../../filesystem/vscode/fileSystemServi
 import { IGitExtensionService } from '../../git/common/gitExtensionService';
 import { IGitService } from '../../git/common/gitService';
 import { ILogService } from '../../log/common/logService';
-import { BaseSearchServiceImpl } from '../../search/vscode/baseSearchServiceImpl';
+import { ISearchService } from '../../search/common/searchService';
 import { IWorkspaceService } from '../../workspace/common/workspaceService';
 import { BaseIgnoreService } from '../node/ignoreServiceImpl';
 
 
 export class VsCodeIgnoreService extends BaseIgnoreService {
 
-	constructor(
-		@IGitService _gitService: IGitService,
-		@IGitExtensionService _gitExtensionService: IGitExtensionService,
-		@ILogService _logService: ILogService,
-		@IAuthenticationService _authService: IAuthenticationService,
-		@IWorkspaceService _workspaceService: IWorkspaceService,
-		@ICAPIClientService _capiClientService: ICAPIClientService
-	) {
-		super(
-			_gitService,
-			_logService,
-			_authService,
-			_workspaceService,
-			_capiClientService,
-			new BaseSearchServiceImpl(),
-			new VSCodeFileSystemService()
-		);
-		this.installListeners();
-	}
+    constructor(
+        @IGitService _gitService: IGitService,
+        @IGitExtensionService _gitExtensionService: IGitExtensionService,
+        @ILogService _logService: ILogService,
+        @IAuthenticationService _authService: IAuthenticationService,
+        @IWorkspaceService _workspaceService: IWorkspaceService,
+        @ICAPIClientService _capiClientService: ICAPIClientService,
+        @ISearchService _searchService: ISearchService
+    ) {
+        super(
+            _gitService,
+            _logService,
+            _authService,
+            _workspaceService,
+            _capiClientService,
+            _searchService,
+            new VSCodeFileSystemService()
+        );
+        this.installListeners();
+    }
 
 	private installListeners() {
 		this._disposables.push(workspace.onDidChangeWorkspaceFolders(e => {

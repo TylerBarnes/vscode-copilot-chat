@@ -18,24 +18,24 @@ import { GHPR_EXTENSION_ID } from '../../chatSessions/vscode/chatSessionsUriHand
 
 const welcomeViewContextKeys = {
 	Activated: 'github.copilot-chat.activated',
-	Offline: 'github.copilot.offline',
-	IndividualDisabled: 'github.copilot.interactiveSession.individual.disabled',
-	IndividualExpired: 'github.copilot.interactiveSession.individual.expired',
-	ContactSupport: 'github.copilot.interactiveSession.contactSupport',
-	EnterpriseDisabled: 'github.copilot.interactiveSession.enterprise.disabled',
-	CopilotChatDisabled: 'github.copilot.interactiveSession.chatDisabled'
+	Offline: 'acp.copilot.offline',
+	IndividualDisabled: 'acp.copilot.interactiveSession.individual.disabled',
+	IndividualExpired: 'acp.copilot.interactiveSession.individual.expired',
+	ContactSupport: 'acp.copilot.interactiveSession.contactSupport',
+	EnterpriseDisabled: 'acp.copilot.interactiveSession.enterprise.disabled',
+	CopilotChatDisabled: 'acp.copilot.interactiveSession.chatDisabled'
 };
 
-const chatQuotaExceededContextKey = 'github.copilot.chat.quotaExceeded';
+const chatQuotaExceededContextKey = 'acp.copilot.chat.quotaExceeded';
 
-const showLogViewContextKey = `github.copilot.chat.showLogView`;
-const debugReportFeedbackContextKey = 'github.copilot.debugReportFeedback';
+const showLogViewContextKey = `acp.copilot.chat.showLogView`;
+const debugReportFeedbackContextKey = 'acp.copilot.debugReportFeedback';
 
-const previewFeaturesDisabledContextKey = 'github.copilot.previewFeaturesDisabled';
+const previewFeaturesDisabledContextKey = 'acp.copilot.previewFeaturesDisabled';
 
-const debugContextKey = 'github.copilot.chat.debug';
+const debugContextKey = 'acp.copilot.chat.debug';
 
-export const prExtensionInstalledContextKey = 'github.copilot.prExtensionInstalled';
+export const prExtensionInstalledContextKey = 'acp.copilot.prExtensionInstalled';
 
 export class ContextKeysContribution extends Disposable {
 
@@ -55,8 +55,8 @@ export class ContextKeysContribution extends Disposable {
 
 		void this._inspectContext().catch(console.error);
 		this._register(_authenticationService.onDidAuthenticationChange(async () => await this._onAuthenticationChange()));
-		this._register(commands.registerCommand('github.copilot.refreshToken', async () => await this._inspectContext()));
-		this._register(commands.registerCommand('github.copilot.debug.showChatLogView', async () => {
+		this._register(commands.registerCommand('acp.copilot.refreshToken', async () => await this._inspectContext()));
+		this._register(commands.registerCommand('acp.copilot.debug.showChatLogView', async () => {
 			this._showLogView = true;
 			await commands.executeCommand('setContext', showLogViewContextKey, true);
 			await commands.executeCommand('copilot-chat.focus');

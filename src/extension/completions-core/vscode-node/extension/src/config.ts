@@ -199,7 +199,7 @@ export async function enableCompletions(accessor: ServicesAccessor) {
 		}
 	}
 
-	// The rest of this function is the inverse of disableCompletions(), updating the github.copilot.enable setting.
+	// The rest of this function is the inverse of disableCompletions(), updating the acp.copilot.enable setting.
 	const languageId = vscode.window.activeTextEditor?.document.languageId;
 	if (!languageId) { return; }
 	const config = vscode.workspace.getConfiguration(CopilotConfigPrefix);
@@ -218,7 +218,7 @@ export async function enableCompletions(accessor: ServicesAccessor) {
 }
 
 /**
- * Disable completions using the github.copilot.enable setting.
+ * Disable completions using the acp.copilot.enable setting.
  */
 export async function disableCompletions(accessor: ServicesAccessor) {
 	const instantiationService = accessor.get(IInstantiationService);
