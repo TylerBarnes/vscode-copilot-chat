@@ -84,7 +84,7 @@ export class ACPClient {
             throw new Error('Client is already initialized');
         }
 
-        const result = await this.rpcClient.sendRequest<InitializeResult>('initialize', params);
+        const result = await this.rpcClient.sendRequest('initialize', params) as InitializeResult;
         // Handle both 'capabilities' and 'agentCapabilities' for backwards compatibility
         this.agentCapabilities = result.agentCapabilities || (result as any).capabilities || {};
         this.isInitialized = true;
@@ -258,7 +258,7 @@ export class ACPClient {
 
     sendPrompt(prompt: string, sessionId?: string): Promise<any> {
         // Compatibility method - maps to session.prompt
-        return this.rpcClient.request('session/prompt', {
+        return this.rpcClient.sendRequest('session/prompt', {
             sessionId: sessionId || this.currentSessionId,
             prompt
         });

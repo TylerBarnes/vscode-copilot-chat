@@ -69,7 +69,7 @@ export class ACPRequestHandler {
 
             // Add references as embedded resources
             for (const ref of references) {
-                if (ref.value && 'uri' in ref.value) {
+                if (ref.value && typeof ref.value === 'object' && ref.value !== null && 'uri' in ref.value) {
                     content.push({
                         type: 'embedded_resource',
                         resource: {

@@ -7,12 +7,9 @@ import * as l10n from '@vscode/l10n';
 import { commands, env, ExtensionContext, ExtensionMode, l10n as vscodeL10n } from 'vscode';
 import { isScenarioAutomation } from '../../../platform/env/common/envService';
 import { isProduction } from '../../../platform/env/common/packagejson';
-// Removed IHeatmapService, IIgnoreService (proprietary)
 import { ILogService } from '../../../platform/log/common/logService';
-// Removed IExperimentationService (telemetry deleted)
 import { IInstantiationServiceBuilder, InstantiationServiceBuilder } from '../../../util/common/services';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
-// Removed CopilotExtensionApi (api deleted)
 import { ContributionCollection, IExtensionContributionFactory } from '../../common/contributions';
 
 // ##################################################################################

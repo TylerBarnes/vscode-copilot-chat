@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, ExtensionMode, l10n } from 'vscode';
+import { ExtensionContext, ExtensionMode } from 'vscode';
 // Authentication services removed - no longer needed for ACP
 // Removed chat services (chat deleted)
 // Removed command services (commands deleted)

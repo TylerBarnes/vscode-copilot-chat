@@ -3,9 +3,28 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ICopilotTokenManager, CopilotTokenType } from '../authentication/common/copilotTokenManager';
 import { CancellationToken } from 'vscode';
 import { Event } from '../../util/vs/base/common/event';
+import { createServiceIdentifier } from '../../util/common/services';
+
+// Define the interface locally since authentication directory was deleted
+export enum CopilotTokenType {
+    Github = 'github',
+    GithubEnterprise = 'github-enterprise',
+}
+
+export interface ICopilotTokenManager {
+    readonly _serviceBrand: undefined;
+    readonly onDidCopilotTokenRefresh: Event<void>;
+    getCopilotToken(type: CopilotTokenType, force?: boolean, token?: CancellationToken): Promise<string | null>;
+    checkCopilotToken(token?: CancellationToken): Promise<{ status: 'OK' | 'NotSignedIn' | 'NotAuthorized' | 'FailedToRefresh' }>;
+    resetCopilotToken(type: CopilotTokenType, reason?: string): Promise<void>;
+    getGitHubToken(force?: boolean, token?: CancellationToken): Promise<string | null>;
+    getGitHubSession(force?: boolean, token?: CancellationToken): Promise<any | null>;
+    dispose(): void;
+}
+
+export const ICopilotTokenManager = createServiceIdentifier<ICopilotTokenManager>('ICopilotTokenManager');
 
 /**
  * Stub implementation of ICopilotTokenManager for ACP.

@@ -25,15 +25,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 	private messages: ChatMessage[] = [];
 	private currentSessionId?: string;
 
-	constructor(
-		private readonly extensionUri: vscode.Uri,
-		private readonly acpClient: ACPClient,
-		private readonly sessionManager: SessionManager,
-		private readonly toolCallHandler: ToolCallHandler,
-		private readonly contentBlockMapper: ContentBlockMapper,
-		private readonly thinkingStepsDisplay: ThinkingStepsDisplay,
-		private readonly agentPlanViewer: AgentPlanViewer
-	) {}
+    constructor(
+        private readonly extensionUri: vscode.Uri,
+        private readonly acpClient: ACPClient,
+        private readonly sessionManager: SessionManager,
+        private readonly toolCallHandler: ToolCallHandler,
+        private readonly _contentBlockMapper: ContentBlockMapper,
+        private readonly _thinkingStepsDisplay: ThinkingStepsDisplay,
+        private readonly _agentPlanViewer: AgentPlanViewer
+    ) {}
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -143,7 +143,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 				return message.content
 					.filter((block: any) => block.type === 'text')
 					.map((block: any) => block.text)
-					.join('\\n');
+					.join('\
+');
 			}
 		}
 		return '';

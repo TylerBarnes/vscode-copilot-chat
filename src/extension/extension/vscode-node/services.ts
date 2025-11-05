@@ -3,60 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExtensionContext, ExtensionMode, env } from 'vscode';
-// Removed proprietary authentication services
-import { StubTokenManager } from '../../../platform/acp/stub-token-manager';
-// Removed proprietary chat services
-// Removed proprietary chunking services
-// import { IDevContainerConfigurationService } from '../../../platform/devcontainer/common/devContainerConfigurationService'; // Removed - proprietary
+import { ExtensionContext, ExtensionMode } from 'vscode';
 import { IDiffService } from '../../../platform/diff/common/diffService';
 import { DiffServiceImpl } from '../../../platform/diff/node/diffServiceImpl';
-// Removed proprietary endpoint services
-import { INativeEnvService, isScenarioAutomation } from '../../../platform/env/common/envService';
+import { INativeEnvService } from '../../../platform/env/common/envService';
 import { NativeEnvServiceImpl } from '../../../platform/env/vscode-node/nativeEnvServiceImpl';
-import { IGitCommitMessageService } from '../../../platform/git/common/gitCommitMessageService';
-import { IGitDiffService } from '../../../platform/git/common/gitDiffService';
-// Removed proprietary github, ignore, and image services
-// Removed ILanguageContextProviderService (proprietary - typescriptContext deleted)
-// Removed ILanguageContextService (proprietary - typescriptContext deleted)
-// Removed ICompletionsFetchService (proprietary - nesFetch deleted)
-// Removed CompletionsFetchService (proprietary - nesFetch deleted)
-// Removed proprietary networking services
-// Removed IParserService (proprietary - parser deleted)
-// Removed proprietary remote code search services
-// Removed proprietary code search authentication services
-// Removed IDocsSearchClient (remoteSearch deleted)
-import { IRequestLogger } from '../../../platform/requestLogger/node/requestLogger';
-// Removed IScopeSelector, ScopeSelectorImpl (proprietary - scopeSelection deleted)
 import { ISearchService } from '../../../platform/search/common/searchService';
-// Removed SearchServiceImpl (using StubSearchService instead)
 import { StubSearchService } from '../../../platform/acp/stub-search-service';
 import { ISettingsEditorSearchService, NoopSettingsEditorSearchService } from '../../../platform/settingsEditor/common/settingsEditorSearchService';
 import { IExperimentationService, NullExperimentationService } from '../../../platform/acp/stub-experimentation-service';
-// Removed proprietary telemetry services (ITelemetryService, NullTelemetryService, TelemetryService)
-// Removed proprietary testing services (IWorkspaceMutationManager, ISetupTestsDetector, ITestDepsResolver)
-// Removed proprietary tokenizer services
-// Removed proprietary workspace chunk search and embeddings services
+import { ICopilotTokenManager, StubTokenManager } from '../../../platform/acp/stub-token-manager';
 import { IInstantiationServiceBuilder } from '../../../util/common/services';
 import { SyncDescriptor } from '../../../util/vs/platform/instantiation/common/descriptors';
-// Removed proprietary command service (depends on deleted intents)
-// Removed ApiEmbeddingsIndex, IApiEmbeddingsIndex (proprietary)
-// Removed IPromptWorkspaceLabels (depends on deleted ignore/telemetry services)
-// Removed ChatAgentService (proprietary - conversation deleted)
-// Removed ConversationStore (proprietary - conversation deleted)
-// Removed IIntentService, IntentService, INewWorkspacePreviewContentManager, NewWorkspacePreviewContentManagerImpl, ITestGenInfoStorage, TestGenInfoStorage (proprietary)
-// Removed LanguageContextProviderService (proprietary - typescriptContext deleted)
-// Removed ILinkifyService, LinkifyService (proprietary - linkify deleted)
-import { collectFetcherTelemetry } from '../../log/vscode-node/loggingActions';
-// Removed onboardDebug services (proprietary - deleted)
-// Removed ILanguageToolsProvider, LanguageToolsProvider (proprietary)
-// Removed ChatMLFetcherImpl (proprietary)
-// Removed prompt services (proprietary - deleted)
-// Removed prompts services (proprietary - deleted)
-// Removed WorkspaceMutationManager (proprietary - testing deleted)
-// Removed IToolsService, ToolsService (proprietary - tools deleted)
-// Removed typescriptContext services (proprietary - deleted)
-// Removed workspaceRecorder services (proprietary - deleted)
 import { registerServices as registerCommonServices } from '../vscode/services';
 
 // ###########################################################################################
@@ -103,6 +61,8 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
     // Removed IDocsSearchClient (remoteSearch deleted)
 // Search - Use stub service to avoid findFiles2 API proposal dependency
         builder.define(ISearchService, new SyncDescriptor(StubSearchService));
+    // Token Manager - Use stub service to avoid devDeviceId API proposal dependency
+        builder.define(ICopilotTokenManager, new SyncDescriptor(StubTokenManager));
     // Removed: ITestDepsResolver, ISetupTestsDetector, IWorkspaceMutationManager (proprietary testing services)
     // Removed IScopeSelector (proprietary - scopeSelection deleted)
 	builder.define(IGitDiffService, new SyncDescriptor(GitDiffService));

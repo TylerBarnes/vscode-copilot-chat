@@ -245,6 +245,12 @@ export interface ToolCall {
     error?: string; // Error message if status is 'error'
 }
 
+export interface ToolResult {
+    toolCallId: string;
+    content: string;
+    error?: string;
+}
+
 // ============================================================================
 // Session Updates (Notifications from Agent)
 // ============================================================================

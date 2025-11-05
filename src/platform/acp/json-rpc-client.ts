@@ -1,5 +1,4 @@
 import { Readable, Writable } from 'stream';
-import { EventEmitter } from 'events';
 
 export interface JsonRpcRequest {
   jsonrpc: '2.0';
@@ -196,7 +195,7 @@ export class JsonRpcClient {
         pending.timeout = setTimeout(() => {
           this.pendingRequests.delete(id);
           reject(new Error('Request timeout'));
-        }, options.timeout);
+        }, options.timeout) as NodeJS.Timeout;
       }
 
       this.pendingRequests.set(id, pending);
@@ -271,7 +270,7 @@ export class JsonRpcClient {
     }
 
     // Reject all pending requests
-    for (const [id, pending] of this.pendingRequests) {
+    for (const [, pending] of this.pendingRequests) {
       if (pending.timeout) {
         clearTimeout(pending.timeout);
       }

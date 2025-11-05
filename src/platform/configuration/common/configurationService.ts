@@ -14,7 +14,7 @@ import { IObservable, observableFromEventOpts } from '../../../util/vs/base/comm
 import * as types from '../../../util/vs/base/common/types';
 import { isPreRelease, packageJson } from '../../env/common/packagejson';
 // Removed proprietary imports: ICopilotTokenStore, NextCursorLinePrediction, xtabPromptOptions, ResponseProcessor, FetcherId, AlternativeNotebookFormat, IExperimentationService
-import { IValidator, vBoolean, vString } from './validator';
+import { IValidator } from './validator';
 
 export const CopilotConfigPrefix = 'github.copilot';
 
@@ -740,8 +740,7 @@ export namespace ConfigKey {
 	export const EnableAlternateGptPrompt = defineExpSetting<boolean>('chat.alternateGptPrompt.enabled', false);
 	export const Gpt5AlternatePrompt = defineExpSetting<string>('chat.gpt5AlternatePrompt', 'default');
 
-	export const CompletionsFetcher = defineExpSetting<FetcherId | undefined>('chat.completionsFetcher', undefined);
-	export const NextEditSuggestionsFetcher = defineExpSetting<FetcherId | undefined>('chat.nesFetcher', undefined);
+    // Removed: CompletionsFetcher and NextEditSuggestionsFetcher (proprietary, FetcherId type not available)
 }
 
 export function getAllConfigKeys(): string[] {
