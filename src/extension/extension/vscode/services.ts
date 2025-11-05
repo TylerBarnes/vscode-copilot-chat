@@ -9,7 +9,7 @@ import { ExtensionContext, ExtensionMode, l10n } from 'vscode';
 // Removed command services (commands deleted)
 import { IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { ConfigurationServiceImpl } from '../../../platform/configuration/vscode/configurationServiceImpl';
-import { CustomInstructionsService, ICustomInstructionsService } from '../../../platform/customInstructions/common/customInstructionsService';
+// Removed CustomInstructionsService, ICustomInstructionsService (customInstructions - proprietary)
 import { IDebugOutputService } from '../../../platform/debug/common/debugOutputService';
 import { DebugOutputServiceImpl } from '../../../platform/debug/vscode/debugOutputServiceImpl';
 import { IDialogService } from '../../../platform/dialog/common/dialogService';
@@ -29,8 +29,7 @@ import { GitExtensionServiceImpl } from '../../../platform/git/vscode/gitExtensi
 import { GitServiceImpl } from '../../../platform/git/vscode/gitServiceImpl';
 // GitHub service removed - no longer needed
 // Heatmap service removed - no longer needed
-import { IInteractiveSessionService } from '../../../platform/interactive/common/interactiveSessionService';
-import { InteractiveSessionServiceImpl } from '../../../platform/interactive/vscode/interactiveSessionServiceImpl';
+// Removed IInteractiveSessionService, InteractiveSessionServiceImpl (interactive - proprietary)
 import { ILanguageDiagnosticsService } from '../../../platform/languages/common/languageDiagnosticsService';
 import { ILanguageFeaturesService } from '../../../platform/languages/common/languageFeaturesService';
 import { LanguageDiagnosticsServiceImpl } from '../../../platform/languages/vscode/languageDiagnosticsServiceImpl';
@@ -44,12 +43,11 @@ import { NotificationService } from '../../../platform/notification/vscode/notif
 import { IUrlOpener, NullUrlOpener } from '../../../platform/open/common/opener';
 import { RealUrlOpener } from '../../../platform/open/vscode/opener';
 // Removed ProjectTemplatesIndex (projectTemplatesIndex deleted)
-import { IPromptPathRepresentationService, PromptPathRepresentationService } from '../../../platform/prompts/common/promptPathRepresentationService';
+// Removed IPromptPathRepresentationService, PromptPathRepresentationService (prompts - proprietary)
 // Removed ReleaseNotesService (releaseNotes deleted)
 import { IRemoteRepositoriesService, RemoteRepositoriesService } from '../../../platform/remoteRepositories/vscode/remoteRepositories';
-import { IReviewService } from '../../../platform/review/common/reviewService';
-import { ReviewServiceImpl } from '../../../platform/review/vscode/reviewServiceImpl';
-import { ISimulationTestContext, NulSimulationTestContext } from '../../../platform/simulationTestContext/common/simulationTestContext';
+// Removed IReviewService, ReviewServiceImpl (review - proprietary)
+// Removed ISimulationTestContext, NulSimulationTestContext (simulationTestContext - proprietary)
 // Removed SnippyService (snippy deleted)
 // Removed SurveyService (survey deleted)
 import { ITabsAndEditorsService } from '../../../platform/tabs/common/tabsAndEditorsService';
@@ -68,8 +66,7 @@ import { SyncDescriptor } from '../../../util/vs/platform/instantiation/common/d
 // Removed merge conflict services (git deleted)
 // Removed LaunchConfigService (onboardDebug deleted)
 // Tools system removed - no longer needed
-import { PromptsServiceImpl } from '../../../platform/promptFiles/common/promptsServiceImpl';
-import { IPromptsService } from '../../../platform/promptFiles/common/promptsService';
+// Removed PromptsServiceImpl, IPromptsService (promptFiles - proprietary)
 
 // ##########################################################################
 // ###                                                                    ###
@@ -115,23 +112,23 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 	builder.define(ILanguageDiagnosticsService, new SyncDescriptor(LanguageDiagnosticsServiceImpl));
 	builder.define(ILanguageFeaturesService, new SyncDescriptor(LanguageFeaturesServiceImpl));
 	// Removed IRunCommandExecutionService (commands deleted)
-	builder.define(ISimulationTestContext, new SyncDescriptor(NulSimulationTestContext));
-	builder.define(IWorkspaceService, new SyncDescriptor(ExtensionTextDocumentManager));
-	builder.define(IExtensionsService, new SyncDescriptor(VSCodeExtensionsService));
+    // Removed ISimulationTestContext (simulationTestContext - proprietary)
+    builder.define(IWorkspaceService, new SyncDescriptor(ExtensionTextDocumentManager));
+    builder.define(IExtensionsService, new SyncDescriptor(VSCodeExtensionsService));
     // Removed ICombinedEmbeddingIndex (proprietary)
     // Removed IProjectTemplatesIndex (projectTemplatesIndex deleted)
     builder.define(IBlockedExtensionService, new SyncDescriptor(BlockedExtensionService));
     // Removed IEditLogService and IMultiFileEditInternalTelemetryService (multiFileEdit deleted)
-    builder.define(ICustomInstructionsService, new SyncDescriptor(CustomInstructionsService));
+    // Removed ICustomInstructionsService (customInstructions - proprietary)
     // Removed ILaunchConfigService (onboardDebug deleted)
     // Heatmap, tools, and notebook services removed - no longer needed
     // Removed ISurveyService (survey deleted)
     // Removed IEditSurvivalTrackerService (editSurvivalTracking deleted)
-    builder.define(IPromptPathRepresentationService, new SyncDescriptor(PromptPathRepresentationService));
-    builder.define(IPromptsService, new SyncDescriptor(PromptsServiceImpl));
+    // Removed IPromptPathRepresentationService (prompts - proprietary)
+    // Removed IPromptsService (promptFiles - proprietary)
     // Removed IReleaseNotesService (releaseNotes deleted)
     // Removed ISnippyService (snippy deleted)
-    builder.define(IInteractiveSessionService, new InteractiveSessionServiceImpl());
+    // Removed IInteractiveSessionService (interactive - proprietary)
     // AuthenticationChatUpgradeService removed - no longer needed for ACP
     // Removed IMergeConflictService (git deleted)
 }

@@ -48,7 +48,7 @@ import { SyncDescriptor } from '../../../util/vs/platform/instantiation/common/d
 // Removed ConversationStore (proprietary - conversation deleted)
 // Removed IIntentService, IntentService, INewWorkspacePreviewContentManager, NewWorkspacePreviewContentManagerImpl, ITestGenInfoStorage, TestGenInfoStorage (proprietary)
 // Removed LanguageContextProviderService (proprietary - typescriptContext deleted)
-import { ILinkifyService, LinkifyService } from '../../linkify/common/linkifyService';
+// Removed ILinkifyService, LinkifyService (proprietary - linkify deleted)
 import { collectFetcherTelemetry } from '../../log/vscode-node/loggingActions';
 // Removed onboardDebug services (proprietary - deleted)
 // Removed ILanguageToolsProvider, LanguageToolsProvider (proprietary)
@@ -112,7 +112,7 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 // Removed IGithubRepositoryService (proprietary)
     builder.define(IDevContainerConfigurationService, new SyncDescriptor(DevContainerConfigurationServiceImpl));
     // Removed IChatAgentService (proprietary)
-    builder.define(ILinkifyService, new SyncDescriptor(LinkifyService));
+    // Removed ILinkifyService registration (proprietary - linkify deleted)
     // Removed IChatMLFetcher (proprietary)
     // Removed IFeedbackReporter (proprietary - prompt deleted)
     // Removed IApiEmbeddingsIndex (proprietary)
