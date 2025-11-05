@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { ConfigurationManager, PermissionPolicy } from './configuration-manager';
+import { ConfigurationManager } from './configuration-manager';
+import type { PermissionPolicy } from './types';
 
 /**
  * Permission Policy Manager
@@ -250,7 +251,8 @@ export class PermissionPolicyManager {
 
     for (const policy of policies) {
       if (this.matchesPattern(toolName, policy.pattern)) {
-        return policy.action;
+        // Map 'deny' to 'reject' for compatibility
+        return policy.action === 'deny' ? 'reject' : policy.action;
       }
     }
 

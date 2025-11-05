@@ -1,22 +1,11 @@
 import * as vscode from 'vscode';
 import { AgentProfile } from './types';
+import type { MCPServerConfig } from './mcp-manager';
 
 /**
- * MCP Server configuration
+ * Permission configuration structure (nested)
  */
-export interface McpServerConfig {
-  name: string;
-  transport: 'stdio' | 'http' | 'sse';
-  command?: string;
-  args?: string[];
-  env?: Record<string, string>;
-  url?: string;
-}
-
-/**
- * Permission policy configuration
- */
-export interface PermissionPolicy {
+export interface PermissionConfiguration {
   fileSystem: {
     read: 'allow' | 'deny' | 'prompt';
     write: 'allow' | 'deny' | 'prompt';
@@ -54,10 +43,10 @@ export interface ACPConfiguration {
     defaultProfile?: string;
   };
   mcp: {
-    servers: McpServerConfig[];
+    servers: MCPServerConfig[];
     enabled: boolean;
   };
-  permissions: PermissionPolicy;
+  permissions: PermissionConfiguration;
   session: SessionConfig;
 }
 
@@ -83,7 +72,7 @@ export class ConfigurationManager {
         defaultProfile: config.get<string>('agent.defaultProfile')
       },
       mcp: {
-        servers: config.get<McpServerConfig[]>('mcp.servers', []),
+        servers: config.get<MCPServerConfig[]>('mcp.servers', []),
         enabled: config.get<boolean>('mcp.enabled', true)
       },
       permissions: this.getPermissionPolicy(config),
@@ -167,9 +156,9 @@ export class ConfigurationManager {
   /**
    * Get MCP server configurations
    */
-  getMcpServers(): McpServerConfig[] {
+  getMcpServers(): MCPServerConfig[] {
     const config = this.workspaceConfig(ConfigurationManager.CONFIG_SECTION);
-    return config.get<McpServerConfig[]>('mcp.servers', []);
+    return config.get<MCPServerConfig[]>('mcp.servers', []);
   }
   
   /**
@@ -183,13 +172,13 @@ export class ConfigurationManager {
   /**
    * Add or update an MCP server
    */
-  async updateMcpServer(server: McpServerConfig): Promise<void> {
+  async updateMcpServer(server: MCPServerConfig): Promise<void> {
     const config = this.workspaceConfig(ConfigurationManager.CONFIG_SECTION);
-    const servers = config.get<McpServerConfig[]>('mcp.servers', []);
+    const servers = config.get<MCPServerConfig[]>('mcp.servers', []);
     
     const existingIndex = servers.findIndex(s => s.name === server.name);
     
-    let updatedServers: McpServerConfig[];
+    let updatedServers: MCPServerConfig[];
     if (existingIndex >= 0) {
       // Replace existing server
       updatedServers = [
@@ -210,7 +199,7 @@ export class ConfigurationManager {
    */
   async removeMcpServer(name: string): Promise<void> {
     const config = this.workspaceConfig(ConfigurationManager.CONFIG_SECTION);
-    const servers = config.get<McpServerConfig[]>('mcp.servers', []);
+    const servers = config.get<MCPServerConfig[]>('mcp.servers', []);
     
     const filtered = servers.filter(s => s.name !== name);
     
@@ -228,7 +217,7 @@ export class ConfigurationManager {
   /**
    * Get permission policy
    */
-  getPermissionPolicy(config?: vscode.WorkspaceConfiguration): PermissionPolicy {
+  getPermissionPolicy(config?: vscode.WorkspaceConfiguration): PermissionConfiguration {
     const cfg = config || this.workspaceConfig(ConfigurationManager.CONFIG_SECTION);
     
     return {
@@ -252,48 +241,19 @@ export class ConfigurationManager {
   }
   
   /**
-   * Update permission policy
+   * Update permission policy (compatibility method)
    */
-  async updatePermissionPolicy(policy: Partial<PermissionPolicy>): Promise<void> {
-    const config = this.workspaceConfig(ConfigurationManager.CONFIG_SECTION);
+  async updatePermissionPolicy(pattern: string, policy: Partial<import('./types').PermissionPolicy>): Promise<void> {
+    // Remove the old policy first
+    await this.removePermissionPolicy(pattern);
     
-    if (policy.fileSystem) {
-      if (policy.fileSystem.read !== undefined) {
-        await config.update('permissions.fileSystem.read', policy.fileSystem.read, vscode.ConfigurationTarget.Global);
-      }
-      if (policy.fileSystem.write !== undefined) {
-        await config.update('permissions.fileSystem.write', policy.fileSystem.write, vscode.ConfigurationTarget.Global);
-      }
-      if (policy.fileSystem.allowedPaths !== undefined) {
-        await config.update('permissions.fileSystem.allowedPaths', policy.fileSystem.allowedPaths, vscode.ConfigurationTarget.Global);
-      }
-      if (policy.fileSystem.deniedPaths !== undefined) {
-        await config.update('permissions.fileSystem.deniedPaths', policy.fileSystem.deniedPaths, vscode.ConfigurationTarget.Global);
-      }
-    }
-    
-    if (policy.terminal) {
-      if (policy.terminal.execute !== undefined) {
-        await config.update('permissions.terminal.execute', policy.terminal.execute, vscode.ConfigurationTarget.Global);
-      }
-      if (policy.terminal.allowedCommands !== undefined) {
-        await config.update('permissions.terminal.allowedCommands', policy.terminal.allowedCommands, vscode.ConfigurationTarget.Global);
-      }
-      if (policy.terminal.deniedCommands !== undefined) {
-        await config.update('permissions.terminal.deniedCommands', policy.terminal.deniedCommands, vscode.ConfigurationTarget.Global);
-      }
-    }
-    
-    if (policy.mcp) {
-      if (policy.mcp.toolCall !== undefined) {
-        await config.update('permissions.mcp.toolCall', policy.mcp.toolCall, vscode.ConfigurationTarget.Global);
-      }
-      if (policy.mcp.allowedTools !== undefined) {
-        await config.update('permissions.mcp.allowedTools', policy.mcp.allowedTools, vscode.ConfigurationTarget.Global);
-      }
-      if (policy.mcp.deniedTools !== undefined) {
-        await config.update('permissions.mcp.deniedTools', policy.mcp.deniedTools, vscode.ConfigurationTarget.Global);
-      }
+    // Add the updated policy
+    if (policy.pattern && policy.action) {
+      await this.addPermissionPolicy({
+        pattern: policy.pattern,
+        action: policy.action,
+        description: policy.description
+      });
     }
   }
   
@@ -369,17 +329,36 @@ export class ConfigurationManager {
   /**
    * Get all permission policies (compatibility method)
    */
-  getPermissionPolicies(): PermissionPolicy[] {
+  getPermissionPolicies(): import('./types').PermissionPolicy[] {
     // Return all permission policies as an array
-    const policies: PermissionPolicy[] = [];
-    const fsPolicy = this.getPermissionPolicy('filesystem');
-    const terminalPolicy = this.getPermissionPolicy('terminal');
+    const policies: import('./types').PermissionPolicy[] = [];
     
-    if (fsPolicy) {
-      policies.push({ resource: 'filesystem', ...fsPolicy } as PermissionPolicy);
+    // Convert nested configuration to flat policy list
+    const config = vscode.workspace.getConfiguration('acp.chat');
+    const permissionsConfig = config.get<any>('permissions', {});
+    
+    // Add file system policies
+    if (permissionsConfig.fileSystem?.allowedPaths) {
+      for (const path of permissionsConfig.fileSystem.allowedPaths) {
+        policies.push({ pattern: path, action: 'allow', description: 'File system access' });
+      }
     }
-    if (terminalPolicy) {
-      policies.push({ resource: 'terminal', ...terminalPolicy } as PermissionPolicy);
+    if (permissionsConfig.fileSystem?.deniedPaths) {
+      for (const path of permissionsConfig.fileSystem.deniedPaths) {
+        policies.push({ pattern: path, action: 'deny', description: 'File system access' });
+      }
+    }
+    
+    // Add terminal policies
+    if (permissionsConfig.terminal?.allowedCommands) {
+      for (const cmd of permissionsConfig.terminal.allowedCommands) {
+        policies.push({ pattern: cmd, action: 'allow', description: 'Terminal command' });
+      }
+    }
+    if (permissionsConfig.terminal?.deniedCommands) {
+      for (const cmd of permissionsConfig.terminal.deniedCommands) {
+        policies.push({ pattern: cmd, action: 'deny', description: 'Terminal command' });
+      }
     }
     
     return policies;
@@ -388,7 +367,50 @@ export class ConfigurationManager {
   /**
    * Add a permission policy (compatibility method)
    */
-  async addPermissionPolicy(policy: PermissionPolicy): Promise<void> {
-    await this.updatePermissionPolicy(policy.resource, policy);
+  async addPermissionPolicy(policy: import('./types').PermissionPolicy): Promise<void> {
+    // Store the policy in the appropriate configuration section
+    const config = vscode.workspace.getConfiguration('acp.chat');
+    const permissionsConfig = config.get<any>('permissions', {});
+    
+    // Determine which section to update based on pattern
+    if (policy.pattern.includes('/') || policy.pattern.includes('\\')) {
+      // File system path
+      const section = policy.action === 'allow' ? 'allowedPaths' : 'deniedPaths';
+      if (!permissionsConfig.fileSystem) permissionsConfig.fileSystem = {};
+      if (!permissionsConfig.fileSystem[section]) permissionsConfig.fileSystem[section] = [];
+      permissionsConfig.fileSystem[section].push(policy.pattern);
+    } else {
+      // Terminal command
+      const section = policy.action === 'allow' ? 'allowedCommands' : 'deniedCommands';
+      if (!permissionsConfig.terminal) permissionsConfig.terminal = {};
+      if (!permissionsConfig.terminal[section]) permissionsConfig.terminal[section] = [];
+      permissionsConfig.terminal[section].push(policy.pattern);
+    }
+    
+    await config.update('permissions', permissionsConfig, vscode.ConfigurationTarget.Workspace);
+  }
+
+  /**
+   * Remove a permission policy (compatibility method)
+   */
+  async removePermissionPolicy(pattern: string): Promise<void> {
+    const config = vscode.workspace.getConfiguration('acp.chat');
+    const permissionsConfig = config.get<any>('permissions', {});
+    
+    // Remove from all sections
+    if (permissionsConfig.fileSystem?.allowedPaths) {
+      permissionsConfig.fileSystem.allowedPaths = permissionsConfig.fileSystem.allowedPaths.filter((p: string) => p !== pattern);
+    }
+    if (permissionsConfig.fileSystem?.deniedPaths) {
+      permissionsConfig.fileSystem.deniedPaths = permissionsConfig.fileSystem.deniedPaths.filter((p: string) => p !== pattern);
+    }
+    if (permissionsConfig.terminal?.allowedCommands) {
+      permissionsConfig.terminal.allowedCommands = permissionsConfig.terminal.allowedCommands.filter((c: string) => c !== pattern);
+    }
+    if (permissionsConfig.terminal?.deniedCommands) {
+      permissionsConfig.terminal.deniedCommands = permissionsConfig.terminal.deniedCommands.filter((c: string) => c !== pattern);
+    }
+    
+    await config.update('permissions', permissionsConfig, vscode.ConfigurationTarget.Workspace);
   }
 }

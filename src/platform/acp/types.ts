@@ -193,13 +193,21 @@ export interface SessionPromptResult {
 // ============================================================================
 
 export enum ToolCallKind {
+    // File system operations
     ReadTextFile = 'fs/read_text_file',
     WriteTextFile = 'fs/write_text_file',
+    Read = 'read', // Simplified alias for read operations
+    Write = 'write', // Simplified alias for write operations
+    
+    // Terminal operations
     TerminalCreate = 'terminal/create',
     TerminalSendInput = 'terminal/send_input',
     TerminalSendText = 'terminal/send_text', // Alias for send_input
     TerminalGetOutput = 'terminal/get_output',
     TerminalKill = 'terminal/kill',
+    Execute = 'execute', // Simplified alias for execute operations
+    
+    // MCP operations
     MCPToolCall = 'mcp/tool_call',
 }
 
@@ -227,10 +235,12 @@ export interface ToolCallContent {
 
 export interface ToolCall {
     toolCallId: string;
+    id: string; // Alias for toolCallId for compatibility
     title: string;
     kind: ToolCallKind;
     status: ToolCallStatus;
     content?: ToolCallContent | string;
+    input?: Record<string, any>; // Tool input parameters
     locations?: ToolCallLocation[];
     error?: string; // Error message if status is 'error'
 }
@@ -472,6 +482,20 @@ export type PermissionResponse = SessionRequestPermissionResult;
  * Prompt request - alias for SessionPromptParams
  */
 export type PromptRequest = SessionPromptParams;
+
+/**
+ * Session info - alias for SessionNewResult
+ */
+export type SessionInfo = SessionNewResult;
+
+/**
+ * Permission policy configuration
+ */
+export interface PermissionPolicy {
+  pattern: string;
+  action: 'allow' | 'deny' | 'prompt';
+  description?: string;
+}
 
 /**
  * Agent profile configuration
