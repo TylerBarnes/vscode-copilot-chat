@@ -34,7 +34,8 @@ import { ISearchService } from '../../../platform/search/common/searchService';
 // Removed SearchServiceImpl (using StubSearchService instead)
 import { StubSearchService } from '../../../platform/acp/stub-search-service';
 import { ISettingsEditorSearchService, NoopSettingsEditorSearchService } from '../../../platform/settingsEditor/common/settingsEditorSearchService';
-// Removed proprietary telemetry services
+import { IExperimentationService, NullExperimentationService } from '../../../platform/acp/stub-experimentation-service';
+// Removed proprietary telemetry services (ITelemetryService, NullTelemetryService, TelemetryService)
 // Removed proprietary testing services (IWorkspaceMutationManager, ISetupTestsDetector, ITestDepsResolver)
 // Removed proprietary tokenizer services
 // Removed proprietary workspace chunk search and embeddings services
