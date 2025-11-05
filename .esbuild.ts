@@ -54,9 +54,9 @@ const webviewBuildOptions = {
 	...baseBuildOptions,
 	platform: 'browser',
 	target: 'es2024', // Electron 34 -> Chrome 132 -> ES2024
-	entryPoints: [
-		{ in: 'src/extension/completions-core/vscode-node/extension/src/copilotPanel/webView/suggestionsPanelWebview.ts', out: 'suggestionsPanelWebview' },
-	],
+    entryPoints: [
+        // Removed suggestionsPanelWebview (proprietary - completions-core deleted)
+    ],
 } satisfies esbuild.BuildOptions;
 
 const nodeExtHostTestGlobs = [
@@ -174,20 +174,19 @@ const shimVsCodeTypesPlugin: esbuild.Plugin = {
 
 const nodeExtHostBuildOptions = {
 	...baseNodeBuildOptions,
-	entryPoints: [
-		{ in: './src/extension/extension/vscode-node/extension.ts', out: 'extension' },
-		{ in: './src/platform/parser/node/parserWorker.ts', out: 'worker2' },
-		{ in: './src/platform/tokenizer/node/tikTokenizerWorker.ts', out: 'tikTokenizerWorker' },
-		{ in: './src/platform/diff/node/diffWorkerMain.ts', out: 'diffWorker' },
-		{ in: './src/platform/tfidf/node/tfidfWorker.ts', out: 'tfidfWorker' },
-		{ in: './src/extension/onboardDebug/node/copilotDebugWorker/index.ts', out: 'copilotDebugCommand' },
-		{ in: './src/extension/chatSessions/vscode-node/copilotCLIShim.ts', out: 'copilotCLIShim' },
-		{ in: './src/test-extension.ts', out: 'test-extension' },
-		{ in: './src/sanity-test-extension.ts', out: 'sanity-test-extension' },
-	],
-	loader: { '.ps1': 'text' },
-	plugins: [testBundlePlugin, sanityTestBundlePlugin, importMetaPlugin],
-	external: [
+    entryPoints: [
+        { in: './src/extension/extension/vscode-node/extension.ts', out: 'extension' },
+        { in: './src/platform/parser/node/parserWorker.ts', out: 'worker2' },
+        // Removed tikTokenizerWorker (proprietary - tokenizer deleted)
+        { in: './src/platform/diff/node/diffWorkerMain.ts', out: 'diffWorker' },
+        { in: './src/platform/tfidf/node/tfidfWorker.ts', out: 'tfidfWorker' },
+        // Removed copilotDebugCommand (proprietary - onboardDebug deleted)
+        // Removed copilotCLIShim (proprietary - chatSessions deleted)
+        // Removed test-extension and sanity-test-extension (simulation tests deleted)
+    ],
+    loader: { '.ps1': 'text' },
+    plugins: [importMetaPlugin], // Removed testBundlePlugin and sanityTestBundlePlugin (simulation tests deleted)
+    external: [
 		...baseNodeBuildOptions.external,
 		'vscode'
 	]
@@ -206,87 +205,30 @@ const webExtHostBuildOptions = {
 	]
 } satisfies esbuild.BuildOptions;
 
-const nodeExtHostSimulationTestOptions = {
-	...nodeExtHostBuildOptions,
-	outdir: '.vscode/extensions/test-extension/dist',
-	entryPoints: [
-		{ in: '.vscode/extensions/test-extension/main.ts', out: './simulation-extension' }
-	]
-} satisfies esbuild.BuildOptions;
+// Removed nodeExtHostSimulationTestOptions and nodeSimulationBuildOptions (simulation tests deleted)
 
 const nodeSimulationBuildOptions = {
-	...baseNodeBuildOptions,
-	entryPoints: [
-		{ in: './test/simulationMain.ts', out: 'simulationMain' },
-	],
-	plugins: [testBundlePlugin, shimVsCodeTypesPlugin],
+    ...baseNodeBuildOptions,
+    entryPoints: [
+        // Removed simulationMain.ts (simulation tests deleted)
+    ],
+	plugins: [shimVsCodeTypesPlugin], // Removed testBundlePlugin (simulation tests deleted)
 	external: [
 		...baseNodeBuildOptions.external,
 	]
 } satisfies esbuild.BuildOptions;
 
-const nodeSimulationWorkbenchUIBuildOptions = {
-	...baseNodeBuildOptions,
-	platform: 'browser', // @ulugbekna: important to target 'browser' for correct bundling using 'window'
-	mainFields: ["browser", "module", "main"],
-	entryPoints: [
-		{ in: './test/simulation/workbench/simulationWorkbench.tsx', out: 'simulationWorkbench' },
-	],
-	alias: {
-		'vscode': './src/util/common/test/shims/vscodeTypesShim.ts'
-	},
-	external: [
-		...baseNodeBuildOptions.external,
+// Removed nodeSimulationWorkbenchUIBuildOptions (simulation tests deleted)
 
-		'../../node_modules/monaco-editor/*',
-
-		// @ulugbekna: libs provided by node that need to be specified manually because of 'platform' is set to 'browser'
-		'fs',
-		'path',
-		'readline',
-		'child_process',
-		'http',
-		'assert',
-	],
-} satisfies esbuild.BuildOptions;
-
-async function typeScriptServerPluginPackageJsonInstall(): Promise<void> {
-	await mkdir('./node_modules/@vscode/copilot-typescript-server-plugin', { recursive: true });
-	const source = path.join(__dirname, './src/extension/typescriptContext/serverPlugin/package.json');
-	const destination = path.join(__dirname, './node_modules/@vscode/copilot-typescript-server-plugin/package.json');
-	try {
-		await copyFile(source, destination);
-	} catch (error) {
-		console.error('Error copying package.json:', error);
-	}
-}
-
-const typeScriptServerPluginBuildOptions = {
-	bundle: true,
-	format: 'cjs',
-	// keepNames: true,
-	logLevel: 'info',
-	minify: !isDev,
-	outdir: './node_modules/@vscode/copilot-typescript-server-plugin/dist',
-	platform: 'node',
-	sourcemap: isDev ? 'linked' : false,
-	sourcesContent: false,
-	treeShaking: true,
-	external: [
-		"typescript",
-		"typescript/lib/tsserverlibrary"
-	],
-	entryPoints: [
-		{ in: './src/extension/typescriptContext/serverPlugin/src/node/main.ts', out: 'main' },
-	]
-} satisfies esbuild.BuildOptions;
+// Removed typeScriptServerPluginPackageJsonInstall (proprietary - typescriptContext deleted)
+// Removed typeScriptServerPluginBuildOptions (proprietary - typescriptContext deleted)
 
 async function main() {
 	if (!isDev) {
 		applyPackageJsonPatch(isPreRelease);
 	}
 
-	await typeScriptServerPluginPackageJsonInstall();
+    // Removed typeScriptServerPluginPackageJsonInstall call (proprietary - typescriptContext deleted)
 
 	if (isWatch) {
 
@@ -295,20 +237,11 @@ async function main() {
 		const nodeExtHostContext = await esbuild.context(nodeExtHostBuildOptions);
 		contexts.push(nodeExtHostContext);
 
-		const webExtHostContext = await esbuild.context(webExtHostBuildOptions);
-		contexts.push(webExtHostContext);
+        const webExtHostContext = await esbuild.context(webExtHostBuildOptions);
+        contexts.push(webExtHostContext);
 
-		const nodeSimulationContext = await esbuild.context(nodeSimulationBuildOptions);
-		contexts.push(nodeSimulationContext);
-
-		const nodeSimulationWorkbenchUIContext = await esbuild.context(nodeSimulationWorkbenchUIBuildOptions);
-		contexts.push(nodeSimulationWorkbenchUIContext);
-
-		const nodeExtHostSimulationContext = await esbuild.context(nodeExtHostSimulationTestOptions);
-		contexts.push(nodeExtHostSimulationContext);
-
-		const typeScriptServerPluginContext = await esbuild.context(typeScriptServerPluginBuildOptions);
-		contexts.push(typeScriptServerPluginContext);
+        // Removed simulation build contexts (simulation tests deleted)
+        // Removed typeScriptServerPluginContext (proprietary - typescriptContext deleted)
 
 		let debounce: NodeJS.Timeout | undefined;
 
@@ -357,15 +290,13 @@ async function main() {
 		});
 		rebuild();
 	} else {
-		await Promise.all([
-			esbuild.build(nodeExtHostBuildOptions),
-			esbuild.build(webExtHostBuildOptions),
-			esbuild.build(nodeSimulationBuildOptions),
-			esbuild.build(nodeSimulationWorkbenchUIBuildOptions),
-			esbuild.build(nodeExtHostSimulationTestOptions),
-			esbuild.build(typeScriptServerPluginBuildOptions),
-			esbuild.build(webviewBuildOptions),
-		]);
+        await Promise.all([
+            esbuild.build(nodeExtHostBuildOptions),
+            esbuild.build(webExtHostBuildOptions),
+            // Removed simulation build options (simulation tests deleted)
+            // Removed typeScriptServerPluginBuildOptions (proprietary - typescriptContext deleted)
+            esbuild.build(webviewBuildOptions),
+        ]);
 	}
 }
 

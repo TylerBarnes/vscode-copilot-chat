@@ -8,7 +8,7 @@ import { Codicon } from '../../../util/vs/base/common/codicons';
 import { CancellationError } from '../../../util/vs/base/common/errors';
 import { SymbolKind } from '../../../util/vs/workbench/api/common/extHostTypes/symbolInformation';
 import { IDialogService } from '../../dialog/common/dialogService';
-import { TextDocumentSnapshot } from '../../editing/common/textDocumentSnapshot';
+import { TextDocumentSnapshot } from '../../../util/textDocumentSnapshot';
 import { ILanguageFeaturesService } from '../../languages/common/languageFeaturesService';
 import { IParserService, treeSitterOffsetRangeToVSCodeRange, vscodeToTreeSitterOffsetRange } from '../../parser/node/parserService';
 import { IScopeSelector } from '../common/scopeSelection';

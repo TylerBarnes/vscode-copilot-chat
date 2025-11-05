@@ -4,110 +4,60 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ExtensionContext, ExtensionMode, env } from 'vscode';
-import { IAuthenticationService } from '../../../platform/authentication/common/authentication';
-import { ICopilotTokenManager } from '../../../platform/authentication/common/copilotTokenManager';
-import { StaticGitHubAuthenticationService } from '../../../platform/authentication/common/staticGitHubAuthenticationService';
-import { createStaticGitHubTokenProvider, getOrCreateTestingCopilotTokenManager } from '../../../platform/authentication/node/copilotTokenManager';
-import { AuthenticationService } from '../../../platform/authentication/vscode-node/authenticationService';
-import { VSCodeCopilotTokenManager } from '../../../platform/authentication/vscode-node/copilotTokenManager';
+// Removed proprietary authentication services
 import { StubTokenManager } from '../../../platform/acp/stub-token-manager';
-import { IChatAgentService } from '../../../platform/chat/common/chatAgents';
-import { IChatMLFetcher } from '../../../platform/chat/common/chatMLFetcher';
-import { IChunkingEndpointClient } from '../../../platform/chunking/common/chunkingEndpointClient';
-import { ChunkingEndpointClientImpl } from '../../../platform/chunking/common/chunkingEndpointClientImpl';
-import { INaiveChunkingService, NaiveChunkingService } from '../../../platform/chunking/node/naiveChunkerService';
+// Removed proprietary chat services
+// Removed proprietary chunking services
 import { IDevContainerConfigurationService } from '../../../platform/devcontainer/common/devContainerConfigurationService';
 import { IDiffService } from '../../../platform/diff/common/diffService';
 import { DiffServiceImpl } from '../../../platform/diff/node/diffServiceImpl';
-import { ICAPIClientService } from '../../../platform/endpoint/common/capiClient';
-import { IDomainService } from '../../../platform/endpoint/common/domainService';
-import { IEndpointProvider } from '../../../platform/endpoint/common/endpointProvider';
-import { AutomodeService, IAutomodeService } from '../../../platform/endpoint/node/automodeService';
-import { CAPIClientImpl } from '../../../platform/endpoint/node/capiClientImpl';
-import { DomainService } from '../../../platform/endpoint/node/domainServiceImpl';
+// Removed proprietary endpoint services
 import { INativeEnvService, isScenarioAutomation } from '../../../platform/env/common/envService';
 import { NativeEnvServiceImpl } from '../../../platform/env/vscode-node/nativeEnvServiceImpl';
 import { IGitCommitMessageService } from '../../../platform/git/common/gitCommitMessageService';
 import { IGitDiffService } from '../../../platform/git/common/gitDiffService';
-import { IGithubRepositoryService } from '../../../platform/github/common/githubService';
-import { GithubRepositoryService } from '../../../platform/github/node/githubRepositoryService';
-import { IIgnoreService } from '../../../platform/ignore/common/ignoreService';
-import { VsCodeIgnoreService } from '../../../platform/ignore/vscode-node/ignoreService';
-import { IImageService } from '../../../platform/image/common/imageService';
-import { ImageServiceImpl } from '../../../platform/image/node/imageServiceImpl';
-import { ILanguageContextProviderService } from '../../../platform/languageContextProvider/common/languageContextProviderService';
-import { ILanguageContextService } from '../../../platform/languageServer/common/languageContextService';
-import { ICompletionsFetchService } from '../../../platform/nesFetch/common/completionsFetchService';
-import { CompletionsFetchService } from '../../../platform/nesFetch/node/completionsFetchServiceImpl';
-import { IFetcherService } from '../../../platform/networking/common/fetcherService';
-import { FetcherService } from '../../../platform/networking/vscode-node/fetcherServiceImpl';
+// Removed proprietary github, ignore, and image services
+// Removed ILanguageContextProviderService (proprietary - typescriptContext deleted)
+// Removed ILanguageContextService (proprietary - typescriptContext deleted)
+// Removed ICompletionsFetchService (proprietary - nesFetch deleted)
+// Removed CompletionsFetchService (proprietary - nesFetch deleted)
+// Removed proprietary networking services
 import { IParserService } from '../../../platform/parser/node/parserService';
 import { ParserServiceImpl } from '../../../platform/parser/node/parserServiceImpl';
-import { AdoCodeSearchService, IAdoCodeSearchService } from '../../../platform/remoteCodeSearch/common/adoCodeSearchService';
-import { GithubCodeSearchService, IGithubCodeSearchService } from '../../../platform/remoteCodeSearch/common/githubCodeSearchService';
-import { ICodeSearchAuthenticationService } from '../../../platform/remoteCodeSearch/node/codeSearchRepoAuth';
-import { VsCodeCodeSearchAuthenticationService } from '../../../platform/remoteCodeSearch/vscode-node/codeSearchRepoAuth';
-import { IDocsSearchClient } from '../../../platform/remoteSearch/common/codeOrDocsSearchClient';
-import { DocsSearchClient } from '../../../platform/remoteSearch/node/codeOrDocsSearchClientImpl';
+// Removed proprietary remote code search services
+// Removed proprietary code search authentication services
+// Removed IDocsSearchClient (remoteSearch deleted)
 import { IRequestLogger } from '../../../platform/requestLogger/node/requestLogger';
 import { IScopeSelector } from '../../../platform/scopeSelection/common/scopeSelection';
 import { ScopeSelectorImpl } from '../../../platform/scopeSelection/vscode-node/scopeSelectionImpl';
 import { ISearchService } from '../../../platform/search/common/searchService';
-import { SearchServiceImpl } from '../../../platform/search/vscode-node/searchServiceImpl';
+// Removed SearchServiceImpl (using StubSearchService instead)
 import { StubSearchService } from '../../../platform/acp/stub-search-service';
-import { ISettingsEditorSearchService } from '../../../platform/settingsEditor/common/settingsEditorSearchService';
-import { IExperimentationService, NullExperimentationService } from '../../../platform/telemetry/common/nullExperimentationService';
-import { NullTelemetryService } from '../../../platform/telemetry/common/nullTelemetryService';
-import { ITelemetryService, ITelemetryUserConfig, TelemetryUserConfigImpl } from '../../../platform/telemetry/common/telemetry';
-import { APP_INSIGHTS_KEY_ENHANCED, APP_INSIGHTS_KEY_STANDARD } from '../../../platform/telemetry/node/azureInsights';
-import { MicrosoftExperimentationService } from '../../../platform/telemetry/vscode-node/microsoftExperimentationService';
-import { TelemetryService } from '../../../platform/telemetry/vscode-node/telemetryServiceImpl';
-import { IWorkspaceMutationManager } from '../../../platform/testing/common/workspaceMutationManager';
-import { ISetupTestsDetector, SetupTestsDetector } from '../../../platform/testing/node/setupTestDetector';
-import { ITestDepsResolver, TestDepsResolver } from '../../../platform/testing/node/testDepsResolver';
-import { ITokenizerProvider, TokenizerProvider } from '../../../platform/tokenizer/node/tokenizer';
-import { GithubAvailableEmbeddingTypesService, IGithubAvailableEmbeddingTypesService } from '../../../platform/workspaceChunkSearch/common/githubAvailableEmbeddingTypes';
-import { IRerankerService, RerankerService } from '../../../platform/workspaceChunkSearch/common/rerankerService';
-import { IWorkspaceChunkSearchService, WorkspaceChunkSearchService } from '../../../platform/workspaceChunkSearch/node/workspaceChunkSearchService';
-import { IWorkspaceFileIndex, WorkspaceFileIndex } from '../../../platform/workspaceChunkSearch/node/workspaceFileIndex';
+import { ISettingsEditorSearchService, NoopSettingsEditorSearchService } from '../../../platform/settingsEditor/common/settingsEditorSearchService';
+// Removed proprietary telemetry services
+// Removed proprietary testing services (IWorkspaceMutationManager, ISetupTestsDetector, ITestDepsResolver)
+// Removed proprietary tokenizer services
+// Removed proprietary workspace chunk search and embeddings services
 import { IInstantiationServiceBuilder } from '../../../util/common/services';
 import { SyncDescriptor } from '../../../util/vs/platform/instantiation/common/descriptors';
-import { CommandServiceImpl, ICommandService } from '../../commands/node/commandService';
-import { ApiEmbeddingsIndex, IApiEmbeddingsIndex } from '../../context/node/resolvers/extensionApi';
-import { IPromptWorkspaceLabels, PromptWorkspaceLabels } from '../../context/node/resolvers/promptWorkspaceLabels';
-import { ChatAgentService } from '../../conversation/vscode-node/chatParticipants';
-import { FeedbackReporter } from '../../conversation/vscode-node/feedbackReporter';
-import { IUserFeedbackService, UserFeedbackService } from '../../conversation/vscode-node/userActions';
-import { ConversationStore, IConversationStore } from '../../conversationStore/node/conversationStore';
-import { IIntentService, IntentService } from '../../intents/node/intentService';
-import { INewWorkspacePreviewContentManager, NewWorkspacePreviewContentManagerImpl } from '../../intents/node/newIntent';
-import { ITestGenInfoStorage, TestGenInfoStorage } from '../../intents/node/testIntent/testInfoStorage';
-import { LanguageContextProviderService } from '../../languageContextProvider/vscode-node/languageContextProviderService';
+// Removed proprietary command service (depends on deleted intents)
+// Removed ApiEmbeddingsIndex, IApiEmbeddingsIndex (proprietary)
+// Removed IPromptWorkspaceLabels (depends on deleted ignore/telemetry services)
+// Removed ChatAgentService (proprietary - conversation deleted)
+// Removed ConversationStore (proprietary - conversation deleted)
+// Removed IIntentService, IntentService, INewWorkspacePreviewContentManager, NewWorkspacePreviewContentManagerImpl, ITestGenInfoStorage, TestGenInfoStorage (proprietary)
+// Removed LanguageContextProviderService (proprietary - typescriptContext deleted)
 import { ILinkifyService, LinkifyService } from '../../linkify/common/linkifyService';
 import { collectFetcherTelemetry } from '../../log/vscode-node/loggingActions';
-import { DebugCommandToConfigConverter, IDebugCommandToConfigConverter } from '../../onboardDebug/node/commandToConfigConverter';
-import { DebuggableCommandIdentifier, IDebuggableCommandIdentifier } from '../../onboardDebug/node/debuggableCommandIdentifier';
-import { ILanguageToolsProvider, LanguageToolsProvider } from '../../onboardDebug/node/languageToolsProvider';
-import { ChatMLFetcherImpl } from '../../prompt/node/chatMLFetcher';
-import { IFeedbackReporter } from '../../prompt/node/feedbackReporter';
-import { IPromptVariablesService } from '../../prompt/node/promptVariablesService';
-import { ITodoListContextProvider, TodoListContextProvider } from '../../prompt/node/todoListContextProvider';
-import { DevContainerConfigurationServiceImpl } from '../../prompt/vscode-node/devContainerConfigurationServiceImpl';
-import { ProductionEndpointProvider } from '../../prompt/vscode-node/endpointProviderImpl';
-import { GitCommitMessageServiceImpl } from '../../prompt/vscode-node/gitCommitMessageServiceImpl';
-import { GitDiffService } from '../../prompt/vscode-node/gitDiffService';
-import { PromptVariablesServiceImpl } from '../../prompt/vscode-node/promptVariablesService';
-import { RequestLogger } from '../../prompt/vscode-node/requestLoggerImpl';
-import { ScenarioAutomationEndpointProviderImpl } from '../../prompt/vscode-node/scenarioAutomationEndpointProviderImpl';
-import { SettingsEditorSearchServiceImpl } from '../../prompt/vscode-node/settingsEditorSearchServiceImpl';
-import { CodeMapperService, ICodeMapperService } from '../../prompts/node/codeMapper/codeMapperService';
-import { FixCookbookService, IFixCookbookService } from '../../prompts/node/inline/fixCookbookService';
-import { WorkspaceMutationManager } from '../../testing/node/setupTestsFileManager';
-import { IToolsService } from '../../tools/common/toolsService';
-import { ToolsService } from '../../tools/vscode-node/toolsService';
-import { LanguageContextServiceImpl } from '../../typescriptContext/vscode-node/languageContextService';
-import { IWorkspaceListenerService } from '../../workspaceRecorder/common/workspaceListenerService';
-import { WorkspacListenerService } from '../../workspaceRecorder/vscode-node/workspaceListenerService';
+// Removed onboardDebug services (proprietary - deleted)
+// Removed ILanguageToolsProvider, LanguageToolsProvider (proprietary)
+// Removed ChatMLFetcherImpl (proprietary)
+// Removed prompt services (proprietary - deleted)
+// Removed prompts services (proprietary - deleted)
+// Removed WorkspaceMutationManager (proprietary - testing deleted)
+// Removed IToolsService, ToolsService (proprietary - tools deleted)
+// Removed typescriptContext services (proprietary - deleted)
+// Removed workspaceRecorder services (proprietary - deleted)
 import { registerServices as registerCommonServices } from '../vscode/services';
 
 // ###########################################################################################
@@ -126,18 +76,15 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 
     registerCommonServices(builder, extensionContext);
 
-	builder.define(IAutomodeService, new SyncDescriptor(AutomodeService));
-	builder.define(IConversationStore, new ConversationStore());
-	builder.define(IDiffService, new DiffServiceImpl());
-	builder.define(ITokenizerProvider, new SyncDescriptor(TokenizerProvider, [true]));
-	builder.define(IToolsService, new SyncDescriptor(ToolsService));
-	builder.define(IRequestLogger, new SyncDescriptor(RequestLogger));
+    // Removed IAutomodeService (proprietary)
+    // Removed IConversationStore (proprietary - conversation deleted)
+    builder.define(IDiffService, new DiffServiceImpl());
+    // Removed ITokenizerProvider (proprietary - tokenizer deleted)
+    // Removed IToolsService (proprietary - tools deleted)
+    // Removed IRequestLogger (proprietary - prompt deleted)
 	builder.define(INativeEnvService, new SyncDescriptor(NativeEnvServiceImpl));
 
-	builder.define(IFetcherService, new SyncDescriptor(FetcherService, [undefined]));
-	builder.define(IDomainService, new SyncDescriptor(DomainService));
-	builder.define(ICAPIClientService, new SyncDescriptor(CAPIClientImpl));
-	builder.define(IImageService, new SyncDescriptor(ImageServiceImpl));
+	// Removed IFetcherService, IDomainService, ICAPIClientService, IImageService (proprietary)
 
 	builder.define(ITelemetryUserConfig, new SyncDescriptor(TelemetryUserConfigImpl, [undefined, undefined]));
 	const internalAIKey = extensionContext.extension.packageJSON.internalAIKey ?? '';
@@ -147,60 +94,43 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
     // This avoids the devDeviceId proposed API dependency
     builder.define(ICopilotTokenManager, new SyncDescriptor(StubTokenManager));
 
-	if (isScenarioAutomation) {
-		builder.define(IAuthenticationService, new SyncDescriptor(StaticGitHubAuthenticationService, [createStaticGitHubTokenProvider()]));
-		builder.define(IEndpointProvider, new SyncDescriptor(ScenarioAutomationEndpointProviderImpl, [collectFetcherTelemetry]));
+    // Removed IAuthenticationService (proprietary - authentication deleted)
 
-	} else {
-		builder.define(IAuthenticationService, new SyncDescriptor(AuthenticationService));
-		builder.define(IEndpointProvider, new SyncDescriptor(ProductionEndpointProvider, [collectFetcherTelemetry]));
-	}
-
-	builder.define(ITestGenInfoStorage, new SyncDescriptor(TestGenInfoStorage)); // Used for test generation (/tests intent)
-	builder.define(IParserService, new SyncDescriptor(ParserServiceImpl, [/*useWorker*/ true]));
-	builder.define(IIntentService, new SyncDescriptor(IntentService));
-	builder.define(IIgnoreService, new SyncDescriptor(VsCodeIgnoreService));
-	builder.define(INaiveChunkingService, new SyncDescriptor(NaiveChunkingService));
-	builder.define(IWorkspaceFileIndex, new SyncDescriptor(WorkspaceFileIndex));
-	builder.define(IChunkingEndpointClient, new SyncDescriptor(ChunkingEndpointClientImpl));
-	builder.define(ICommandService, new SyncDescriptor(CommandServiceImpl));
-	builder.define(IDocsSearchClient, new SyncDescriptor(DocsSearchClient));
+    // Removed ITestGenInfoStorage, IIntentService (proprietary - intents deleted)
+    builder.define(IParserService, new SyncDescriptor(ParserServiceImpl, [/*useWorker*/ true]));
+// Removed IIgnoreService, INaiveChunkingService (proprietary)
+// Removed IWorkspaceFileIndex, IChunkingEndpointClient (proprietary)
+	// Removed ICommandService (proprietary - commands deleted)
+    // Removed IDocsSearchClient (remoteSearch deleted)
 // Search - Use stub service to avoid findFiles2 API proposal dependency
 		builder.define(ISearchService, new SyncDescriptor(StubSearchService));
-	builder.define(ITestDepsResolver, new SyncDescriptor(TestDepsResolver));
-	builder.define(ISetupTestsDetector, new SyncDescriptor(SetupTestsDetector));
-	builder.define(IWorkspaceMutationManager, new SyncDescriptor(WorkspaceMutationManager));
+	// Removed: ITestDepsResolver, ISetupTestsDetector, IWorkspaceMutationManager (proprietary testing services)
 	builder.define(IScopeSelector, new SyncDescriptor(ScopeSelectorImpl));
 	builder.define(IGitDiffService, new SyncDescriptor(GitDiffService));
 	builder.define(IGitCommitMessageService, new SyncDescriptor(GitCommitMessageServiceImpl));
-	builder.define(IGithubRepositoryService, new SyncDescriptor(GithubRepositoryService));
-	builder.define(IDevContainerConfigurationService, new SyncDescriptor(DevContainerConfigurationServiceImpl));
-	builder.define(IChatAgentService, new SyncDescriptor(ChatAgentService));
-	builder.define(ILinkifyService, new SyncDescriptor(LinkifyService));
-	builder.define(IChatMLFetcher, new SyncDescriptor(ChatMLFetcherImpl));
-	builder.define(IFeedbackReporter, new SyncDescriptor(FeedbackReporter));
-	builder.define(IApiEmbeddingsIndex, new SyncDescriptor(ApiEmbeddingsIndex, [/*useRemoteCache*/ true]));
-	builder.define(IGithubCodeSearchService, new SyncDescriptor(GithubCodeSearchService));
-	builder.define(IAdoCodeSearchService, new SyncDescriptor(AdoCodeSearchService));
-	builder.define(IWorkspaceChunkSearchService, new SyncDescriptor(WorkspaceChunkSearchService));
-	builder.define(ISettingsEditorSearchService, new SyncDescriptor(SettingsEditorSearchServiceImpl));
-	builder.define(INewWorkspacePreviewContentManager, new SyncDescriptor(NewWorkspacePreviewContentManagerImpl));
-	builder.define(IPromptVariablesService, new SyncDescriptor(PromptVariablesServiceImpl));
-	builder.define(IPromptWorkspaceLabels, new SyncDescriptor(PromptWorkspaceLabels));
-	builder.define(IUserFeedbackService, new SyncDescriptor(UserFeedbackService));
-	builder.define(IDebugCommandToConfigConverter, new SyncDescriptor(DebugCommandToConfigConverter));
-	builder.define(IDebuggableCommandIdentifier, new SyncDescriptor(DebuggableCommandIdentifier));
-	builder.define(ILanguageToolsProvider, new SyncDescriptor(LanguageToolsProvider));
-	builder.define(ICodeMapperService, new SyncDescriptor(CodeMapperService));
-	builder.define(ICompletionsFetchService, new SyncDescriptor(CompletionsFetchService));
-	builder.define(IFixCookbookService, new SyncDescriptor(FixCookbookService));
-	builder.define(ILanguageContextService, new SyncDescriptor(LanguageContextServiceImpl));
-	builder.define(ILanguageContextProviderService, new SyncDescriptor(LanguageContextProviderService));
-	builder.define(IWorkspaceListenerService, new SyncDescriptor(WorkspacListenerService));
-	builder.define(ICodeSearchAuthenticationService, new SyncDescriptor(VsCodeCodeSearchAuthenticationService));
-	builder.define(ITodoListContextProvider, new SyncDescriptor(TodoListContextProvider));
-	builder.define(IGithubAvailableEmbeddingTypesService, new SyncDescriptor(GithubAvailableEmbeddingTypesService));
-	builder.define(IRerankerService, new SyncDescriptor(RerankerService));
+// Removed IGithubRepositoryService (proprietary)
+    builder.define(IDevContainerConfigurationService, new SyncDescriptor(DevContainerConfigurationServiceImpl));
+    // Removed IChatAgentService (proprietary)
+    builder.define(ILinkifyService, new SyncDescriptor(LinkifyService));
+    // Removed IChatMLFetcher (proprietary)
+    // Removed IFeedbackReporter (proprietary - prompt deleted)
+    // Removed IApiEmbeddingsIndex (proprietary)
+    // Removed IGithubCodeSearchService, IAdoCodeSearchService, IWorkspaceChunkSearchService (proprietary)
+    builder.define(ISettingsEditorSearchService, new SyncDescriptor(NoopSettingsEditorSearchService));
+    // Removed INewWorkspacePreviewContentManager (proprietary)
+    // Removed IPromptVariablesService (proprietary - prompts deleted)
+    // Removed IPromptWorkspaceLabels (proprietary - context deleted)
+    // Removed IUserFeedbackService (proprietary - prompt deleted)
+    // Removed IDebugCommandToConfigConverter (proprietary - onboardDebug deleted)
+    // Removed IDebuggableCommandIdentifier (proprietary - onboardDebug deleted)
+    // Removed ILanguageToolsProvider, ICodeMapperService (proprietary)
+	// Removed ICompletionsFetchService (proprietary - nesFetch deleted)
+	// Removed IFixCookbookService (proprietary - prompts deleted)
+	// Removed ILanguageContextService (proprietary - typescriptContext deleted)
+	// Removed ILanguageContextProviderService (proprietary - typescriptContext deleted)
+	// Removed IWorkspaceListenerService (proprietary - prompts deleted)
+// Removed ICodeSearchAuthenticationService, IGithubAvailableEmbeddingTypesService, IRerankerService (proprietary)
+    // Removed ITodoListContextProvider (proprietary - context deleted)
 }
 
 function setupMSFTExperimentationService(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext) {

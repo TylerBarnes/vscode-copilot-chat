@@ -5,7 +5,7 @@
 
 import { ACPContribution } from '../../../platform/acp/acp.contribution';
 import { IExtensionContributionFactory, asContributionFactory } from '../../common/contributions';
-import { ContextKeysContribution } from '../../contextKeys/vscode-node/contextKeys.contribution';
+// Removed ContextKeysContribution (proprietary - depends on deleted authentication/telemetry)
 import vscodeContributions from '../vscode/contributions';
 
 // ###################################################################################################
@@ -36,7 +36,7 @@ import vscodeContributions from '../vscode/contributions';
 export const vscodeNodeContributions: IExtensionContributionFactory[] = [
     ...vscodeContributions,
     asContributionFactory(ACPContribution),
-    asContributionFactory(ContextKeysContribution),
+    // Removed ContextKeysContribution (proprietary - depends on deleted authentication/telemetry)
 ];
 
 /**

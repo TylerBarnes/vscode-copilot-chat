@@ -19,8 +19,7 @@ import type * as vscodeType from 'vscode';
 import { SimpleRPC } from '../src/extension/onboardDebug/node/copilotDebugWorker/rpc';
 import { ISimulationModelConfig, createExtensionUnitTestingServices } from '../src/extension/test/node/services';
 import { CHAT_MODEL } from '../src/platform/configuration/common/configurationService';
-import { IEndpointProvider, ModelSupportedEndpoint } from '../src/platform/endpoint/common/endpointProvider';
-import { IModelConfig } from '../src/platform/endpoint/test/node/openaiCompatibleEndpoint';
+// Endpoint system removed - no longer needed
 import { fileSystemServiceReadAsJSON } from '../src/platform/filesystem/common/fileSystemService';
 import { LogLevel } from '../src/platform/log/common/logService';
 import { ParserWithCaching } from '../src/platform/parser/node/parserWithCaching';

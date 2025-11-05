@@ -18,7 +18,7 @@ import { registerServices } from './services';
 // ###############################################################################################
 
 //#region TODO@bpasero this needs cleanup
-import '../../intents/node/allIntents';
+// Intents system removed - no longer needed
 
 function configureDevPackages() {
 	try {

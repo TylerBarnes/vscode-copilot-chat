@@ -4,18 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ExtensionContext, ExtensionMode, l10n } from 'vscode';
-import { IAuthenticationChatUpgradeService } from '../../../platform/authentication/common/authenticationUpgrade';
-import { AuthenticationChatUpgradeService } from '../../../platform/authentication/common/authenticationUpgradeService';
-import { CopilotTokenStore, ICopilotTokenStore } from '../../../platform/authentication/common/copilotTokenStore';
-import { BlockedExtensionService, IBlockedExtensionService } from '../../../platform/chat/common/blockedExtensionService';
-import { IChatQuotaService } from '../../../platform/chat/common/chatQuotaService';
-import { ChatQuotaService } from '../../../platform/chat/common/chatQuotaServiceImpl';
-import { IChatSessionService } from '../../../platform/chat/common/chatSessionService';
-import { IConversationOptions } from '../../../platform/chat/common/conversationOptions';
-import { IInteractionService, InteractionService } from '../../../platform/chat/common/interactionService';
-import { ChatSessionService } from '../../../platform/chat/vscode/chatSessionService';
-import { IRunCommandExecutionService } from '../../../platform/commands/common/runCommandExecutionService';
-import { RunCommandExecutionServiceImpl } from '../../../platform/commands/vscode/runCommandExecutionServiceImpl';
+// Authentication services removed - no longer needed for ACP
+// Removed chat services (chat deleted)
+// Removed command services (commands deleted)
 import { IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { ConfigurationServiceImpl } from '../../../platform/configuration/vscode/configurationServiceImpl';
 import { CustomInstructionsService, ICustomInstructionsService } from '../../../platform/customInstructions/common/customInstructionsService';
@@ -23,10 +14,8 @@ import { IDebugOutputService } from '../../../platform/debug/common/debugOutputS
 import { DebugOutputServiceImpl } from '../../../platform/debug/vscode/debugOutputServiceImpl';
 import { IDialogService } from '../../../platform/dialog/common/dialogService';
 import { DialogServiceImpl } from '../../../platform/dialog/vscode/dialogServiceImpl';
-import { EditSurvivalTrackerService, IEditSurvivalTrackerService } from '../../../platform/editSurvivalTracking/common/editSurvivalTrackerService';
-import { IEmbeddingsComputer } from '../../../platform/embeddings/common/embeddingsComputer';
-import { RemoteEmbeddingsComputer } from '../../../platform/embeddings/common/remoteEmbeddingsComputer';
-import { ICombinedEmbeddingIndex, VSCodeCombinedIndexImpl } from '../../../platform/embeddings/common/vscodeIndex';
+// Removed EditSurvivalTrackerService (editSurvivalTracking deleted)
+// Removed IEmbeddingsComputer, RemoteEmbeddingsComputer, ICombinedEmbeddingIndex, VSCodeCombinedIndexImpl (proprietary)
 import { IEnvService, isScenarioAutomation } from '../../../platform/env/common/envService';
 import { EnvServiceImpl } from '../../../platform/env/vscode/envServiceImpl';
 import { IVSCodeExtensionContext } from '../../../platform/extContext/common/extensionContext';
@@ -38,10 +27,8 @@ import { IGitExtensionService } from '../../../platform/git/common/gitExtensionS
 import { IGitService } from '../../../platform/git/common/gitService';
 import { GitExtensionServiceImpl } from '../../../platform/git/vscode/gitExtensionServiceImpl';
 import { GitServiceImpl } from '../../../platform/git/vscode/gitServiceImpl';
-import { IOctoKitService } from '../../../platform/github/common/githubService';
-import { OctoKitService } from '../../../platform/github/common/octoKitServiceImpl';
-import { IHeatmapService } from '../../../platform/heatmap/common/heatmapService';
-import { HeatmapServiceImpl } from '../../../platform/heatmap/vscode/heatmapServiceImpl';
+// GitHub service removed - no longer needed
+// Heatmap service removed - no longer needed
 import { IInteractiveSessionService } from '../../../platform/interactive/common/interactiveSessionService';
 import { InteractiveSessionServiceImpl } from '../../../platform/interactive/vscode/interactiveSessionServiceImpl';
 import { ILanguageDiagnosticsService } from '../../../platform/languages/common/languageDiagnosticsService';
@@ -50,54 +37,37 @@ import { LanguageDiagnosticsServiceImpl } from '../../../platform/languages/vsco
 import { LanguageFeaturesServiceImpl } from '../../../platform/languages/vscode/languageFeaturesServicesImpl';
 import { ILogService, LogServiceImpl } from '../../../platform/log/common/logService';
 import { NewOutputChannelLogTarget } from '../../../platform/log/vscode/outputChannelLogTarget';
-import { EditLogService, IEditLogService } from '../../../platform/multiFileEdit/common/editLogService';
-import { IMultiFileEditInternalTelemetryService, MultiFileEditInternalTelemetryService } from '../../../platform/multiFileEdit/common/multiFileEditQualityTelemetry';
-import { HeaderContributors, IHeaderContributors } from '../../../platform/networking/common/networking';
-import { AlternativeNotebookContentService, IAlternativeNotebookContentService } from '../../../platform/notebook/common/alternativeContent';
-import { AlternativeNotebookContentEditGenerator, IAlternativeNotebookContentEditGenerator } from '../../../platform/notebook/common/alternativeContentEditGenerator';
-import { INotebookService } from '../../../platform/notebook/common/notebookService';
-import { INotebookSummaryTracker } from '../../../platform/notebook/common/notebookSummaryTracker';
-import { NotebookService } from '../../../platform/notebook/vscode/notebookServiceImpl';
-import { NotebookSummaryTrackerImpl } from '../../../platform/notebook/vscode/notebookSummaryTrackerImpl';
+// Removed EditLogService and MultiFileEditInternalTelemetryService (multiFileEdit deleted)
+// Networking and notebook services removed - no longer needed
 import { INotificationService, NullNotificationService } from '../../../platform/notification/common/notificationService';
 import { NotificationService } from '../../../platform/notification/vscode/notificationServiceImpl';
 import { IUrlOpener, NullUrlOpener } from '../../../platform/open/common/opener';
 import { RealUrlOpener } from '../../../platform/open/vscode/opener';
-import { IProjectTemplatesIndex, ProjectTemplatesIndex } from '../../../platform/projectTemplatesIndex/common/projectTemplatesIndex';
+// Removed ProjectTemplatesIndex (projectTemplatesIndex deleted)
 import { IPromptPathRepresentationService, PromptPathRepresentationService } from '../../../platform/prompts/common/promptPathRepresentationService';
-import { IReleaseNotesService } from '../../../platform/releaseNotes/common/releaseNotesService';
-import { ReleaseNotesService } from '../../../platform/releaseNotes/vscode/releaseNotesServiceImpl';
+// Removed ReleaseNotesService (releaseNotes deleted)
 import { IRemoteRepositoriesService, RemoteRepositoriesService } from '../../../platform/remoteRepositories/vscode/remoteRepositories';
 import { IReviewService } from '../../../platform/review/common/reviewService';
 import { ReviewServiceImpl } from '../../../platform/review/vscode/reviewServiceImpl';
 import { ISimulationTestContext, NulSimulationTestContext } from '../../../platform/simulationTestContext/common/simulationTestContext';
-import { ISnippyService } from '../../../platform/snippy/common/snippyService';
-import { SnippyService } from '../../../platform/snippy/common/snippyServiceImpl';
-import { ISurveyService } from '../../../platform/survey/common/surveyService';
-import { SurveyService } from '../../../platform/survey/vscode/surveyServiceImpl';
+// Removed SnippyService (snippy deleted)
+// Removed SurveyService (survey deleted)
 import { ITabsAndEditorsService } from '../../../platform/tabs/common/tabsAndEditorsService';
 import { TabsAndEditorsServiceImpl } from '../../../platform/tabs/vscode/tabsAndEditorsServiceImpl';
 import { ITasksService } from '../../../platform/tasks/common/tasksService';
 import { TasksService } from '../../../platform/tasks/vscode/tasksService';
 import { ITerminalService } from '../../../platform/terminal/common/terminalService';
 import { TerminalServiceImpl } from '../../../platform/terminal/vscode/terminalServiceImpl';
-import { ITestProvider } from '../../../platform/testing/common/testProvider';
-import { TestProvider } from '../../../platform/testing/vscode/testProviderImpl';
+// Removed: ITestProvider, TestProvider (proprietary testing services)
 import { IWorkbenchService } from '../../../platform/workbench/common/workbenchService';
 import { WorkbenchServiceImpl } from '../../../platform/workbench/vscode/workbenchServiceImpt';
 import { IWorkspaceService } from '../../../platform/workspace/common/workspaceService';
 import { ExtensionTextDocumentManager } from '../../../platform/workspace/vscode/workspaceServiceImpl';
 import { IInstantiationServiceBuilder } from '../../../util/common/services';
 import { SyncDescriptor } from '../../../util/vs/platform/instantiation/common/descriptors';
-import { IMergeConflictService } from '../../git/common/mergeConflictService';
-import { MergeConflictServiceImpl } from '../../git/vscode/mergeConflictServiceImpl';
-import { ILaunchConfigService } from '../../onboardDebug/common/launchConfigService';
-import { LaunchConfigService } from '../../onboardDebug/vscode/launchConfigService';
-import { EditToolLearningService, IEditToolLearningService } from '../../tools/common/editToolLearningService';
-import { IToolEmbeddingsComputer, ToolEmbeddingsComputer } from '../../tools/common/virtualTools/toolEmbeddingsComputer';
-import { ToolGroupingService } from '../../tools/common/virtualTools/toolGroupingService';
-import { ToolGroupingCache } from '../../tools/common/virtualTools/virtualToolGroupCache';
-import { IToolGroupingCache, IToolGroupingService } from '../../tools/common/virtualTools/virtualToolTypes';
+// Removed merge conflict services (git deleted)
+// Removed LaunchConfigService (onboardDebug deleted)
+// Tools system removed - no longer needed
 import { PromptsServiceImpl } from '../../../platform/promptFiles/common/promptsServiceImpl';
 import { IPromptsService } from '../../../platform/promptFiles/common/promptsService';
 
@@ -112,21 +82,17 @@ import { IPromptsService } from '../../../platform/promptFiles/common/promptsSer
 export function registerServices(builder: IInstantiationServiceBuilder, extensionContext: ExtensionContext): void {
 	const isTestMode = extensionContext.extensionMode === ExtensionMode.Test;
 
-	builder.define(IInteractionService, new SyncDescriptor(InteractionService));
-	builder.define(ICopilotTokenStore, new CopilotTokenStore());
-	builder.define(IDebugOutputService, new DebugOutputServiceImpl());
+    // Removed IInteractionService (chat deleted)
+    // CopilotTokenStore removed - no longer needed for ACP
+    builder.define(IDebugOutputService, new DebugOutputServiceImpl());
 	builder.define(IDialogService, new DialogServiceImpl());
-	builder.define(IEnvService, new EnvServiceImpl());
-	builder.define(IFileSystemService, new VSCodeFileSystemService());
-	builder.define(IHeaderContributors, new HeaderContributors());
-	builder.define(INotebookService, new SyncDescriptor(NotebookService));
-	builder.define(INotebookSummaryTracker, new SyncDescriptor(NotebookSummaryTrackerImpl));
-	builder.define(IAlternativeNotebookContentService, new SyncDescriptor(AlternativeNotebookContentService));
-	builder.define(IAlternativeNotebookContentEditGenerator, new SyncDescriptor(AlternativeNotebookContentEditGenerator));
-	builder.define(IRemoteRepositoriesService, new RemoteRepositoriesService());
+    builder.define(IEnvService, new EnvServiceImpl());
+    builder.define(IFileSystemService, new VSCodeFileSystemService());
+    // Notebook and networking services removed - no longer needed
+    builder.define(IRemoteRepositoriesService, new RemoteRepositoriesService());
 	builder.define(ITabsAndEditorsService, new TabsAndEditorsServiceImpl());
 	builder.define(ITerminalService, new SyncDescriptor(TerminalServiceImpl));
-	builder.define(ITestProvider, new SyncDescriptor(TestProvider));
+	// Removed: ITestProvider (proprietary testing service)
 	builder.define(IUrlOpener, isTestMode && !isScenarioAutomation ? new NullUrlOpener() : new RealUrlOpener());
 	builder.define(INotificationService, isTestMode && !isScenarioAutomation ? new NullNotificationService() : new NotificationService());
 	builder.define(IVSCodeExtensionContext, <any>/*force _serviceBrand*/extensionContext);
@@ -138,41 +104,34 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 		topP: 1,
 		rejectionMessage: l10n.t('Sorry, but I can only assist with programming related questions.'),
 	});
-	builder.define(IChatSessionService, new SyncDescriptor(ChatSessionService));
+	// Removed IChatSessionService (chat deleted)
 	builder.define(IConfigurationService, new SyncDescriptor(ConfigurationServiceImpl));
 	builder.define(ILogService, new SyncDescriptor(LogServiceImpl, [[new NewOutputChannelLogTarget(extensionContext)]]));
-	builder.define(IChatQuotaService, new SyncDescriptor(ChatQuotaService));
+	// Removed IChatQuotaService (chat deleted)
 	builder.define(ITasksService, new SyncDescriptor(TasksService));
 	builder.define(IGitExtensionService, new SyncDescriptor(GitExtensionServiceImpl));
 	builder.define(IGitService, new SyncDescriptor(GitServiceImpl));
-	builder.define(IOctoKitService, new SyncDescriptor(OctoKitService));
-	builder.define(IReviewService, new SyncDescriptor(ReviewServiceImpl));
+    // OctoKitService and ReviewService removed - no longer needed
 	builder.define(ILanguageDiagnosticsService, new SyncDescriptor(LanguageDiagnosticsServiceImpl));
 	builder.define(ILanguageFeaturesService, new SyncDescriptor(LanguageFeaturesServiceImpl));
-	builder.define(IRunCommandExecutionService, new SyncDescriptor(RunCommandExecutionServiceImpl));
+	// Removed IRunCommandExecutionService (commands deleted)
 	builder.define(ISimulationTestContext, new SyncDescriptor(NulSimulationTestContext));
 	builder.define(IWorkspaceService, new SyncDescriptor(ExtensionTextDocumentManager));
 	builder.define(IExtensionsService, new SyncDescriptor(VSCodeExtensionsService));
-	builder.define(ICombinedEmbeddingIndex, new SyncDescriptor(VSCodeCombinedIndexImpl, [/*useRemoteCache*/ true]));
-	builder.define(IProjectTemplatesIndex, new SyncDescriptor(ProjectTemplatesIndex, [/*useRemoteCache*/ true]));
-	builder.define(IBlockedExtensionService, new SyncDescriptor(BlockedExtensionService));
-	builder.define(IEditLogService, new SyncDescriptor(EditLogService));
-	builder.define(IMultiFileEditInternalTelemetryService, new SyncDescriptor(MultiFileEditInternalTelemetryService));
-	builder.define(ICustomInstructionsService, new SyncDescriptor(CustomInstructionsService));
-	builder.define(ILaunchConfigService, new SyncDescriptor(LaunchConfigService));
-	builder.define(IHeatmapService, new SyncDescriptor(HeatmapServiceImpl));
-	builder.define(ISurveyService, new SyncDescriptor(SurveyService));
-	builder.define(IEditSurvivalTrackerService, new SyncDescriptor(EditSurvivalTrackerService));
-	builder.define(IPromptPathRepresentationService, new SyncDescriptor(PromptPathRepresentationService));
-	builder.define(IPromptsService, new SyncDescriptor(PromptsServiceImpl));
-	builder.define(IReleaseNotesService, new SyncDescriptor(ReleaseNotesService));
-	builder.define(ISnippyService, new SyncDescriptor(SnippyService));
-	builder.define(IInteractiveSessionService, new InteractiveSessionServiceImpl());
-	builder.define(IAuthenticationChatUpgradeService, new SyncDescriptor(AuthenticationChatUpgradeService));
-	builder.define(IEmbeddingsComputer, new SyncDescriptor(RemoteEmbeddingsComputer));
-	builder.define(IToolGroupingService, new SyncDescriptor(ToolGroupingService));
-	builder.define(IToolEmbeddingsComputer, new SyncDescriptor(ToolEmbeddingsComputer));
-	builder.define(IToolGroupingCache, new SyncDescriptor(ToolGroupingCache));
-	builder.define(IMergeConflictService, new SyncDescriptor(MergeConflictServiceImpl));
-	builder.define(IEditToolLearningService, new SyncDescriptor(EditToolLearningService));
+    // Removed ICombinedEmbeddingIndex (proprietary)
+    // Removed IProjectTemplatesIndex (projectTemplatesIndex deleted)
+    builder.define(IBlockedExtensionService, new SyncDescriptor(BlockedExtensionService));
+    // Removed IEditLogService and IMultiFileEditInternalTelemetryService (multiFileEdit deleted)
+    builder.define(ICustomInstructionsService, new SyncDescriptor(CustomInstructionsService));
+    // Removed ILaunchConfigService (onboardDebug deleted)
+    // Heatmap, tools, and notebook services removed - no longer needed
+    // Removed ISurveyService (survey deleted)
+    // Removed IEditSurvivalTrackerService (editSurvivalTracking deleted)
+    builder.define(IPromptPathRepresentationService, new SyncDescriptor(PromptPathRepresentationService));
+    builder.define(IPromptsService, new SyncDescriptor(PromptsServiceImpl));
+    // Removed IReleaseNotesService (releaseNotes deleted)
+    // Removed ISnippyService (snippy deleted)
+    builder.define(IInteractiveSessionService, new InteractiveSessionServiceImpl());
+    // AuthenticationChatUpgradeService removed - no longer needed for ACP
+    // Removed IMergeConflictService (git deleted)
 }

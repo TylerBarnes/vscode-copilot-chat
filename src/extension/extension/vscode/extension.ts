@@ -7,13 +7,12 @@ import * as l10n from '@vscode/l10n';
 import { commands, env, ExtensionContext, ExtensionMode, l10n as vscodeL10n } from 'vscode';
 import { isScenarioAutomation } from '../../../platform/env/common/envService';
 import { isProduction } from '../../../platform/env/common/packagejson';
-import { IHeatmapService } from '../../../platform/heatmap/common/heatmapService';
-import { IIgnoreService } from '../../../platform/ignore/common/ignoreService';
+// Removed IHeatmapService, IIgnoreService (proprietary)
 import { ILogService } from '../../../platform/log/common/logService';
-import { IExperimentationService } from '../../../platform/telemetry/common/nullExperimentationService';
+// Removed IExperimentationService (telemetry deleted)
 import { IInstantiationServiceBuilder, InstantiationServiceBuilder } from '../../../util/common/services';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
-import { CopilotExtensionApi } from '../../api/vscode/extensionApi';
+// Removed CopilotExtensionApi (api deleted)
 import { ContributionCollection, IExtensionContributionFactory } from '../../common/contributions';
 
 // ##################################################################################
@@ -62,15 +61,11 @@ export async function baseActivate(configuration: IExtensionActivationConfigurat
 
 	const instantiationService = createInstantiationService(configuration);
 
-	await instantiationService.invokeFunction(async accessor => {
-		const expService = accessor.get(IExperimentationService);
-		const logService = accessor.get(ILogService);
+    await instantiationService.invokeFunction(async accessor => {
+        // Removed experimentation service (telemetry deleted)
+        const logService = accessor.get(ILogService);
 
-		// Await intialization of exp service. This ensure cache is fresh.
-		// It will then auto refresh every 30 minutes after that.
-		await expService.hasTreatments();
-
-		const contributions = instantiationService.createInstance(ContributionCollection, configuration.contributions);
+        const contributions = instantiationService.createInstance(ContributionCollection, configuration.contributions);
 		context.subscriptions.push(contributions);
 
 		logService.trace('Copilot Chat extension activated');
@@ -80,15 +75,8 @@ export async function baseActivate(configuration: IExtensionActivationConfigurat
 		return instantiationService; // The returned accessor is used in tests
 	}
 
-	return {
-		getAPI(version: number) {
-			if (version > CopilotExtensionApi.version) {
-				throw new Error('Invalid Copilot Chat extension API version. Please upgrade Copilot Chat.');
-			}
-
-			return instantiationService.createInstance(CopilotExtensionApi);
-		}
-	};
+    // Removed API return (api deleted - ACP extension doesn't expose an API)
+    return undefined;
 }
 
 export function createInstantiationService(configuration: IExtensionActivationConfiguration): IInstantiationService {

@@ -12,15 +12,8 @@ import { Disposable } from '../../../util/vs/base/common/lifecycle';
 import * as objects from '../../../util/vs/base/common/objects';
 import { IObservable, observableFromEventOpts } from '../../../util/vs/base/common/observable';
 import * as types from '../../../util/vs/base/common/types';
-import { ICopilotTokenStore } from '../../authentication/common/copilotTokenStore';
 import { isPreRelease, packageJson } from '../../env/common/packagejson';
-import { NextCursorLinePrediction } from '../../inlineEdits/common/dataTypes/nextCursorLinePrediction';
-import * as xtabPromptOptions from '../../inlineEdits/common/dataTypes/xtabPromptOptions';
-import { LANGUAGE_CONTEXT_ENABLED_LANGUAGES, LanguageContextLanguages } from '../../inlineEdits/common/dataTypes/xtabPromptOptions';
-import { ResponseProcessor } from '../../inlineEdits/common/responseProcessor';
-import { FetcherId } from '../../networking/common/fetcherService';
-import { AlternativeNotebookFormat } from '../../notebook/common/alternativeContentFormat';
-import { IExperimentationService } from '../../telemetry/common/nullExperimentationService';
+// Removed proprietary imports: ICopilotTokenStore, NextCursorLinePrediction, xtabPromptOptions, ResponseProcessor, FetcherId, AlternativeNotebookFormat, IExperimentationService
 import { IValidator, vBoolean, vString } from './validator';
 
 export const CopilotConfigPrefix = 'github.copilot';
@@ -128,7 +121,7 @@ export interface IConfigurationService {
 	 *
 	 * @remark For object values, the user config will replace the default config.
 	 */
-	getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, experimentationService: IExperimentationService, scope?: ConfigurationScope): T;
+    getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, scope?: ConfigurationScope): T;
 
 	/**
 	 * Gets the observable of a user configuration for a key from vscode (which if not defined, pulls default value from package.json).
@@ -136,7 +129,7 @@ export interface IConfigurationService {
 	 *
 	 * @remark For object values, the user config will replace the default config.
 	 */
-	getExperimentBasedConfigObservable<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, experimentationService: IExperimentationService): IObservable<T>;
+    getExperimentBasedConfigObservable<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>): IObservable<T>;
 
 	/**
 	 * For object values, the user config will be mixed in with the default config.
@@ -175,19 +168,10 @@ export abstract class AbstractConfigurationService extends Disposable implements
 	protected _isTeamMember: boolean = false;
 	private _teamMemberUsername: string | undefined = undefined;
 
-	constructor(copilotTokenStore?: ICopilotTokenStore) {
-		super();
-		if (copilotTokenStore) {
-			this._register(copilotTokenStore.onDidStoreUpdate(() => {
-				const isTeamMember = !!copilotTokenStore.copilotToken?.isVscodeTeamMember;
-				this._setUserInfo({
-					isInternal: !!copilotTokenStore.copilotToken?.isInternal,
-					isTeamMember,
-					teamMemberUsername: isTeamMember ? copilotTokenStore.copilotToken?.username : undefined
-				});
-			}));
-		}
-	}
+    constructor() {
+        super();
+        // Removed ICopilotTokenStore dependency (proprietary authentication)
+    }
 
 	getConfigMixedWithDefaults<T>(key: Config<T>): T {
 		if (key.options?.valueIgnoredForExternals && !this._isInternal) {
@@ -241,7 +225,7 @@ export abstract class AbstractConfigurationService extends Disposable implements
 	abstract inspectConfig<T>(key: BaseConfig<T>, scope?: ConfigurationScope): InspectConfigResult<T> | undefined;
 	abstract getNonExtensionConfig<T>(configKey: string): T | undefined;
 	abstract setConfig<T>(key: BaseConfig<T>, value: T): Thenable<void>;
-	abstract getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, experimentationService: IExperimentationService): T;
+    abstract getExperimentBasedConfig<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>): T;
 	abstract dumpConfig(): { [key: string]: string };
 	public updateExperimentBasedConfiguration(treatments: string[]): void {
 		if (treatments.length === 0) {
@@ -254,9 +238,9 @@ export abstract class AbstractConfigurationService extends Disposable implements
 		return this._getObservable_$show2FramesUp(key, () => this.getConfig(key));
 	}
 
-	public getExperimentBasedConfigObservable<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>, experimentationService: IExperimentationService): IObservable<T> {
-		return this._getObservable_$show2FramesUp(key, () => this.getExperimentBasedConfig(key, experimentationService));
-	}
+    public getExperimentBasedConfigObservable<T extends ExperimentBasedConfigType>(key: ExperimentBasedConfig<T>): IObservable<T> {
+        return this._getObservable_$show2FramesUp(key, () => this.getExperimentBasedConfig(key));
+    }
 
 	private observables = new Map<string, IObservable<any>>();
 

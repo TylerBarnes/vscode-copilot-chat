@@ -3,45 +3,41 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Event, FileSystem, NotebookData, NotebookDocument, NotebookDocumentChangeEvent, TextDocument, TextDocumentChangeEvent, TextEditorSelectionChangeEvent, Uri, WorkspaceEdit, WorkspaceFolder, WorkspaceFoldersChangeEvent } from 'vscode';
-import { findNotebook } from '../../../util/common/notebooks';
+import type { Event, FileSystem, TextDocument, TextDocumentChangeEvent, TextEditorSelectionChangeEvent, Uri, WorkspaceEdit, WorkspaceFolder, WorkspaceFoldersChangeEvent } from 'vscode';
+// Removed: findNotebook (proprietary notebook support)
 import { createServiceIdentifier } from '../../../util/common/services';
 import * as path from '../../../util/vs/base/common/path';
 import { extUriBiasedIgnorePathCase, relativePath } from '../../../util/vs/base/common/resources';
 import { URI } from '../../../util/vs/base/common/uri';
-import { NotebookDocumentSnapshot } from '../../editing/common/notebookDocumentSnapshot';
-import { TextDocumentSnapshot } from '../../editing/common/textDocumentSnapshot';
+// Removed: NotebookDocumentSnapshot (proprietary notebook support)
+import { TextDocumentSnapshot } from '../../../util/textDocumentSnapshot';
 import { DisposableStore, IDisposable } from '../../../util/vs/base/common/lifecycle';
 import { Emitter } from '../../../util/vs/base/common/event';
 
 export const IWorkspaceService = createServiceIdentifier<IWorkspaceService>('IWorkspaceService');
 
 export interface IWorkspaceService {
-	readonly _serviceBrand: undefined;
-	textDocuments: readonly TextDocument[];
-	notebookDocuments: readonly NotebookDocument[];
-	readonly onDidOpenTextDocument: Event<TextDocument>;
-	readonly onDidCloseTextDocument: Event<TextDocument>;
-	readonly onDidOpenNotebookDocument: Event<NotebookDocument>;
-	readonly onDidCloseNotebookDocument: Event<NotebookDocument>;
-	readonly onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
-	readonly onDidChangeNotebookDocument: Event<NotebookDocumentChangeEvent>;
-	readonly onDidChangeWorkspaceFolders: Event<WorkspaceFoldersChangeEvent>;
-	readonly onDidChangeTextEditorSelection: Event<TextEditorSelectionChangeEvent>;
-	openTextDocument(uri: Uri): Promise<TextDocument>;
-	fs: FileSystem;
-	showTextDocument(document: TextDocument): Promise<void>;
-	openTextDocumentAndSnapshot(uri: Uri): Promise<TextDocumentSnapshot>;
-	openNotebookDocumentAndSnapshot(uri: Uri, format: 'xml' | 'json' | 'text'): Promise<NotebookDocumentSnapshot>;
-	openNotebookDocument(uri: Uri): Promise<NotebookDocument>;
-	openNotebookDocument(notebookType: string, content?: NotebookData): Promise<NotebookDocument>;
-	getWorkspaceFolders(): URI[];
-	getWorkspaceFolder(resource: URI): URI | undefined;
-	getWorkspaceFolderName(workspaceFolderUri: URI): string;
-	showWorkspaceFolderPicker(): Promise<WorkspaceFolder | undefined>;
+    readonly _serviceBrand: undefined;
+    textDocuments: readonly TextDocument[];
+    // Removed: notebookDocuments (proprietary notebook support)
+    readonly onDidOpenTextDocument: Event<TextDocument>;
+    readonly onDidCloseTextDocument: Event<TextDocument>;
+    // Removed: onDidOpenNotebookDocument, onDidCloseNotebookDocument, onDidChangeNotebookDocument (proprietary notebook support)
+    readonly onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
+    readonly onDidChangeWorkspaceFolders: Event<WorkspaceFoldersChangeEvent>;
+    readonly onDidChangeTextEditorSelection: Event<TextEditorSelectionChangeEvent>;
+    openTextDocument(uri: Uri): Promise<TextDocument>;
+    fs: FileSystem;
+    showTextDocument(document: TextDocument): Promise<void>;
+    openTextDocumentAndSnapshot(uri: Uri): Promise<TextDocumentSnapshot>;
+    // Removed: openNotebookDocumentAndSnapshot, openNotebookDocument (proprietary notebook support)
+    getWorkspaceFolders(): URI[];
+    getWorkspaceFolder(resource: URI): URI | undefined;
+    getWorkspaceFolderName(workspaceFolderUri: URI): string;
+    showWorkspaceFolderPicker(): Promise<WorkspaceFolder | undefined>;
 
-	asRelativePath(pathOrUri: string | Uri, includeWorkspaceFolder?: boolean): string;
-	applyEdit(edit: WorkspaceEdit): Thenable<boolean>;
+    asRelativePath(pathOrUri: string | Uri, includeWorkspaceFolder?: boolean): string;
+    applyEdit(edit: WorkspaceEdit): Thenable<boolean>;
 
 	/**
 	 * Ensures that the workspace has fully loaded before returning. This is useful for
@@ -52,27 +48,24 @@ export interface IWorkspaceService {
 }
 
 export abstract class AbstractWorkspaceService implements IWorkspaceService {
-	declare readonly _serviceBrand: undefined;
-	abstract textDocuments: readonly TextDocument[];
-	abstract notebookDocuments: readonly NotebookDocument[];
-	abstract readonly onDidOpenTextDocument: Event<TextDocument>;
-	abstract readonly onDidCloseTextDocument: Event<TextDocument>;
-	abstract readonly onDidOpenNotebookDocument: Event<NotebookDocument>;
-	abstract readonly onDidCloseNotebookDocument: Event<NotebookDocument>;
-	abstract readonly onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
-	abstract readonly onDidChangeWorkspaceFolders: Event<WorkspaceFoldersChangeEvent>;
-	abstract readonly onDidChangeNotebookDocument: Event<NotebookDocumentChangeEvent>;
-	abstract readonly onDidChangeTextEditorSelection: Event<TextEditorSelectionChangeEvent>;
-	abstract openTextDocument(uri: Uri): Promise<TextDocument>;
-	abstract fs: FileSystem;
-	abstract showTextDocument(document: TextDocument): Promise<void>;
-	abstract openNotebookDocument(uri: Uri): Promise<NotebookDocument>;
-	abstract openNotebookDocument(notebookType: string, content?: NotebookData): Promise<NotebookDocument>;
-	abstract getWorkspaceFolders(): URI[];
-	abstract ensureWorkspaceIsFullyLoaded(): Promise<void>;
-	abstract showWorkspaceFolderPicker(): Promise<WorkspaceFolder | undefined>;
-	abstract getWorkspaceFolderName(workspaceFolderUri: URI): string;
-	abstract applyEdit(edit: WorkspaceEdit): Thenable<boolean>;
+    declare readonly _serviceBrand: undefined;
+    abstract textDocuments: readonly TextDocument[];
+    // Removed: notebookDocuments (proprietary notebook support)
+    abstract readonly onDidOpenTextDocument: Event<TextDocument>;
+    abstract readonly onDidCloseTextDocument: Event<TextDocument>;
+    // Removed: onDidOpenNotebookDocument, onDidCloseNotebookDocument, onDidChangeNotebookDocument (proprietary notebook support)
+    abstract readonly onDidChangeTextDocument: Event<TextDocumentChangeEvent>;
+    abstract readonly onDidChangeWorkspaceFolders: Event<WorkspaceFoldersChangeEvent>;
+    abstract readonly onDidChangeTextEditorSelection: Event<TextEditorSelectionChangeEvent>;
+    abstract openTextDocument(uri: Uri): Promise<TextDocument>;
+    abstract fs: FileSystem;
+    abstract showTextDocument(document: TextDocument): Promise<void>;
+    // Removed: openNotebookDocument (proprietary notebook support)
+    abstract getWorkspaceFolders(): URI[];
+    abstract ensureWorkspaceIsFullyLoaded(): Promise<void>;
+    abstract showWorkspaceFolderPicker(): Promise<WorkspaceFolder | undefined>;
+    abstract getWorkspaceFolderName(workspaceFolderUri: URI): string;
+    abstract applyEdit(edit: WorkspaceEdit): Thenable<boolean>;
 	asRelativePath(pathOrUri: string | Uri, includeWorkspaceFolder?: boolean): string {
 		// Copied from the implementation in vscode/extHostWorkspace.ts
 		let resource: URI | undefined;
@@ -107,17 +100,13 @@ export abstract class AbstractWorkspaceService implements IWorkspaceService {
 		return result!;
 	}
 
-	async openTextDocumentAndSnapshot(uri: Uri): Promise<TextDocumentSnapshot> {
-		const doc = await this.openTextDocument(uri);
-		return TextDocumentSnapshot.create(doc);
-	}
+    async openTextDocumentAndSnapshot(uri: Uri): Promise<TextDocumentSnapshot> {
+        const doc = await this.openTextDocument(uri);
 
-	async openNotebookDocumentAndSnapshot(uri: Uri, format: 'xml' | 'json' | 'text'): Promise<NotebookDocumentSnapshot> {
-		// Possible we have an untitled file opened as a notebook.
-		const doc = findNotebook(uri, this.notebookDocuments) || await this.openNotebookDocument(uri);
+        return TextDocumentSnapshot.create(doc);
+    }
 
-		return NotebookDocumentSnapshot.create(doc, format);
-	}
+    // Removed: openNotebookDocumentAndSnapshot (proprietary notebook support)
 
 	getWorkspaceFolder(resource: URI): URI | undefined {
 		return this.getWorkspaceFolders().find(folder => extUriBiasedIgnorePathCase.isEqualOrParent(resource, folder));
@@ -135,32 +124,28 @@ export class NullWorkspaceService extends AbstractWorkspaceService implements ID
 
 	public readonly didOpenTextDocumentEmitter = this.disposables.add(new Emitter<TextDocument>());
 	public readonly didCloseTextDocumentEmitter = this.disposables.add(new Emitter<TextDocument>());
-	public readonly didOpenNotebookDocumentEmitter = this.disposables.add(new Emitter<NotebookDocument>());
-	public readonly didCloseNotebookDocumentEmitter = this.disposables.add(new Emitter<NotebookDocument>());
-	public readonly didChangeTextDocumentEmitter = this.disposables.add(new Emitter<TextDocumentChangeEvent>());
-	public readonly didChangeWorkspaceFoldersEmitter = this.disposables.add(new Emitter<WorkspaceFoldersChangeEvent>());
-	public readonly didChangeNotebookDocumentEmitter = this.disposables.add(new Emitter<NotebookDocumentChangeEvent>());
-	public readonly didChangeTextEditorSelectionEmitter = this.disposables.add(new Emitter<TextEditorSelectionChangeEvent>());
+    // Removed: didOpenNotebookDocumentEmitter, didCloseNotebookDocumentEmitter, didChangeNotebookDocumentEmitter (proprietary notebook support)
+    public readonly didChangeTextDocumentEmitter = this.disposables.add(new Emitter<TextDocumentChangeEvent>());
+    public readonly didChangeWorkspaceFoldersEmitter = this.disposables.add(new Emitter<WorkspaceFoldersChangeEvent>());
+    public readonly didChangeTextEditorSelectionEmitter = this.disposables.add(new Emitter<TextEditorSelectionChangeEvent>());
 
-	public override readonly onDidChangeTextDocument = this.didChangeTextDocumentEmitter.event;
-	public override readonly onDidCloseTextDocument = this.didCloseTextDocumentEmitter.event;
-	public override readonly onDidOpenNotebookDocument = this.didOpenNotebookDocumentEmitter.event;
-	public override readonly onDidCloseNotebookDocument = this.didCloseNotebookDocumentEmitter.event;
-	public override readonly onDidOpenTextDocument = this.didOpenTextDocumentEmitter.event;
-	public override readonly onDidChangeWorkspaceFolders = this.didChangeWorkspaceFoldersEmitter.event;
-	public override readonly onDidChangeNotebookDocument = this.didChangeNotebookDocumentEmitter.event;
-	public override readonly onDidChangeTextEditorSelection = this.didChangeTextEditorSelectionEmitter.event;
+    public override readonly onDidChangeTextDocument = this.didChangeTextDocumentEmitter.event;
+    public override readonly onDidCloseTextDocument = this.didCloseTextDocumentEmitter.event;
+    // Removed: onDidOpenNotebookDocument, onDidCloseNotebookDocument, onDidChangeNotebookDocument (proprietary notebook support)
+    public override readonly onDidOpenTextDocument = this.didOpenTextDocumentEmitter.event;
+    public override readonly onDidChangeWorkspaceFolders = this.didChangeWorkspaceFoldersEmitter.event;
+    public override readonly onDidChangeTextEditorSelection = this.didChangeTextEditorSelectionEmitter.event;
 
-	private readonly workspaceFolder: URI[];
-	private readonly _textDocuments: TextDocument[] = [];
-	private readonly _notebookDocuments: NotebookDocument[] = [];
+    private readonly workspaceFolder: URI[];
+    private readonly _textDocuments: TextDocument[] = [];
+    // Removed: _notebookDocuments (proprietary notebook support)
 
-	constructor(workspaceFolders: URI[] = [], textDocuments: TextDocument[] = [], notebookDocuments: NotebookDocument[] = []) {
-		super();
-		this.workspaceFolder = workspaceFolders;
-		this._textDocuments = textDocuments;
-		this._notebookDocuments = notebookDocuments;
-	}
+    constructor(workspaceFolders: URI[] = [], textDocuments: TextDocument[] = []) {
+        super();
+        this.workspaceFolder = workspaceFolders;
+        this._textDocuments = textDocuments;
+        // Removed: notebookDocuments parameter (proprietary notebook support)
+    }
 
 	get textDocuments(): TextDocument[] {
 		return this._textDocuments;
@@ -179,25 +164,8 @@ export class NullWorkspaceService extends AbstractWorkspaceService implements ID
 		throw new Error(`Unknown document: ${uri}`);
 	}
 
-	override async openNotebookDocument(uri: Uri): Promise<NotebookDocument>;
-	override async openNotebookDocument(notebookType: string, content?: NotebookData): Promise<NotebookDocument>;
-	override async openNotebookDocument(arg1: Uri | string, arg2?: NotebookData): Promise<NotebookDocument> {
-		if (typeof arg1 === 'string') {
-			// Handle the overload for notebookType and content
-			throw new Error('Not implemented');
-		} else {
-			const notebook = this.notebookDocuments.find(d => d.uri.toString() === arg1.toString());
-			if (notebook) {
-				return notebook;
-			}
-
-			throw new Error(`Unknown notebook: ${arg1}`);
-		}
-	}
-
-	get notebookDocuments(): readonly NotebookDocument[] {
-		return this._notebookDocuments;
-	}
+    // Removed: openNotebookDocument (proprietary notebook support)
+    // Removed: notebookDocuments getter (proprietary notebook support)
 
 	getWorkspaceFolders(): URI[] {
 		return this.workspaceFolder;

@@ -12,7 +12,7 @@ import { DisposableStore } from '../../../util/vs/base/common/lifecycle';
 import { equals } from '../../../util/vs/base/common/objects';
 import { URI } from '../../../util/vs/base/common/uri';
 import { Range } from '../../../util/vs/editor/common/core/range';
-import { OffsetLineColumnConverter } from '../../editing/common/offsetLineColumnConverter';
+import { OffsetLineColumnConverter } from '../../../util/offsetLineColumnConverter';
 import { IFileSystemService } from '../../filesystem/common/fileSystemService';
 import { ILanguageDiagnosticsService } from '../../languages/common/languageDiagnosticsService';
 import { ILogService } from '../../log/common/logService';

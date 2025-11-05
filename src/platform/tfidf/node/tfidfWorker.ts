@@ -12,7 +12,7 @@ import { StopWatch } from '../../../util/vs/base/common/stopwatch';
 import { URI, UriComponents } from '../../../util/vs/base/common/uri';
 import { IRange, Range } from '../../../util/vs/editor/common/core/range';
 import { FileChunk } from '../../chunking/common/chunk';
-import { NaiveChunker } from '../../chunking/node/naiveChunker';
+// Chunking system removed - no longer needed
 import { NullTelemetryService } from '../../telemetry/common/nullTelemetryService';
 import { TokenizationEndpoint, TokenizerProvider } from '../../tokenizer/node/tokenizer';
 import { PersistentTfIdf, TfIdfDoc, TfIdfSearchOptions } from './tfidf';
@@ -113,15 +113,12 @@ class TfidfWorker {
 	private readonly _tfIdf: PersistentTfIdf;
 	private readonly _pendingChanges = new ResourceMap<TfIdfOperation>();
 
-	private readonly _chunker: NaiveChunker;
+private readonly _host: Host;
 
-	private readonly _host: Host;
-
-	constructor(port: MessagePort, workerData: TfIdfWorkerData) {
-		this._tfIdf = new PersistentTfIdf(workerData.dbPath === ':memory:' ? ':memory:' : URI.from(workerData.dbPath));
-		this._chunker = new NaiveChunker(workerData.endpoint, new TokenizerProvider(false, new NullTelemetryService()));
-		this._host = new Host(port, this);
-	}
+    constructor(port: MessagePort, workerData: TfIdfWorkerData) {
+        this._tfIdf = new PersistentTfIdf(workerData.dbPath === ':memory:' ? ':memory:' : URI.from(workerData.dbPath));
+        this._host = new Host(port, this);
+    }
 
 	initialize(workspaceDocsIn: ReadonlyArray<{ uri: UriComponents; contentId: string }>): TfIdfInitializeTelemetry {
 		const { outOfSyncDocs, newDocs, deletedDocs } = this._tfIdf.initialize(workspaceDocsIn.map(entry => ({
