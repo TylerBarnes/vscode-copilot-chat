@@ -615,10 +615,10 @@ export namespace ConfigKey {
 		export const ReviewIntent = defineSetting('chat.advanced.review.intent', false, INTERNAL);
 		/** Enable the new notebook priorities experiment */
 		export const NotebookSummaryExperimentEnabled = defineSetting('chat.advanced.notebook.summaryExperimentEnabled', false, INTERNAL);
-		/** Enable filtering variables by cell document symbols */
-		export const NotebookVariableFilteringEnabled = defineSetting('chat.advanced.notebook.variableFilteringEnabled', false, INTERNAL);
-		export const NotebookAlternativeDocumentFormat = defineExpSetting<AlternativeNotebookFormat>('chat.advanced.notebook.alternativeFormat', AlternativeNotebookFormat.xml, INTERNAL);
-		export const UseAlternativeNESNotebookFormat = defineExpSetting<boolean>('chat.advanced.notebook.alternativeNESFormat.enabled', false, INTERNAL);
+        /** Enable filtering variables by cell document symbols */
+        export const NotebookVariableFilteringEnabled = defineSetting('chat.advanced.notebook.variableFilteringEnabled', false, INTERNAL);
+        // Removed NotebookAlternativeDocumentFormat (proprietary notebook feature)
+        // Removed UseAlternativeNESNotebookFormat (proprietary notebook feature)
 		export const TerminalToDebuggerPatterns = defineSetting<string[]>('chat.advanced.debugTerminalCommandPatterns', [], INTERNAL);
 		export const InlineEditsIgnoreCompletionsDisablement = defineValidatedSetting<boolean>('chat.advanced.inlineEdits.ignoreCompletionsDisablement', vBoolean(), false, INTERNAL_RESTRICTED);
 		export const InlineEditsAsyncCompletions = defineExpSetting<boolean>('chat.advanced.inlineEdits.asyncCompletions', true, INTERNAL_RESTRICTED);

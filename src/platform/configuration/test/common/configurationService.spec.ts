@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { assert, suite, test } from 'vitest';
-import { AlternativeNotebookFormat } from '../../../notebook/common/alternativeContentFormat';
+// Removed proprietary import: AlternativeNotebookFormat
 import { AbstractConfigurationService, ConfigKey, DefaultValueWithTeamValue } from '../../common/configurationService';
 
 suite('AbstractConfigurationService', () => {
@@ -158,21 +158,7 @@ suite('AbstractConfigurationService', () => {
 
 		});
 
-		test('NotebookAlternativeDocumentFormat is correctly configured', () => {
-			const setting = ConfigKey.Internal.NotebookAlternativeDocumentFormat;
-			assert.strictEqual(setting.id, 'chat.advanced.notebook.alternativeFormat');
-			assert.strictEqual(setting.defaultValue, AlternativeNotebookFormat.xml);
-			assert.strictEqual(setting.isPublic, false);
-
-		});
-
-		test('UseAlternativeNESNotebookFormat is correctly configured', () => {
-			const setting = ConfigKey.Internal.UseAlternativeNESNotebookFormat;
-			assert.strictEqual(setting.id, 'chat.advanced.notebook.alternativeNESFormat.enabled');
-			assert.strictEqual(setting.defaultValue, false);
-			assert.strictEqual(setting.isPublic, false);
-
-		});
+        // Removed tests for NotebookAlternativeDocumentFormat and UseAlternativeNESNotebookFormat (proprietary notebook features)
 
 		test('TerminalToDebuggerPatterns is correctly configured', () => {
 			const setting = ConfigKey.Internal.TerminalToDebuggerPatterns;
