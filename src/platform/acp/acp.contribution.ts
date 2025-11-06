@@ -182,6 +182,20 @@ private async initialize(): Promise<void> {
                 env: { ...process.env, ...activeProfile.env }
             });
             
+            // Capture agent stderr for debugging
+            let stderrOutput = '';
+            agentProcess.stderr?.on('data', (data) => {
+                stderrOutput += data.toString();
+                this.logService.error(`[ACP] Agent stderr: ${data.toString()}`);
+            });
+            
+            agentProcess.on('error', (error) => {
+                this.logService.error(`[ACP] Agent process error: ${error.message}`);
+                if (this.chatViewProvider) {
+                    this.chatViewProvider.showMessage(`Agent process error: ${error.message}`, 'error');
+                }
+            });
+            
             this.acpClient = this.instantiationService.createInstance(
                 ACPClient,
                 agentProcess
@@ -192,21 +206,19 @@ private async initialize(): Promise<void> {
 
             // Initialize ACP client
             this.logService.info('[ACP] Initializing ACP client...');
+            if (!this.acpClient) {
+                this.logService.error('[ACP] ACP client is null, cannot initialize');
+                return;
+            }
             try {
-                await this.acpClient!.initialize({
+                await this.acpClient.initialize({
                     protocolVersion: '2025-01-13',
                     clientCapabilities: {
                         fs: {
                             readTextFile: true,
                             writeTextFile: true
                         },
-                        terminal: {
-                            create: true,
-                            output: true,
-                            waitForExit: true,
-                            kill: true,
-                            release: true
-                        }
+                        terminal: true
                     },
                     clientInfo: {
                         name: 'vscode-copilot-chat-acp',

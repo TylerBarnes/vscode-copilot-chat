@@ -62,13 +62,7 @@ describe('ACP Integration Tests', () => {
 					readTextFile: true,
 					writeTextFile: true,
 				},
-				terminal: {
-					create: true,
-					output: true,
-					waitForExit: true,
-					kill: true,
-					release: true,
-				},
+terminal: true,
 			},
 			clientInfo: {
 				name: 'VS Code Copilot Chat',

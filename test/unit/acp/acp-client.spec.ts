@@ -73,13 +73,7 @@ describe('ACPClient', () => {
                         readTextFile: true,
                         writeTextFile: true
                     },
-                    terminal: {
-                        create: true,
-                        output: true,
-                        waitForExit: true,
-                        kill: true,
-                        release: true
-                    }
+                    terminal: true
                 },
                 clientInfo: {
                     name: 'vscode-copilot-chat',

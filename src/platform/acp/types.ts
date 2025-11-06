@@ -31,13 +31,7 @@ export interface ClientCapabilities {
         readTextFile?: boolean;
         writeTextFile?: boolean;
     };
-    terminal?: {
-        create?: boolean;
-        output?: boolean;
-        waitForExit?: boolean;
-        kill?: boolean;
-        release?: boolean;
-    };
+    terminal?: boolean;
 }
 
 export interface PromptCapabilities {
