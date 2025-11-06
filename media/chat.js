@@ -84,18 +84,27 @@
             return;
         }
 
-        // Only render new messages or update existing ones
-        messages.forEach((message, index) => {
-            const existingEl = messagesContainer.children[index];
+        // Clear only messages that no longer exist in the data model
+        const existingMessageIds = new Set(messages.map(m => m.id));
+        const existingElements = messagesContainer.querySelectorAll('[data-message-id]');
+        existingElements.forEach(el => {
+            if (!existingMessageIds.has(el.dataset.messageId)) {
+                el.remove();
+            }
+        });
+
+        // Render or update each message
+        messages.forEach((message) => {
+            let messageEl = messagesContainer.querySelector(`[data-message-id="${message.id}"]`);
             
-            if (!existingEl) {
+            if (!messageEl) {
                 // New message - append it
-                const messageEl = createMessageElement(message);
+                messageEl = createMessageElement(message);
                 messageEl.dataset.messageId = message.id;
                 messagesContainer.appendChild(messageEl);
-            } else if (existingEl.dataset.messageId === message.id) {
+            } else {
                 // Existing message - update content if changed
-                const contentEl = existingEl.querySelector('.message-content');
+                const contentEl = messageEl.querySelector('.message-content');
                 if (contentEl && contentEl.textContent !== message.content) {
                     contentEl.textContent = message.content;
                 }

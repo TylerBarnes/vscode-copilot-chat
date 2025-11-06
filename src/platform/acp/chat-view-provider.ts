@@ -49,8 +49,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             if (this.sessionManager) {
                 console.log('[ChatViewProvider] Registering session change listener');
                 this.sessionManager.onDidChangeSession((sessionId) => {
+                    console.log('[ChatViewProvider] Session changed to:', sessionId);
+                    console.log('[ChatViewProvider] Messages before loadSessionMessages:', this.messages.length);
                     this.currentSessionId = sessionId;
                     this.loadSessionMessages(sessionId);
+                    console.log('[ChatViewProvider] Messages after loadSessionMessages:', this.messages.length);
                 });
             }
 
@@ -158,6 +161,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     private async handleUserMessage(text: string): Promise<void> {
         console.log('[ChatViewProvider] handleUserMessage called with text:', text);
+        console.log('[ChatViewProvider] Messages before adding user message:', this.messages.length);
         
         if (!text.trim()) {
             console.log('[ChatViewProvider] Empty text, returning');
@@ -185,7 +189,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             timestamp: Date.now()
         };
         this.messages.push(userMessage);
+        console.log('[ChatViewProvider] Added user message, total messages:', this.messages.length);
+        console.log('[ChatViewProvider] Message IDs:', this.messages.map(m => m.id));
         this.updateWebview();
+        console.log('[ChatViewProvider] Webview updated with user message');
 
         try {
             // Send to ACP agent
@@ -240,14 +247,30 @@ private handleAgentMessage(message: any): void {
                 this.messages.push(this.currentAssistantMessage);
             }
             
-            // Check if this is a delta (new content) or full content
-            // If the new content starts with the existing content, it's full content
-            if (content.startsWith(this.currentAssistantMessage.content)) {
-                // Full content - replace
-                this.currentAssistantMessage.content = content;
+            // Check if this is a new message or continuation
+            const existingContent = this.currentAssistantMessage.content;
+            const isNewMessage = this.isNewAssistantMessage(content, existingContent);
+            
+            if (isNewMessage) {
+                // Finalize previous message and create new one
+                console.log('[ChatViewProvider] handleAgentMessage - detected new message, creating new bubble');
+                this.currentAssistantMessage = {
+                    id: this.generateId(),
+                    role: 'assistant',
+                    content: content,
+                    timestamp: Date.now()
+                };
+                this.messages.push(this.currentAssistantMessage);
             } else {
-                // Delta - append
-                this.currentAssistantMessage.content += content;
+                // Check if this is a delta (new content) or full content
+                // If the new content starts with the existing content, it's full content
+                if (content.startsWith(existingContent)) {
+                    // Full content - replace
+                    this.currentAssistantMessage.content = content;
+                } else {
+                    // Delta - append
+                    this.currentAssistantMessage.content += content;
+                }
             }
             
             console.log('[ChatViewProvider] handleAgentMessage - accumulated content:', this.currentAssistantMessage.content);
@@ -264,12 +287,53 @@ private handleAgentMessage(message: any): void {
             this.currentAssistantMessage = undefined;
             console.log('[ChatViewProvider] handleAgentMessage - message complete');
             this.updateWebview();
+        } else if (message.update?.sessionUpdate === 'tool_call' || message.update?.sessionUpdate === 'tool_call_update') {
+            // Handle tool calls
+            if (this.currentAssistantMessage) {
+                if (!this.currentAssistantMessage.toolCalls) {
+                    this.currentAssistantMessage.toolCalls = [];
+                }
+                
+                const toolCall = message.update?.toolCall;
+                if (toolCall) {
+                    // Find existing tool call or add new one
+                    const existingIndex = this.currentAssistantMessage.toolCalls.findIndex(
+                        (tc: any) => tc.id === toolCall.id
+                    );
+                    
+                    if (existingIndex >= 0) {
+                        // Update existing tool call
+                        this.currentAssistantMessage.toolCalls[existingIndex] = toolCall;
+                    } else {
+                        // Add new tool call
+                        this.currentAssistantMessage.toolCalls.push(toolCall);
+                    }
+                    
+                    console.log('[ChatViewProvider] handleAgentMessage - tool call:', toolCall);
+                    this.updateWebview();
+                }
+            }
         }
     }
 
 	
 
-	private extractThinking(message: any): string[] | undefined {
+    private isNewAssistantMessage(newContent: string, existingContent: string): boolean {
+        // If new content doesn't start with existing content and doesn't continue from it
+        if (!newContent.startsWith(existingContent)) {
+            // Check if this looks like a new message start
+            // New messages typically start with a capital letter after punctuation
+            const lastChar = existingContent.trim().slice(-1);
+            const firstChar = newContent.trim()[0];
+            
+            if (['.', '!', '?'].includes(lastChar) && firstChar === firstChar.toUpperCase()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private extractThinking(message: any): string[] | undefined {
 		if (message.content && Array.isArray(message.content)) {
 			const thinkingBlocks = message.content.filter(
 				(block: any) => block.type === 'thinking'
@@ -333,14 +397,18 @@ private handleAgentMessage(message: any): void {
         }
     }
 
-	private updateWebview(): void {
-		if (this.view) {
-			this.view.webview.postMessage({
-				type: 'updateMessages',
-				messages: this.messages
-			});
-		}
-	}
+private updateWebview(): void {
+        console.log('[ChatViewProvider] updateWebview called with', this.messages.length, 'messages');
+        if (this.view) {
+            console.log('[ChatViewProvider] Sending messages to webview:', this.messages.map(m => ({ id: m.id, role: m.role, content: m.content })));
+            this.view.webview.postMessage({
+                type: 'updateMessages',
+                messages: this.messages
+            });
+        } else {
+            console.log('[ChatViewProvider] No view available, skipping webview update');
+        }
+    }
 
 	private generateId(): string {
 		return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

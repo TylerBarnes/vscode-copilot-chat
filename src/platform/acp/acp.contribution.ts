@@ -184,10 +184,11 @@ private async initialize(): Promise<void> {
                 return;
             }
             
-            this.logService.info(`[ACP] Spawning agent: ${activeProfile.executable} ${activeProfile.args?.join(' ') || ''}`);
+            this.logService.info(`[ACP] Spawning agent: ${activeProfile.executable} ${activeProfile.args?.join(' ') || ''} in cwd: ${cwd}`);
             const agentProcess = spawn(activeProfile.executable, activeProfile.args || [], {
                 stdio: ['pipe', 'pipe', 'pipe'],
-                env: { ...process.env, ...activeProfile.env }
+                env: { ...process.env, ...activeProfile.env },
+                cwd: cwd
             });
             
             // Capture agent stderr for debugging
