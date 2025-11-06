@@ -181,6 +181,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
         console.log('[ChatViewProvider] ACP client and session manager are initialized');
 
+        // Reset current assistant message for new conversation turn
+        this.currentAssistantMessage = undefined;
+        console.log('[ChatViewProvider] Reset currentAssistantMessage for new turn');
+
         // Add user message to UI
         const userMessage: ChatMessage = {
             id: this.generateId(),
