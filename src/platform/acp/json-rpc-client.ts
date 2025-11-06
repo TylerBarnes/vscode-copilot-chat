@@ -199,7 +199,9 @@ export class JsonRpcClient {
       }
 
       this.pendingRequests.set(id, pending);
-      this.stdin.write(JSON.stringify(request) + '\n');
+      const requestStr = JSON.stringify(request) + '\n';
+      console.log('[JsonRpcClient] Sending request:', requestStr.trim());
+      this.stdin.write(requestStr);
     });
   }
 

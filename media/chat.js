@@ -48,6 +48,7 @@
         switch (message.type) {
             case 'updateMessages':
                 console.log('[Webview] Updating messages:', message.messages?.length || 0);
+                console.log('[Webview] Messages data:', JSON.stringify(message.messages, null, 2));
                 messages = message.messages;
                 renderMessages();
                 break;
@@ -126,11 +127,36 @@
 			messageEl.appendChild(planEl);
 		}
 
-		// Message content
-		const contentEl = document.createElement('div');
-		contentEl.className = 'message-content';
-		contentEl.textContent = message.content;
-		messageEl.appendChild(contentEl);
+// Message content
+        const contentEl = document.createElement('div');
+        contentEl.className = 'message-content';
+        
+        console.log('[Webview] createMessageElement - message.content:', message.content);
+        console.log('[Webview] createMessageElement - content type:', typeof message.content);
+        console.log('[Webview] createMessageElement - is array:', Array.isArray(message.content));
+        
+        // Handle content blocks or plain string content
+        if (Array.isArray(message.content)) {
+            console.log('[Webview] Processing content blocks array, length:', message.content.length);
+            // Content blocks - render text blocks
+            message.content.forEach((block, idx) => {
+                console.log('[Webview] Block', idx, ':', block);
+                if (block.type === 'text') {
+                    const textEl = document.createElement('div');
+                    textEl.textContent = block.text;
+                    console.log('[Webview] Added text block:', block.text);
+                    contentEl.appendChild(textEl);
+                }
+            });
+        } else if (typeof message.content === 'string') {
+            console.log('[Webview] Processing string content:', message.content);
+            contentEl.textContent = message.content;
+        } else {
+            console.log('[Webview] Unknown content type!');
+        }
+        
+        console.log('[Webview] contentEl.innerHTML:', contentEl.innerHTML);
+        messageEl.appendChild(contentEl);
 
 		// Tool calls (if present)
 		if (message.toolCalls && message.toolCalls.length > 0) {

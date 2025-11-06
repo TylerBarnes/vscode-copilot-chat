@@ -63,10 +63,31 @@ export class SessionManager {
         conversationId: string,
         options: SessionOptions = {}
     ): Promise<SessionInfo> {
-        const sessionInfo = await this.client.newSession({
-            cwd: process.cwd(),
+        console.log('[SessionManager] createSession called with conversationId:', conversationId);
+        console.log('[SessionManager] createSession called with options:', JSON.stringify(options, null, 2));
+        
+        // Get the actual workspace directory instead of process.cwd()
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        console.log('[SessionManager] workspaceFolders:', workspaceFolders);
+        console.log('[SessionManager] workspaceFolders?.length:', workspaceFolders?.length);
+        console.log('[SessionManager] workspaceFolders?.[0]:', workspaceFolders?.[0]);
+        console.log('[SessionManager] workspaceFolders?.[0]?.uri:', workspaceFolders?.[0]?.uri);
+        console.log('[SessionManager] workspaceFolders?.[0]?.uri.fsPath:', workspaceFolders?.[0]?.uri.fsPath);
+        
+        const cwd = workspaceFolders && workspaceFolders.length > 0 
+            ? workspaceFolders[0].uri.fsPath 
+            : process.cwd();
+        
+        console.log('[SessionManager] Computed cwd:', cwd);
+        console.log('[SessionManager] process.cwd():', process.cwd());
+            
+        const params = {
+            cwd: cwd,
             mcpServers: [], // Empty array when no MCP servers are configured
-        });
+        };
+        console.log('[SessionManager] About to call client.newSession with params:', JSON.stringify(params, null, 2));
+        const sessionInfo = await this.client.newSession(params);
+        console.log('[SessionManager] client.newSession returned sessionInfo:', JSON.stringify(sessionInfo, null, 2));
 
 		// Store mapping
 		this.conversationToSession.set(conversationId, sessionInfo.sessionId);

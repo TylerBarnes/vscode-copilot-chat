@@ -34,16 +34,24 @@ export class ACPContribution implements vscode.Disposable {
     private mcpManager: MCPManager | undefined;
     private chatParticipant: ACPChatParticipant | undefined;
     private chatViewProvider: ChatViewProvider | undefined;
+    private isInitialized = false;
+    /** @internal Used by tests to await initialization */
+    public readonly initializationPromise: Promise<void>;
 
     constructor(
         @IInstantiationService private readonly instantiationService: IInstantiationService,
         @ILogService private readonly logService: ILogService,
         @IVSCodeExtensionContext private readonly extensionContext: IVSCodeExtensionContext
     ) {
-        this.initialize();
+        this.initializationPromise = this.initialize();
     }
 
 private async initialize(): Promise<void> {
+        if (this.isInitialized) {
+            this.logService.info('[ACP] Already initialized, skipping');
+            return;
+        }
+        
         try {
             this.logService.info('[ACP] Initializing ACP contribution');
 
@@ -242,33 +250,40 @@ private async initialize(): Promise<void> {
             const sessionManager = new SessionManager(this.acpClient, storageUri);
             this.logService.info('[ACP] SessionManager created');
             
+            this.logService.info('[ACP] Creating ACPRequestHandler...');
             const requestHandler = this.instantiationService.createInstance(
                 ACPRequestHandler,
                 this.acpClient
             ) as any;
+            this.logService.info('[ACP] ACPRequestHandler created');
 
             // Initialize chat view with the actual components
+            this.logService.info('[ACP] Initializing chat view provider...');
             this.chatViewProvider.initialize(
                 this.acpClient,
                 sessionManager,
                 toolCallHandler
             );
+            this.logService.info('[ACP] Chat view provider initialized');
 
             // Create and register chat participant (for command palette integration)
+            this.logService.info('[ACP] Creating ACPChatParticipant...');
             this.chatParticipant = this.instantiationService.createInstance(
                 ACPChatParticipant,
                 this.acpClient,
                 requestHandler,
                 sessionManager
             );
+            this.logService.info('[ACP] ACPChatParticipant created');
             this.disposables.push(this.chatParticipant);
 
+            this.isInitialized = true;
             this.logService.info('[ACP] ACP contribution initialized successfully');
-		} catch (error) {
-			this.logService.error('[ACP] Failed to initialize ACP contribution', error);
-			// Don't re-throw since initialization is async
-		}
-	}
+        } catch (error) {
+            this.logService.error('[ACP] Failed to initialize ACP contribution', error);
+            // Don't re-throw since initialization is async
+        }
+    }
 
 	private async startMCPServers(): Promise<void> {
 		if (!this.mcpManager) {

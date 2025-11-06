@@ -98,6 +98,8 @@ export class ACPClient {
     async newSession(params: SessionNewParams): Promise<SessionNewResult> {
         this.ensureInitialized();
         
+        console.log('[DEBUG] ACPClient.newSession called with params:', JSON.stringify(params, null, 2));
+        console.log('[DEBUG] ACPClient.newSession stack trace:', new Error().stack);
         const result = await this.rpcClient.sendRequest('session/new', params) as SessionNewResult;
         this.currentSessionId = result.sessionId;
         
@@ -321,7 +323,12 @@ export class ACPClient {
     private setupClientMethods(): void {
         // Session update notifications
         this.rpcClient.onNotification('session/update', (params: SessionUpdateNotification) => {
-            this.sessionUpdateHandlers.forEach(handler => handler(params));
+            console.log('[ACPClient] Received session/update notification:', JSON.stringify(params, null, 2));
+            console.log('[ACPClient] Number of session update handlers:', this.sessionUpdateHandlers.size);
+            this.sessionUpdateHandlers.forEach((handler, index) => {
+                console.log(`[ACPClient] Calling session update handler ${index}`);
+                handler(params);
+            });
         });
 
         // File system methods

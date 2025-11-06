@@ -24,6 +24,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     private acpClient?: ACPClient;
     private sessionManager?: SessionManager;
     private toolCallHandler?: ToolCallHandler;
+    private currentAssistantMessage: ChatMessage | undefined;
 
     constructor(
         private readonly extensionUri: vscode.Uri
@@ -38,16 +39,43 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         sessionManager: SessionManager,
         toolCallHandler: ToolCallHandler
     ): void {
-        this.acpClient = acpClient;
-        this.sessionManager = sessionManager;
-        this.toolCallHandler = toolCallHandler;
-        
-        // If view is already resolved, update it
-        if (this.view) {
-            this.view.webview.postMessage({
-                type: 'initialized',
-                message: 'ACP agent connected and ready'
-            });
+        try {
+            console.log('[ChatViewProvider] initialize() called');
+            this.acpClient = acpClient;
+            this.sessionManager = sessionManager;
+            this.toolCallHandler = toolCallHandler;
+
+            // Listen for session changes
+            if (this.sessionManager) {
+                console.log('[ChatViewProvider] Registering session change listener');
+                this.sessionManager.onDidChangeSession((sessionId) => {
+                    this.currentSessionId = sessionId;
+                    this.loadSessionMessages(sessionId);
+                });
+            }
+
+            // Listen for new messages from the agent
+            if (this.acpClient) {
+                console.log('[ChatViewProvider] Registering message listener via onDidReceiveMessage');
+                this.acpClient.onDidReceiveMessage((message) => {
+                    console.log('[ChatViewProvider] onDidReceiveMessage handler called with message:', message);
+                    this.handleAgentMessage(message);
+                });
+                console.log('[ChatViewProvider] Message listener registered');
+            }
+            
+            // If view is already resolved, update it
+            if (this.view) {
+                console.log('[ChatViewProvider] Sending initialized message to webview');
+                this.view.webview.postMessage({
+                    type: 'initialized',
+                    message: 'ACP agent connected and ready'
+                });
+                console.log('[ChatViewProvider] Initialized message sent');
+            }
+        } catch (error) {
+            console.error('[ChatViewProvider] Error during initialization:', error);
+            throw error;
         }
     }
 
@@ -88,10 +116,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
         // Handle messages from the webview
         webviewView.webview.onDidReceiveMessage(async (message) => {
-            console.log('[ChatViewProvider] Received message from webview:', message.type);
+            console.log('[ChatViewProvider] Received message from webview:', message);
+            console.log('[ChatViewProvider] Message type:', message.type);
+            console.log('[ChatViewProvider] Message text:', message.text);
+            
             switch (message.type) {
                 case 'sendMessage':
-                    await this.handleUserMessage(message.text);
+                    console.log('[ChatViewProvider] Handling sendMessage case');
+                    console.log('[ChatViewProvider] About to call handleUserMessage with text:', message.text);
+                    try {
+                        await this.handleUserMessage(message.text);
+                        console.log('[ChatViewProvider] handleUserMessage completed successfully');
+                    } catch (error) {
+                        console.error('[ChatViewProvider] handleUserMessage failed:', error);
+                    }
                     break;
                 case 'newChat':
                     await this.startNewChat();
@@ -131,15 +169,21 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 	}
 
     private async handleUserMessage(text: string): Promise<void> {
+        console.log('[ChatViewProvider] handleUserMessage called with text:', text);
+        
         if (!text.trim()) {
+            console.log('[ChatViewProvider] Empty text, returning');
             return;
         }
 
         // Check if ACP client is initialized
         if (!this.acpClient || !this.sessionManager) {
+            console.log('[ChatViewProvider] ACP client or session manager not initialized');
             this.showMessage('ACP agent is not initialized. Please configure an agent profile.', 'error');
             return;
         }
+
+        console.log('[ChatViewProvider] ACP client and session manager are initialized');
 
         // Add user message to UI
         const userMessage: ChatMessage = {
@@ -153,8 +197,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
         try {
             // Send to ACP agent
+            console.log('[ChatViewProvider] Current session ID:', this.currentSessionId);
             if (!this.currentSessionId) {
+                console.log('[ChatViewProvider] No current session, creating new session...');
                 const sessionInfo = await this.sessionManager.createSession('default-conversation');
+                console.log('[ChatViewProvider] Session created:', sessionInfo);
                 this.currentSessionId = sessionInfo.sessionId;
             }
 
@@ -170,37 +217,58 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         }
     }
 
-	private handleAgentMessage(message: any): void {
-		// Map ACP response to chat message
-		const chatMessage: ChatMessage = {
-			id: this.generateId(),
-			role: 'assistant',
-			content: this.extractContent(message),
-			timestamp: Date.now(),
-			thinking: this.extractThinking(message),
-			plan: this.extractPlan(message),
-			toolCalls: this.extractToolCalls(message)
-		};
+private handleAgentMessage(message: any): void {
+        console.log('[ChatViewProvider] handleAgentMessage - update.type:', message.update?.type);
+        console.log('[ChatViewProvider] handleAgentMessage - update.content:', JSON.stringify(message.update?.content));
+        
+        if (message.update?.type === 'agent_message_chunk') {
+            // Extract content from the update
+            let content = '';
+            if (message.update.content) {
+                if (message.update.content.type === 'text') {
+                    content = message.update.content.text;
+                } else if (Array.isArray(message.update.content)) {
+                    content = message.update.content
+                        .filter((block: any) => block.type === 'text')
+                        .map((block: any) => block.text)
+                        .join('');
+                }
+            }
+            
+            console.log('[ChatViewProvider] handleAgentMessage - extracted content:', content);
+            
+            // Accumulate streaming chunks into the current assistant message
+            if (!this.currentAssistantMessage) {
+                this.currentAssistantMessage = {
+                    id: this.generateId(),
+                    role: 'assistant',
+                    content: '',
+                    timestamp: Date.now()
+                };
+                this.messages.push(this.currentAssistantMessage);
+            }
+            
+            // Append the chunk to the current message
+            this.currentAssistantMessage.content += content;
+            
+            console.log('[ChatViewProvider] handleAgentMessage - accumulated content:', this.currentAssistantMessage.content);
+            
+            this.updateWebview();
+        } else if (message.update?.type === 'agent_message_complete') {
+            // Finalize the current assistant message
+            if (this.currentAssistantMessage) {
+                // Extract any final metadata
+                this.currentAssistantMessage.thinking = this.extractThinking(message);
+                this.currentAssistantMessage.plan = this.extractPlan(message);
+                this.currentAssistantMessage.toolCalls = this.extractToolCalls(message);
+            }
+            this.currentAssistantMessage = undefined;
+            console.log('[ChatViewProvider] handleAgentMessage - message complete');
+            this.updateWebview();
+        }
+    }
 
-		this.messages.push(chatMessage);
-		this.updateWebview();
-	}
-
-	private extractContent(message: any): string {
-		if (message.content) {
-			if (typeof message.content === 'string') {
-				return message.content;
-			}
-			if (Array.isArray(message.content)) {
-				return message.content
-					.filter((block: any) => block.type === 'text')
-					.map((block: any) => block.text)
-					.join('\
-');
-			}
-		}
-		return '';
-	}
+	
 
 	private extractThinking(message: any): string[] | undefined {
 		if (message.content && Array.isArray(message.content)) {
