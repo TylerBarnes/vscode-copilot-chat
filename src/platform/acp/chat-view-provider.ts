@@ -152,17 +152,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             }
         });
 
-        // Listen for session changes (only if initialized)
-        if (this.sessionManager) {
-            this.sessionManager.onDidChangeSession((sessionId) => {
-                this.currentSessionId = sessionId;
-                this.loadSessionMessages(sessionId);
-            });
-        }
-
-        // Note: onDidReceiveMessage listener is registered in initialize() method
+        // Note: onDidReceiveMessage and onDidChangeSession listeners are registered in initialize() method
         // to avoid duplicate registrations
-	}
+    }
 
     private async handleUserMessage(text: string): Promise<void> {
         console.log('[ChatViewProvider] handleUserMessage called with text:', text);
