@@ -63,6 +63,7 @@ describe('SessionManager', () => {
 
             expect(mockClient.newSession).toHaveBeenCalledWith({
                 cwd: expect.any(String),
+                mcpServers: [],
             });
 			expect(result).toEqual(sessionInfo);
 		});

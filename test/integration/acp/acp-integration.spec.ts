@@ -56,7 +56,7 @@ describe('ACP Integration Tests', () => {
 
 		// Initialize
 		const result = await client.initialize({
-			protocolVersion: '2025-01-13',
+			protocolVersion: 20250113,
 			clientCapabilities: {
 				fs: {
 					readTextFile: true,
@@ -70,7 +70,7 @@ terminal: true,
 			},
 		});
 
-        expect(result.protocolVersion).toBe('2025-01-13');
+        expect(result.protocolVersion).toBe(20250113);
         expect(result.agentCapabilities).toBeDefined();
         expect(result.agentCapabilities.loadSession).toBe(true);
         expect(result.agentInfo).toBeDefined();
@@ -87,7 +87,7 @@ terminal: true,
 
 		client = new ACPClient(agentProcess);
 		await client.initialize({
-			protocolVersion: '2025-01-13',
+			protocolVersion: 20250113,
 			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
@@ -112,7 +112,7 @@ terminal: true,
 
 		client = new ACPClient(agentProcess);
 		await client.initialize({
-			protocolVersion: '2025-01-13',
+			protocolVersion: 20250113,
 			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
@@ -163,7 +163,7 @@ terminal: true,
 
 		client = new ACPClient(agentProcess);
 		const initResult = await client.initialize({
-			protocolVersion: '2025-01-13',
+			protocolVersion: 20250113,
 			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
@@ -214,7 +214,7 @@ terminal: true,
 
 		client = new ACPClient(agentProcess);
 		await client.initialize({
-			protocolVersion: '2025-01-13',
+			protocolVersion: 20250113,
 			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});
@@ -239,10 +239,10 @@ terminal: true,
 
 		client = new ACPClient(agentProcess);
 
-		// Try to initialize with invalid version
-		await expect(
-			client.initialize({
-				protocolVersion: '1999-01-01',
+        // Try to initialize with invalid version
+        await expect(
+            client.initialize({
+                protocolVersion: 19990101,
 				clientCapabilities: {},
 				clientInfo: { name: 'Test', version: '1.0.0' },
 			})
@@ -259,7 +259,7 @@ terminal: true,
 
 		client = new ACPClient(agentProcess);
 		await client.initialize({
-			protocolVersion: '2025-01-13',
+			protocolVersion: 20250113,
 			clientCapabilities: {},
 			clientInfo: { name: 'Test', version: '1.0.0' },
 		});

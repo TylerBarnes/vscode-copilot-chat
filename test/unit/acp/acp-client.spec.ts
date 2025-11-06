@@ -67,7 +67,7 @@ describe('ACPClient', () => {
             client = new ACPClient(mockProcess);
             
             const initPromise = client.initialize({
-                protocolVersion: '0.1.0',
+                protocolVersion: 10,
                 clientCapabilities: {
                     fs: {
                         readTextFile: true,
@@ -87,7 +87,7 @@ describe('ACPClient', () => {
                     jsonrpc: '2.0',
                     id: 1,
                     result: {
-                        protocolVersion: '0.1.0',
+                        protocolVersion: 10,
                         agentCapabilities: {
                             loadSession: true,
                             promptCapabilities: {
@@ -106,7 +106,7 @@ describe('ACPClient', () => {
             }, 10);
 
             const result = await initPromise;
-            expect(result.protocolVersion).toBe('0.1.0');
+            expect(result.protocolVersion).toBe(10);
             expect(result.agentCapabilities.loadSession).toBe(true);
             expect(result.agentInfo?.name).toBe('test-agent');
         });
@@ -115,7 +115,7 @@ describe('ACPClient', () => {
             client = new ACPClient(mockProcess);
             
             const initPromise = client.initialize({
-                protocolVersion: '0.1.0',
+                protocolVersion: 10,
                 clientCapabilities: {},
                 clientInfo: {
                     name: 'vscode-copilot-chat',
@@ -146,7 +146,7 @@ describe('ACPClient', () => {
             
             // Initialize first
             const initPromise = client.initialize({
-                protocolVersion: '0.1.0',
+                protocolVersion: 10,
                 clientCapabilities: {},
                 clientInfo: {
                     name: 'vscode-copilot-chat',
@@ -159,7 +159,7 @@ describe('ACPClient', () => {
                     jsonrpc: '2.0',
                     id: 1,
                     result: {
-                        protocolVersion: '0.1.0',
+                        protocolVersion: 10,
                         agentCapabilities: {}
                     }
                 };
@@ -225,7 +225,7 @@ describe('ACPClient', () => {
             
             // Initialize and create session
             const initPromise = client.initialize({
-                protocolVersion: '0.1.0',
+                protocolVersion: 10,
                 clientCapabilities: {},
                 clientInfo: {
                     name: 'vscode-copilot-chat',
@@ -237,7 +237,7 @@ describe('ACPClient', () => {
                 stdoutEmitter.emit('data', JSON.stringify({
                     jsonrpc: '2.0',
                     id: 1,
-                    result: { protocolVersion: '0.1.0', agentCapabilities: {} }
+                    result: { protocolVersion: 10, agentCapabilities: {} }
                 }) + '\n');
             }, 10);
 
@@ -385,7 +385,7 @@ describe('ACPClient', () => {
             
             // Initialize
             const initPromise = client.initialize({
-                protocolVersion: '0.1.0',
+                protocolVersion: 10,
                 clientCapabilities: {
                     fs: {
                         readTextFile: true,
@@ -402,7 +402,7 @@ describe('ACPClient', () => {
                 stdoutEmitter.emit('data', JSON.stringify({
                     jsonrpc: '2.0',
                     id: 1,
-                    result: { protocolVersion: '0.1.0', agentCapabilities: {} }
+                    result: { protocolVersion: 10, agentCapabilities: {} }
                 }) + '\n');
             }, 10);
 
@@ -519,7 +519,7 @@ describe('ACPClient', () => {
             
             // Initialize and create session
             const initPromise = client.initialize({
-                protocolVersion: '0.1.0',
+                protocolVersion: 10,
                 clientCapabilities: {},
                 clientInfo: {
                     name: 'vscode-copilot-chat',
@@ -531,7 +531,7 @@ describe('ACPClient', () => {
                 stdoutEmitter.emit('data', JSON.stringify({
                     jsonrpc: '2.0',
                     id: 1,
-                    result: { protocolVersion: '0.1.0', agentCapabilities: {} }
+                    result: { protocolVersion: 10, agentCapabilities: {} }
                 }) + '\n');
             }, 10);
 
@@ -622,7 +622,7 @@ describe('ACPClient', () => {
             client = new ACPClient(mockProcess);
             
             const initPromise = client.initialize({
-                protocolVersion: '0.1.0',
+                protocolVersion: 10,
                 clientCapabilities: {},
                 clientInfo: {
                     name: 'vscode-copilot-chat',
@@ -634,7 +634,7 @@ describe('ACPClient', () => {
                 stdoutEmitter.emit('data', JSON.stringify({
                     jsonrpc: '2.0',
                     id: 1,
-                    result: { protocolVersion: '0.1.0', agentCapabilities: {} }
+                    result: { protocolVersion: 10, agentCapabilities: {} }
                 }) + '\n');
             }, 10);
 

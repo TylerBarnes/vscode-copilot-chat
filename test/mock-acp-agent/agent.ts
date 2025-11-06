@@ -134,21 +134,21 @@ class MockACPAgent {
 		}
 	}
 
-	private handleInitialize(params: any): any {
-		console.error('Initialize with params:', JSON.stringify(params));
+    private handleInitialize(params: any): any {
+        console.error('Initialize with params:', JSON.stringify(params));
 
-		// Validate protocol version
-		const clientVersion = params.protocolVersion;
-		if (clientVersion !== '2025-01-13') {
-			throw {
-				code: -32602,
-				message: `Unsupported protocol version: ${clientVersion}`,
-			};
-		}
+        // Validate protocol version
+        const clientVersion = params.protocolVersion;
+        if (clientVersion !== 20250113) {
+            throw {
+                code: -32602,
+                message: `Unsupported protocol version: ${clientVersion}`,
+            };
+        }
 
         // Return agent capabilities
-		return {
-			protocolVersion: '2025-01-13',
+        return {
+            protocolVersion: 20250113,
 			agentCapabilities: {
 				loadSession: true,
 				promptCapabilities: {

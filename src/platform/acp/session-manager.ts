@@ -65,6 +65,7 @@ export class SessionManager {
     ): Promise<SessionInfo> {
         const sessionInfo = await this.client.newSession({
             cwd: process.cwd(),
+            mcpServers: [], // Empty array when no MCP servers are configured
         });
 
 		// Store mapping

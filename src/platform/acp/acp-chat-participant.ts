@@ -32,7 +32,7 @@ export class ACPChatParticipant {
 
         // Initialize the ACP client
         this.acpClient.initialize({
-            protocolVersion: '1.0.0',
+            protocolVersion: 100,
             clientCapabilities: {},
             clientInfo: {
                 name: 'vscode-copilot-chat-acp',

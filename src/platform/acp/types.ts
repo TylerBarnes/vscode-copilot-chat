@@ -59,13 +59,13 @@ export interface AgentCapabilities {
 // ============================================================================
 
 export interface InitializeParams {
-    protocolVersion: string;
+    protocolVersion: number;
     clientCapabilities: ClientCapabilities;
     clientInfo: ClientInfo;
 }
 
 export interface InitializeResult {
-    protocolVersion: string;
+    protocolVersion: number;
     agentCapabilities: AgentCapabilities;
     agentInfo?: AgentInfo;
 }

@@ -212,7 +212,7 @@ private async initialize(): Promise<void> {
             }
             try {
                 await this.acpClient.initialize({
-                    protocolVersion: '2025-01-13',
+                    protocolVersion: 20250113,
                     clientCapabilities: {
                         fs: {
                             readTextFile: true,
