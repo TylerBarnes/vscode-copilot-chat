@@ -160,12 +160,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             });
         }
 
-        // Listen for new messages (only if initialized)
-        if (this.acpClient) {
-            this.acpClient.onDidReceiveMessage((message) => {
-                this.handleAgentMessage(message);
-            });
-        }
+        // Note: onDidReceiveMessage listener is registered in initialize() method
+        // to avoid duplicate registrations
 	}
 
     private async handleUserMessage(text: string): Promise<void> {
@@ -218,10 +214,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
 
 private handleAgentMessage(message: any): void {
-        console.log('[ChatViewProvider] handleAgentMessage - update.type:', message.update?.type);
+        console.log('[ChatViewProvider] handleAgentMessage - update.sessionUpdate:', message.update?.sessionUpdate);
         console.log('[ChatViewProvider] handleAgentMessage - update.content:', JSON.stringify(message.update?.content));
         
-        if (message.update?.type === 'agent_message_chunk') {
+        if (message.update?.sessionUpdate === 'agent_message_chunk') {
             // Extract content from the update
             let content = '';
             if (message.update.content) {
@@ -248,13 +244,20 @@ private handleAgentMessage(message: any): void {
                 this.messages.push(this.currentAssistantMessage);
             }
             
-            // Append the chunk to the current message
-            this.currentAssistantMessage.content += content;
+            // Check if this is a delta (new content) or full content
+            // If the new content starts with the existing content, it's full content
+            if (content.startsWith(this.currentAssistantMessage.content)) {
+                // Full content - replace
+                this.currentAssistantMessage.content = content;
+            } else {
+                // Delta - append
+                this.currentAssistantMessage.content += content;
+            }
             
             console.log('[ChatViewProvider] handleAgentMessage - accumulated content:', this.currentAssistantMessage.content);
             
             this.updateWebview();
-        } else if (message.update?.type === 'agent_message_complete') {
+        } else if (message.update?.sessionUpdate === 'agent_message_complete') {
             // Finalize the current assistant message
             if (this.currentAssistantMessage) {
                 // Extract any final metadata

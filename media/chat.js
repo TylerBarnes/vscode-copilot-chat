@@ -78,22 +78,33 @@
 		vscode.postMessage({ type: 'newChat' });
 	}
 
-	function renderMessages() {
-		if (messages.length === 0) {
-			showEmptyState();
-			return;
-		}
+    function renderMessages() {
+        if (messages.length === 0) {
+            showEmptyState();
+            return;
+        }
 
-		messagesContainer.innerHTML = '';
-		
-		messages.forEach(message => {
-			const messageEl = createMessageElement(message);
-			messagesContainer.appendChild(messageEl);
-		});
+        // Only render new messages or update existing ones
+        messages.forEach((message, index) => {
+            const existingEl = messagesContainer.children[index];
+            
+            if (!existingEl) {
+                // New message - append it
+                const messageEl = createMessageElement(message);
+                messageEl.dataset.messageId = message.id;
+                messagesContainer.appendChild(messageEl);
+            } else if (existingEl.dataset.messageId === message.id) {
+                // Existing message - update content if changed
+                const contentEl = existingEl.querySelector('.message-content');
+                if (contentEl && contentEl.textContent !== message.content) {
+                    contentEl.textContent = message.content;
+                }
+            }
+        });
 
-		// Scroll to bottom
-		messagesContainer.scrollTop = messagesContainer.scrollHeight;
-	}
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 
 	function createMessageElement(message) {
 		const messageEl = document.createElement('div');
