@@ -333,8 +333,10 @@ private handleAgentMessage(message: any): void {
         if (session) {
             // Session doesn't contain messages in current implementation
             // Messages would need to be loaded from agent via session/load
-            this.messages = [];
-            this.updateWebview();
+            // Don't clear existing messages - they might be the current conversation
+            console.log('[ChatViewProvider] loadSessionMessages called, preserving existing messages');
+            // this.messages = []; // Don't clear messages for fresh sessions
+            // this.updateWebview(); // Don't update unless we actually loaded history
         }
     }
 
