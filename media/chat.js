@@ -1,12 +1,19 @@
 (function() {
-	const vscode = acquireVsCodeApi();
-	
-	const messagesContainer = document.getElementById('messages');
-	const messageInput = document.getElementById('messageInput');
-	const sendBtn = document.getElementById('sendBtn');
-	const newChatBtn = document.getElementById('newChatBtn');
+    const vscode = acquireVsCodeApi();
+    
+    const messagesContainer = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const newChatBtn = document.getElementById('newChatBtn');
 
-	let messages = [];
+    let messages = [];
+
+    // Utility function to escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
     // Initialize
     function init() {
@@ -43,6 +50,10 @@
                 console.log('[Webview] Updating messages:', message.messages?.length || 0);
                 messages = message.messages;
                 renderMessages();
+                break;
+            case 'showMessage':
+                console.log('[Webview] Showing message:', message.message, message.messageType);
+                showExtensionMessage(message.message, message.messageType || 'info');
                 break;
         }
     }
@@ -216,17 +227,36 @@
 		return toolCallsEl;
 	}
 
-	function showEmptyState() {
-		messagesContainer.innerHTML = `
-			<div class="empty-state">
-				<div class="empty-state-icon">💬</div>
-				<div class="empty-state-text">Start a conversation with your ACP agent</div>
-				<div class="empty-state-hint">Type a message below to begin</div>
-			</div>
-		`;
-	}
+function showEmptyState() {
+        messagesContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">💬</div>
+                <div class="empty-state-text">Start a conversation with your ACP agent</div>
+                <div class="empty-state-hint">Type a message below to begin</div>
+            </div>
+        `;
+    }
 
-	function formatTimestamp(timestamp) {
+    function showExtensionMessage(message, messageType = 'info') {
+        // Create a message element for extension messages
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message system ${messageType}`;
+        
+        const icon = messageType === 'error' ? '❌' : messageType === 'warning' ? '⚠️' : 'ℹ️';
+        
+        messageDiv.innerHTML = `
+            <div class="message-avatar">${icon}</div>
+            <div class="message-content">
+                <div class="message-role">System</div>
+                <div class="message-text">${escapeHtml(message)}</div>
+            </div>
+        `;
+        
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function formatTimestamp(timestamp) {
 		const date = new Date(timestamp);
 		const now = new Date();
 		const diff = now.getTime() - date.getTime();

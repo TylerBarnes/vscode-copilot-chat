@@ -135,9 +135,10 @@ describe('ACPContribution', () => {
 			dispose: vi.fn()
 		};
 
-		mockACPClient = {
-			dispose: vi.fn()
-		};
+mockACPClient = {
+            initialize: vi.fn().mockResolvedValue(undefined),
+            dispose: vi.fn()
+        };
 
 		mockRequestHandler = {
 			dispose: vi.fn()
@@ -203,9 +204,9 @@ mockLogService = {
             const calls = (mockInstantiationService.createInstance as any).mock.calls;
             
             // Should have created: TerminalManager, 
-            // SessionManager, ToolCallHandler, MCPManager, ACPClient, ACPRequestHandler, ACPChatParticipant
-            // (AgentConfigManager and FileSystemHandler are now directly instantiated, not via createInstance)
-            expect(calls.length).toBeGreaterThanOrEqual(7);
+            // ToolCallHandler, MCPManager, ACPClient, ACPRequestHandler, ACPChatParticipant
+            // (AgentConfigManager, FileSystemHandler, and SessionManager are now directly instantiated, not via createInstance)
+            expect(calls.length).toBeGreaterThanOrEqual(6);
 
             contribution.dispose();
         });
@@ -274,7 +275,7 @@ mockLogService = {
                 call.length === 4 && 
                 call[1] === mockACPClient &&
                 call[2] === mockRequestHandler &&
-                call[3] === mockSessionManager
+                call[3] && typeof call[3].createSession === 'function' // SessionManager instance
             );
             expect(chatParticipantCall).toBeDefined();
 
@@ -291,6 +292,8 @@ it('should log initialization steps', async () => {
             expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Initializing ACP contribution');
             expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Starting MCP server: test-server');
             expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Using agent profile: Test Agent');
+            expect(mockLogService.info).toHaveBeenCalledWith('[ACP] Initializing ACP client...');
+            expect(mockLogService.info).toHaveBeenCalledWith('[ACP] ACP client initialized successfully');
             expect(mockLogService.info).toHaveBeenCalledWith('[ACP] ACP contribution initialized successfully');
 
             contribution.dispose();

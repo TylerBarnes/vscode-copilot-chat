@@ -125,7 +125,39 @@ body {
 }
 
 .message.user .message-content {
-	background-color: var(--vscode-input-background);
+    background-color: var(--vscode-input-background);
+}
+
+.message.system {
+    margin: 16px 0;
+}
+
+.message.system .message-content {
+    background-color: var(--vscode-editor-background);
+    border-left: 4px solid var(--vscode-charts-purple);
+    opacity: 0.9;
+}
+
+.message.system.error .message-content {
+    border-left-color: var(--vscode-errorForeground);
+    background-color: var(--vscode-inputValidation-errorBackground);
+}
+
+.message.system.warning .message-content {
+    border-left-color: var(--vscode-editorWarning-foreground);
+    background-color: var(--vscode-inputValidation-warningBackground);
+}
+
+.message-role.system {
+    color: var(--vscode-charts-purple);
+}
+
+.message.system.error .message-role.system {
+    color: var(--vscode-errorForeground);
+}
+
+.message.system.warning .message-role.system {
+    color: var(--vscode-editorWarning-foreground);
 }
 
 .thinking-steps {
