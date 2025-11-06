@@ -43,9 +43,21 @@ export class ACPContribution implements vscode.Disposable {
         this.initialize();
     }
 
-    private async initialize(): Promise<void> {
+private async initialize(): Promise<void> {
         try {
             this.logService.info('[ACP] Initializing ACP contribution');
+
+            // Register chat view provider FIRST so the UI loads even if initialization fails
+            this.chatViewProvider = new ChatViewProvider(
+                this.extensionContext.extensionUri
+            );
+            
+            const chatViewDisposable = vscode.window.registerWebviewViewProvider(
+                'acp.copilot.chatView',
+                this.chatViewProvider
+            );
+            this.disposables.push(chatViewDisposable);
+            this.logService.info('[ACP] Chat view registered');
 
             // Create core components with proper config path
             const storageUri = this.extensionContext.globalStorageUri;
@@ -69,7 +81,16 @@ export class ACPContribution implements vscode.Disposable {
             // Initialize agent config manager and wait for it to load
             await agentConfigManager.initialize();
             
-            const fileSystemHandler = this.instantiationService.createInstance(FileSystemHandler as any) as FileSystemHandler;
+            // Get workspace root for FileSystemHandler
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                this.logService.warn('[ACP] No workspace folder open');
+                this.chatViewProvider.showMessage('Please open a folder or workspace to use ACP Chat.', 'warning');
+                return;
+            }
+            const cwd = workspaceFolders[0].uri.fsPath;
+            
+            const fileSystemHandler = new FileSystemHandler(cwd);
             const terminalManager = this.instantiationService.createInstance(TerminalManager as any) as TerminalManager;
             const sessionManager = this.instantiationService.createInstance(SessionManager as any) as SessionManager;
             const toolCallHandler = this.instantiationService.createInstance(ToolCallHandler as any, fileSystemHandler, terminalManager);
@@ -86,20 +107,21 @@ export class ACPContribution implements vscode.Disposable {
             if (!activeProfile) {
                 this.logService.warn('[ACP] No active agent profile configured. Please configure an ACP agent profile in settings.');
                 
-                // Show a helpful message
-                vscode.window.showWarningMessage(
-                    'ACP Chat: No agent profile configured. Please add an ACP agent profile in the extension settings.',
-                    'Open Settings'
-                ).then(selection => {
-                    if (selection === 'Open Settings') {
-                        vscode.commands.executeCommand('workbench.action.openSettings', 'acp');
+                // Show a helpful message in the chat view
+                this.chatViewProvider.showMessage(
+                    'No ACP agent profile configured. Please add an ACP agent profile in the extension settings.',
+                    'warning',
+                    {
+                        text: 'Open Settings',
+                        command: 'workbench.action.openSettings',
+                        args: ['acp']
                     }
-                });
+                );
                 
                 return;
             }
 
-			this.logService.info(`[ACP] Using agent profile: ${activeProfile.name}`);
+            this.logService.info(`[ACP] Using agent profile: ${activeProfile.name}`);
 
             // Create ACP client
             const { spawn } = await import('child_process');
@@ -126,19 +148,12 @@ export class ACPContribution implements vscode.Disposable {
                 this.acpClient
             ) as any;
 
-            // Register custom chat view provider
-            this.chatViewProvider = new ChatViewProvider(
-                this.extensionContext.extensionUri,
+            // Initialize chat view with the actual components
+            this.chatViewProvider.initialize(
                 this.acpClient,
                 sessionManager,
                 toolCallHandler
             );
-            
-            const chatViewDisposable = vscode.window.registerWebviewViewProvider(
-                'acp.copilot.chatView',
-                this.chatViewProvider
-            );
-            this.disposables.push(chatViewDisposable);
 
             // Create and register chat participant (for command palette integration)
             this.chatParticipant = this.instantiationService.createInstance(

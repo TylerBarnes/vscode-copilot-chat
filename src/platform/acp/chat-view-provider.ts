@@ -18,16 +18,56 @@ interface ChatMessage {
  * This replaces VS Code's built-in chat view to avoid hardcoded Copilot dependencies.
  */
 export class ChatViewProvider implements vscode.WebviewViewProvider {
-	private view?: vscode.WebviewView;
-	private messages: ChatMessage[] = [];
-	private currentSessionId?: string;
+    private view?: vscode.WebviewView;
+    private messages: ChatMessage[] = [];
+    private currentSessionId?: string;
+    private acpClient?: ACPClient;
+    private sessionManager?: SessionManager;
+    private toolCallHandler?: ToolCallHandler;
 
     constructor(
-        private readonly extensionUri: vscode.Uri,
-        private readonly acpClient: ACPClient,
-        private readonly sessionManager: SessionManager,
-        private readonly toolCallHandler: ToolCallHandler
+        private readonly extensionUri: vscode.Uri
     ) {}
+
+    /**
+     * Initialize the chat view with ACP components after they're created.
+     * This allows the view to be registered before the agent is started.
+     */
+    public initialize(
+        acpClient: ACPClient,
+        sessionManager: SessionManager,
+        toolCallHandler: ToolCallHandler
+    ): void {
+        this.acpClient = acpClient;
+        this.sessionManager = sessionManager;
+        this.toolCallHandler = toolCallHandler;
+        
+        // If view is already resolved, update it
+        if (this.view) {
+            this.view.webview.postMessage({
+                type: 'initialized',
+                message: 'ACP agent connected and ready'
+            });
+        }
+    }
+
+    /**
+     * Show a message in the chat view (for warnings, errors, etc.)
+     */
+    public showMessage(
+        message: string,
+        type: 'info' | 'warning' | 'error' = 'info',
+        action?: { text: string; command: string; args?: any[] }
+    ): void {
+        if (this.view) {
+            this.view.webview.postMessage({
+                type: 'showMessage',
+                message,
+                messageType: type,
+                action
+            });
+        }
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -57,10 +97,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                     await this.startNewChat();
                     break;
                 case 'approveTool':
-                    await this.toolCallHandler.approveTool(message.toolCallId);
+                    if (this.toolCallHandler) {
+                        await this.toolCallHandler.approveTool(message.toolCallId);
+                    }
                     break;
                 case 'rejectTool':
-                    await this.toolCallHandler.rejectTool(message.toolCallId);
+                    if (this.toolCallHandler) {
+                        await this.toolCallHandler.rejectTool(message.toolCallId);
+                    }
                     break;
                 case 'ready':
                     console.log('[ChatViewProvider] Webview ready, updating...');
@@ -70,32 +114,42 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             }
         });
 
-		// Listen for session changes
-		this.sessionManager.onDidChangeSession((sessionId) => {
-			this.currentSessionId = sessionId;
-			this.loadSessionMessages(sessionId);
-		});
+        // Listen for session changes (only if initialized)
+        if (this.sessionManager) {
+            this.sessionManager.onDidChangeSession((sessionId) => {
+                this.currentSessionId = sessionId;
+                this.loadSessionMessages(sessionId);
+            });
+        }
 
-		// Listen for new messages
-		this.acpClient.onDidReceiveMessage((message) => {
-			this.handleAgentMessage(message);
-		});
+        // Listen for new messages (only if initialized)
+        if (this.acpClient) {
+            this.acpClient.onDidReceiveMessage((message) => {
+                this.handleAgentMessage(message);
+            });
+        }
 	}
 
-	private async handleUserMessage(text: string): Promise<void> {
-		if (!text.trim()) {
-			return;
-		}
+    private async handleUserMessage(text: string): Promise<void> {
+        if (!text.trim()) {
+            return;
+        }
 
-		// Add user message to UI
-		const userMessage: ChatMessage = {
-			id: this.generateId(),
-			role: 'user',
-			content: text,
-			timestamp: Date.now()
-		};
-		this.messages.push(userMessage);
-		this.updateWebview();
+        // Check if ACP client is initialized
+        if (!this.acpClient || !this.sessionManager) {
+            this.showMessage('ACP agent is not initialized. Please configure an agent profile.', 'error');
+            return;
+        }
+
+        // Add user message to UI
+        const userMessage: ChatMessage = {
+            id: this.generateId(),
+            role: 'user',
+            content: text,
+            timestamp: Date.now()
+        };
+        this.messages.push(userMessage);
+        this.updateWebview();
 
         try {
             // Send to ACP agent
@@ -111,10 +165,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                     text
                 }]
             });
-		} catch (error) {
-			vscode.window.showErrorMessage(`Failed to send message: ${error}`);
-		}
-	}
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to send message: ${error}`);
+        }
+    }
 
 	private handleAgentMessage(message: any): void {
 		// Map ACP response to chat message
@@ -183,6 +237,11 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 	}
 
     private async startNewChat(): Promise<void> {
+        if (!this.sessionManager) {
+            this.showMessage('ACP agent is not initialized. Please configure an agent profile.', 'error');
+            return;
+        }
+        
         this.messages = [];
         const sessionInfo = await this.sessionManager.createSession('default-conversation');
         this.currentSessionId = sessionInfo.sessionId;
@@ -190,6 +249,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
 
     private async loadSessionMessages(sessionId: string): Promise<void> {
+        if (!this.sessionManager) {
+            return;
+        }
+        
         // Load messages from session history
         const session = this.sessionManager.getSession(sessionId);
         if (session) {

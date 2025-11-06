@@ -11,6 +11,11 @@ import { ACPContribution } from '../../../src/platform/acp/acp.contribution';
 vi.mock('vscode', () => ({
     workspace: {
         getConfiguration: vi.fn(),
+        workspaceFolders: [{
+            uri: { fsPath: '/test/workspace' },
+            name: 'test-workspace',
+            index: 0
+        }],
         fs: {
             stat: vi.fn(async () => ({ type: 2 })), // 2 = Directory
             createDirectory: vi.fn(async () => {}),
@@ -197,10 +202,10 @@ mockLogService = {
             // Note: We check by function reference, not by name property
             const calls = (mockInstantiationService.createInstance as any).mock.calls;
             
-            // Should have created: FileSystemHandler, TerminalManager, 
+            // Should have created: TerminalManager, 
             // SessionManager, ToolCallHandler, MCPManager, ACPClient, ACPRequestHandler, ACPChatParticipant
-            // (AgentConfigManager is now directly instantiated, not via createInstance)
-            expect(calls.length).toBeGreaterThanOrEqual(8);
+            // (AgentConfigManager and FileSystemHandler are now directly instantiated, not via createInstance)
+            expect(calls.length).toBeGreaterThanOrEqual(7);
 
             contribution.dispose();
         });
