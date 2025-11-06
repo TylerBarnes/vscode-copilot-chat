@@ -309,7 +309,8 @@ private handleAgentMessage(message: any): void {
             return;
         }
         
-        this.messages = [];
+        // Don't clear messages here - they may have already been added by handleUserMessage
+        // this.messages = [];
         const sessionInfo = await this.sessionManager.createSession('default-conversation');
         this.currentSessionId = sessionInfo.sessionId;
         this.updateWebview();

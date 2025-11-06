@@ -324,8 +324,8 @@
   "scripts": {
     "build": "npx tsx .esbuild.ts",
     "package": "vsce package --no-dependencies",
-    "vscode:install": "/Applications/Visual\\ Studio\\ Code.app/Contents/Resources/app/bin/code --uninstall-extension TylerBarnes.copilot-chat-acp && /Applications/Visual\\ Studio\\ Code.app/Contents/Resources/app/bin/code --install-extension copilot-chat-acp-0.33.0.vsix",
-    "test": "vitest",
+    "vscode:install": "/Applications/Visual\\\\ Studio\\\\ Code.app/Contents/Resources/app/bin/code --uninstall-extension TylerBarnes.copilot-chat-acp && /Applications/Visual\\\\ Studio\\\\ Code.app/Contents/Resources/app/bin/code --install-extension copilot-chat-acp-0.33.0.vsix",
+    "test": "vitest run",
     "test:unit": "vitest run test/unit/acp",
     "test:integration": "vitest run test/integration/acp",
     "test:watch": "vitest watch"
