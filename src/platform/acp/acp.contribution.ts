@@ -194,7 +194,7 @@ private async initialize(): Promise<void> {
             this.logService.info('[ACP] Initializing ACP client...');
             try {
                 await this.acpClient!.initialize({
-                    protocolVersion: '2024-11-05',
+                    protocolVersion: '2025-01-13',
                     clientCapabilities: {
                         fs: {
                             readTextFile: true,
